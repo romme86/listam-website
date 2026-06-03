@@ -1,0 +1,1394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki</title>
+    <meta
+      name="description"
+      content="A CodeWiki-style study site for the Listam local-first P2P mobile app."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#desktop" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Desktop Overview</span>
+              </a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#headless" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Headless Overview</span>
+              </a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection" open>
+                <summary class="nav-subgroup" title="Planned, not implemented yet">
+                  <span class="status-icon planned" aria-hidden="true"></span>
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                  <a href="plans.html#phases">Phases</a>
+                  <a href="phases.html#phase-log">Phase Log</a>
+                </div>
+              </details>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-05-29</strong>
+          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Plans · roadmap &amp; review</span>
+            <h1>Plans</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: Corestore, Autobase, invite..." />
+          </label>
+        </header>
+
+        <section id="plans" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Roadmap</span>
+            <h2>Plans</h2>
+            <p class="section-lede">
+              Planned architecture and hardening work that has been reviewed but is not implemented
+              in the current app yet.
+            </p>
+          </div>
+
+          <section id="multi-app-plan" class="plan-section">
+            <div class="section-heading plan-heading">
+              <span class="eyebrow">Expansion roadmap</span>
+              <div class="plan-title">
+                <span class="status-icon planned large" aria-hidden="true"></span>
+                <h2>Multi-App Plan</h2>
+                <span class="status-pill">Not implemented yet</span>
+              </div>
+            </div>
+
+          <div class="callout" id="review-findings" data-nav-section>
+            <strong>Review findings (2026-05-29):</strong>
+            A security/architecture review of this plan against the current <code>listam-mobile</code>
+            code found that the plan layers a rich role / permission / revocation / "minimum-credential"
+            vocabulary on top of an Autobase + BlindPairing substrate that, as implemented, only supports
+            <strong>"full writer holding the encryption key"</strong> or <strong>"no access."</strong>
+            Several headline promises are not achievable without new work. Critical and High items below
+            should be treated as blocking acceptance criteria and resolved before package extraction or
+            the desktop/headless split begins.
+          </div>
+
+          <div class="risk-board">
+            <article class="risk warn">
+              <h3>Critical — substrate cannot honor the promises</h3>
+              <ul>
+                <li><strong>C1 — "Revoke" is impossible today.</strong> Autobase membership is append-only; there is no <code>remove-writer</code>. Revoking an invite does nothing to a peer that already joined. Real removal needs an app-level ACL plus encryption-key rotation/re-encryption.</li>
+                <li><strong>C2 — Role-scoped credentials are unsupported.</strong> Pairing confirms with both <code>key</code> and <code>encryptionKey</code>. You either hold the encryption key (full read, one append from writing) or hold nothing (opaque ciphertext). There is no read-only or sync-only credential.</li>
+                <li><strong>C3 — Any writer can add writers.</strong> <code>apply</code> honors <code>add-writer</code> from any node and every writer can append. No owner authority, gate, or audit. Needs an owner key that alone authorizes membership, verified by signature.</li>
+              </ul>
+            </article>
+            <article class="risk fix">
+              <h3>High — riskiest new/inherited surfaces</h3>
+              <ul>
+                <li><strong>H1 — Owner-control admin channel underspecified.</strong> Remote <code>shutdown</code>/<code>export</code>/<code>import</code> over the DHT with only "require pairing/auth." Needs per-device key pairs, signed commands with replay protection, and scoped capabilities — not bearer tokens.</li>
+                <li><strong>H2 — Deep links auto-join with no confirmation.</strong> A <code>listam.ch/join?invite=</code> link calls <code>RPC_JOIN_KEY</code> directly and tears down the current base. Require explicit user confirmation before joining.</li>
+                <li><strong>H3 — Invites are reusable, non-expiring, pointlessly persisted.</strong> <code>INVITE_MAX_USES = 10</code>, <code>expires</code> is never checked, and <code>lista-invite.json</code> is written but never read. Default to single-use + enforced expiry; delete the unused file.</li>
+              </ul>
+            </article>
+            <article class="risk warn">
+              <h3>Medium — design/sequencing fixes</h3>
+              <ul>
+                <li><strong>M1 — Backend keys items by <code>text</code>, plan normalizes Redux by <code>id</code>.</strong> Migrate the replicated reduction to id-keying before Redux normalization or the two projections diverge.</li>
+                <li><strong>M3 — <code>loyaltyCards</code> slice contradicts secure storage.</strong> Keep secret payloads out of Redux; store handles only and read secrets on demand.</li>
+                <li><strong>M4 — Corruption recovery silently wipes data.</strong> On an Autobase error the code deletes the base and recreates it. Require backup/consent before wipe — never auto-wipe a storage helper.</li>
+                <li><strong>M5 — Redaction is bypassable.</strong> Raw <code>console.error</code> prints keys and item payloads today; committed log files exist. Add a <code>no-console</code> lint + CI secret-grep gate and remove committed logs.</li>
+              </ul>
+            </article>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Finding (current code)</th>
+                <th>Required fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>C1</code></td>
+                <td>Joining appends <code>add-writer</code> → <code>host.addWriter(key, {indexer:true})</code>; membership is append-only with no removal.</td>
+                <td>Separate "revoke invite" from "revoke access"; build ACL + key rotation/re-encryption, or state plainly that writers cannot be removed without re-keying.</td>
+              </tr>
+              <tr>
+                <td><code>C2</code></td>
+                <td>Pairing shares <code>autobase.encryptionKey</code>; read access = full decrypt access.</td>
+                <td>Re-scope roles: blind storage/relay = ciphertext only; any reader has full read. Resolve before headless co-invite.</td>
+              </tr>
+              <tr>
+                <td><code>C3</code></td>
+                <td><code>apply</code> trusts <code>add-writer</code> from any writer; no owner gate.</td>
+                <td>Designated owner key authorizes membership, signature-verified in <code>apply</code>. Milestone deliverable.</td>
+              </tr>
+              <tr>
+                <td><code>H1</code></td>
+                <td>Owner-control exposes <code>shutdown</code>/<code>export</code>/<code>import</code> with only "require pairing/auth."</td>
+                <td>Per-device key pairs, signed commands + nonce/timestamp replay protection, scoped capabilities, rotatable device-bound tokens.</td>
+              </tr>
+              <tr>
+                <td><code>H2</code></td>
+                <td><code>Linking</code> handler calls <code>startJoinWithInvite()</code> with no confirm; <code>joinViaInvite</code> tears down the current base.</td>
+                <td>Explicit user confirmation before any link-initiated join; do not tear down the current base until confirmed.</td>
+              </tr>
+              <tr>
+                <td><code>H3</code></td>
+                <td><code>INVITE_MAX_USES = 10</code>; <code>expires</code> never checked; <code>lista-invite.json</code> written but never read.</td>
+                <td>Single-use, enforced expiry by default; delete unused persistence; UI must state that an invite grants permanent writer access.</td>
+              </tr>
+              <tr>
+                <td><code>M1</code></td>
+                <td>Add/update/delete and <code>rebuildListFromPersistedOps</code> key by <code>text</code>, not <code>id</code>.</td>
+                <td>Migrate reduction to id-keying (backfill legacy ids) before Redux normalization.</td>
+              </tr>
+              <tr>
+                <td><code>M3</code></td>
+                <td>Plan stores loyalty cards in Redux and in secure storage (conflict).</td>
+                <td>Redux holds non-secret handles only; read secret payloads on demand from secure storage.</td>
+              </tr>
+              <tr>
+                <td><code>M4</code></td>
+                <td>Autobase <code>ready()</code> error deletes key file + base storage and recreates a fresh base.</td>
+                <td>Backup/export and owner consent before wipe; never auto-wipe a storage-helper node.</td>
+              </tr>
+              <tr>
+                <td><code>M5</code></td>
+                <td>Raw <code>console.error</code> prints base/writer/encryption keys and item payloads; logs committed to repo.</td>
+                <td><code>no-console</code> lint + CI secret-grep gate; remove committed logs and gitignore local logs plus generated P2P key/invite files.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout" id="implementation-plans" data-nav-section>
+            <strong>Implementation-plan check:</strong>
+            Every review finding now has a planned remediation path, an acceptance signal, and a test
+            expectation. The strategy is to harden the current mobile/backend substrate first, prove
+            the shared package boundaries second, and only then build desktop/headless trust
+            features on top of those boundaries.
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Implementation plan</th>
+                <th>Acceptance signal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>C1</code></td>
+                <td>Rename current controls so "revoke invite" only stops future joins; do not ship "remove member" until membership epochs, owner authority, key rotation, re-encryption, and re-invite of remaining members exist.</td>
+                <td>Invite revoke blocks new joins without false removal claims; true member removal completes a re-key flow and old members cannot decrypt or append accepted active-epoch operations.</td>
+              </tr>
+              <tr>
+                <td><code>C2</code></td>
+                <td>Split current roles from future roles: today a device is either a trusted full participant or a blind helper with no encryption key. Add a separate blind-storage invite path before offering ciphertext-only helpers.</td>
+                <td>Docs and UI never promise read-only or sync-only access with the current BlindPairing writer invite; tests prove blind helpers do not receive the Autobase encryption key.</td>
+              </tr>
+              <tr>
+                <td><code>C3</code></td>
+                <td>Add owner-signed membership operations with owner key, target writer key, role label, operation id, timestamp, and signature; make <code>apply</code> reject unsigned or non-owner membership writes after migration.</td>
+                <td>Non-owner writers cannot add writers; tests cover owner success, non-owner rejection, malformed signatures, replay rejection, and legacy migration.</td>
+              </tr>
+              <tr>
+                <td><code>H1</code></td>
+                <td>Define owner-control as a separate signed capability protocol: per-device key pairs, command id, device id, scope, timestamp, nonce, payload hash, signature, replay tracking, and rotatable grants.</td>
+                <td>Headless refuses unsigned, replayed, expired, or out-of-scope commands; diagnostics-only clients cannot call shutdown/export/import/topic configuration.</td>
+              </tr>
+              <tr>
+                <td><code>H2</code></td>
+                <td>Parse link invites into pending state, show an explicit confirmation describing the base switch, and only call <code>RPC_JOIN_KEY</code> after the user confirms.</td>
+                <td>Cold-start and foreground deep links cannot switch bases without confirmation; cancel leaves the current base untouched and failed joins roll back visibly.</td>
+              </tr>
+              <tr>
+                <td><code>H3</code></td>
+                <td>Default invites to short-lived single-use credentials, enforce expiry/use count before BlindPairing confirm, delete unused plaintext invite persistence, rotate after use/revoke/expiration, and show permanent-writer warning until C1 is solved.</td>
+                <td>Expired or exhausted invites cannot add peers; production does not create plaintext invite files; tests cover expiry, rotation, restart, revoke, and redacted logs.</td>
+              </tr>
+              <tr>
+                <td><code>M1</code></td>
+                <td>Version list operations, backfill deterministic ids for legacy text-only entries, reduce by <code>id</code> when present, and emit id-bearing snapshots before Redux normalization.</td>
+                <td>Backend and Redux agree for duplicate item names; existing lists migrate without losing order/done state; mixed legacy/new logs replay correctly.</td>
+              </tr>
+              <tr>
+                <td><code>M3</code></td>
+                <td>Keep only non-secret loyalty-card handles/safe metadata in Redux; store barcode/QR payloads and sensitive details in platform secure storage, fetched only while rendering/scanning.</td>
+                <td>Redux traces and persisted state never contain card payloads; AsyncStorage cards migrate; delete/export/redaction tests pass.</td>
+              </tr>
+              <tr>
+                <td><code>M4</code></td>
+                <td>Replace auto-wipe with quarantine, backup/export, owner prompt, and headless owner notification. Headless/storage helpers must never destructively repair themselves without owner approval.</td>
+                <td>Corruption never silently deletes storage; tests cover quarantine, backup-before-wipe, user cancel, approved fresh base, and redacted recovery logs.</td>
+              </tr>
+              <tr>
+                <td><code>M5</code></td>
+                <td>Use a shared logger plus enforcement: <code>no-console</code>/banned API rule, CI secret-shape scan, committed log removal, explicit ignore rules for local logs and generated P2P key/invite files, redaction helpers, and debug/trace build gates.</td>
+                <td>Raw production console logging fails lint; secret-shaped values fail CI if they appear in logs/exports outside explicit redaction tests.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="detail-list" id="lower-severity-items" data-nav-section>
+            <h3>Lower-severity items (efficiency &amp; correctness the milestone inherits)</h3>
+            <div>
+              <strong>Full-view replay on every sync</strong>
+              <p><code>rebuildListFromPersistedOps</code> replays the view from index 0 inside the 1-second join poll (up to ~120×). Add a materialized-view checkpoint to resume from; acceptance is bounded replay work during joins.</p>
+            </div>
+            <div>
+              <strong>Full-list pushes instead of diffs</strong>
+              <p><code>SYNC_LIST</code> resends the whole list on poll ticks. Make per-item events the default and snapshots the exception; acceptance is no repeated full-list push during steady-state polling.</p>
+            </div>
+            <div>
+              <strong>Fragile join state machine</strong>
+              <p>Shared <code>_writableCheckTimer</code> across two pollers and a module-global <code>_writeChain</code> never reset across base teardown can send in-flight writes to the wrong base. Add per-base write contexts, reset write queues on teardown, and use distinct timers.</p>
+            </div>
+            <div>
+              <strong>Singleton lock won't survive multi-app</strong>
+              <p><code>lista.lock</code> (<code>wx</code>, cleanup only on teardown) leaves a stale lock after a crash and cannot coordinate desktop + headless on one machine. Add a lease with owner pid/instance id, heartbeat, stale-lock recovery, and separate storage roots where appropriate.</p>
+            </div>
+            <div>
+              <strong>No resource limits on headless relay</strong>
+              <p>Store-and-forward of others' messages has no quotas/rate limits. Defer third-party relay/storage past milestone 1, then add per-topic quotas, queue caps, TTLs, rate limits, and visible storage usage.</p>
+            </div>
+            <div>
+              <strong>No CI/test bootstrap</strong>
+              <p>Zero tests exist and <code>package-lock.json</code> is gitignored. Stand up milestone-zero CI with a reproducible lockfile, test runner, lint, dependency hygiene, redaction scan, and backend reducer/join/security smoke tests.</p>
+            </div>
+          </div>
+
+          <div class="detail-list" id="strategy-improvements" data-nav-section>
+            <h3>Strategy improvements</h3>
+            <div>
+              <strong>Milestone zero first</strong>
+              <p>Security hardening, test bootstrap, reproducible installs, and docs/wiki alignment should land before Redux/package extraction.</p>
+            </div>
+            <div>
+              <strong>Repos and packages set up early</strong>
+              <p>Stand up the separate app repositories (<code>listam-mobile</code>, <code>listam-desktop</code>, <code>listam-headless</code>) and the shared <code>listam-shared</code> package repo from milestone 1, and decouple <code>@listam/backend</code> from BareKit globals so the published backend package runs under mobile worklet, Pear Desktop, and headless Bare/Node.</p>
+            </div>
+            <div>
+              <strong>Honest headless roles</strong>
+              <p>The safe current tiers are trusted full participant and blind ciphertext helper. Richer read-only or sync-only roles require membership authority, key epochs, and a new credential model.</p>
+            </div>
+            <div>
+              <strong>Contract tests everywhere</strong>
+              <p>RPC numbers, protocol events, package exports, storage migrations, owner-control commands, and cross-app sync should all have boundary tests before desktop/headless are accepted.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Testing &amp; cross-instance interaction:</strong>
+            Implementation agents should test each app in isolation and prove the instances interact.
+            Per-app test detail lives on the
+            <a href="mobile.html#testing">Mobile</a>,
+            <a href="desktop.html#testing">Desktop</a>, and
+            <a href="headless.html#testing">Headless</a> testing sections; the shared harness and the
+            cross-instance matrix below are the source of truth for "instances interact properly."
+          </div>
+
+          <div class="detail-list" id="shared-test-harness" data-nav-section>
+            <h3>Shared local test harness</h3>
+            <div>
+              <strong>Separate storage roots</strong>
+              <p>Each instance starts with its own base dir (mobile = Expo document dir; desktop/headless take <code>--storage &lt;dir&gt;</code>). Never share <code>lista-local</code> between instances.</p>
+            </div>
+            <div>
+              <strong>Private DHT bootstrap</strong>
+              <p>Run a local <code>hyperdht</code> bootstrap node and pass it via <code>BOOTSTRAP</code> / <code>--bootstrap</code> so test peers discover each other without the public DHT.</p>
+            </div>
+            <div>
+              <strong>Headless harness commands</strong>
+              <p>Headless exposes scriptable primitives: <code>create-base</code>, <code>print-invite</code>, <code>join &lt;invite&gt;</code>, <code>status</code>, <code>dump-list</code>, <code>add-item</code>, <code>edit-item</code>, <code>mark-done</code>, <code>delete-item</code>, <code>export</code>, <code>import</code>, <code>shutdown</code>.</p>
+            </div>
+            <div>
+              <strong>Content operation suite</strong>
+              <p>Every shared harness run generates content, edits it, marks it done/undone, deletes it, and asserts the resulting snapshot syncs across peers. Assertions compare canonical item ids and deletion state, not display names, so duplicate-name content cannot collapse by text.</p>
+            </div>
+            <div>
+              <strong>Deterministic teardown</strong>
+              <p>Every test closes stores, destroys swarms, releases the lock, and removes temp dirs; seeded keypairs make assertions reproducible.</p>
+            </div>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Pairing</th>
+                <th>Must prove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>mobile ↔ mobile</td><td>invite/join; both devices generate items, edit text, mark done/undone, delete, and converge; duplicate-name handling by id (M1)</td></tr>
+              <tr><td>mobile ↔ desktop</td><td>parity sync both directions for generated, edited, completed, and deleted content; desktop stays usable and records edits/deletes while mobile is offline; reconnect sync converges</td></tr>
+              <tr><td>mobile ↔ headless</td><td>headless stays online while mobile closed; headless accepts generated/edited/deleted content while mobile is absent; reopen mobile → sync; export/import round-trip preserves ids, done state, edits, and deletions</td></tr>
+              <tr><td>desktop ↔ headless</td><td>invite created on headless, joined from desktop; owner-control from desktop; generated, edited, completed, and deleted content syncs both directions</td></tr>
+              <tr><td>3-way</td><td>all converge after concurrent generate/edit/mark-done/delete operations; kill any one, others continue; rejoin reconciles without duplicates or resurrecting deleted items</td></tr>
+              <tr><td>membership (security)</td><td>owner add-member works; non-owner <code>add-writer</code> ignored (C3); member-removal re-key — removed instance cannot follow the new epoch (C1)</td></tr>
+              <tr><td>credential boundary</td><td>blind-storage instance replicates but cannot decrypt <code>view.get()</code> (C2); trusted participant can read</td></tr>
+              <tr><td>invite safety</td><td>link-join requires confirmation (H2); expired/exhausted invite rejected (H3)</td></tr>
+              <tr><td>owner-control</td><td>replayed/expired/out-of-scope command rejected; revoked device blocked (H1)</td></tr>
+              <tr><td>restart / persistence</td><td>each instance rebuilds identical state from disk after restart</td></tr>
+            </tbody>
+          </table>
+
+
+          <div class="callout" id="redux-decision" data-nav-section>
+            <strong>Decision:</strong>
+            After milestone-zero hardening, use <code>Redux Toolkit</code> before creating the desktop
+            and headless versions. Autobase/Corestore remains the durable local-first source of truth,
+            while Redux becomes the shared UI projection, command dispatcher, and app-state model for
+            mobile and desktop.
+          </div>
+
+          <div class="detail-list">
+            <h3>Why Redux Toolkit</h3>
+            <div>
+              <strong>Future domain fit</strong>
+              <p>
+                Redux Toolkit is planned because Listam is expected to grow into multiple list types:
+                to-dos, simple tasks, calendar-derived lists, kanban boards, configurable rules, and
+                state transitions.
+              </p>
+            </div>
+            <div>
+              <strong>Shared app state</strong>
+              <p>
+                Normalized entities, predictable actions, selectors, and audit-friendly event trails
+                give mobile and desktop one shared app-state model while Autobase/Corestore stays the
+                durable replicated source of truth.
+              </p>
+            </div>
+            <div>
+              <strong>Boundary discipline</strong>
+              <p>
+                Redux should be the UI projection and command dispatcher, not the database. Backend
+                snapshots and protocol events reconcile Redux after persistence and replication.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid three" id="app-targets" data-nav-section>
+            <article class="card accent-blue">
+              <h3>Mobile</h3>
+              <p>
+                Keep the current Expo/React Native app as the first implementation target. Refactor it
+                to use shared Redux slices, typed backend commands, and platform adapters without
+                changing the current simple-list behavior.
+              </p>
+            </article>
+            <article class="card accent-green">
+              <h3>Desktop</h3>
+              <p>
+                Build an enhanced Pear Desktop app first, with Electron only as a fallback if Pear
+                blocks a concrete requirement. The first desktop release should match current Listam
+                behavior while adding large-screen density, keyboard actions, and clearer sync status.
+                UI implementation should follow <code>listam-desktop/design-guide/</code>.
+              </p>
+            </article>
+            <article class="card accent-amber">
+              <h3>Headless</h3>
+              <p>
+                Build a Pear Terminal/Bare personal server for always-on devices owned by the user. It
+                should usually run on another device, such as a Raspberry Pi, mini PC, NAS, or home
+                server, and act as a durable personal peer rather than a central cloud service.
+              </p>
+            </article>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Repository</th>
+                <th>Role</th>
+                <th>First milestone</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>listam-mobile</code></td>
+                <td>Existing mobile app</td>
+                <td>Current Listam parity after Redux Toolkit refactor.</td>
+              </tr>
+              <tr>
+                <td><code>listam-desktop</code></td>
+                <td>Pear Desktop app</td>
+                <td>Shared backend, invite/join, list/grid views, and desktop-optimized UI.</td>
+              </tr>
+              <tr>
+                <td><code>listam-headless</code></td>
+                <td>Pear Terminal/Bare personal server</td>
+                <td>Always-on owned device with P2P owner-control, setup/recovery CLI, invites, status, persistence, and topic services.</td>
+              </tr>
+              <tr>
+                <td><code>listam-shared</code></td>
+                <td>Versioned shared npm packages</td>
+                <td>Domain, protocol, backend, client adapters, logging, secrets, and grocery intelligence published for all app repos.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Desktop detail</th>
+                <th>Planned behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>First milestone</td>
+                <td>Current Listam list parity, invite creation/joining, peer and sync status, list/grid views, grocery grouping and icon intelligence, shared Redux/domain logic, and shared backend/client packages.</td>
+              </tr>
+              <tr>
+                <td>Large-screen improvements</td>
+                <td>Denser list and grid layouts, keyboard-first actions, a larger multi-pane structure, clearer sync and peer diagnostics, and tray/status affordances where Pear Desktop supports them.</td>
+              </tr>
+              <tr>
+                <td>Design system</td>
+                <td>Read <code>listam-desktop/design-guide/</code> before building or changing desktop UI; its design system and example screens are binding references for layout, typography, color, spacing, states, and components.</td>
+              </tr>
+              <tr>
+                <td>Device operations</td>
+                <td>Easier review of invites, peers, and owned headless-device connections from desktop diagnostics and management surfaces.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="primitive-flow" id="shared-package-plan" data-nav-section>
+            <h3>Shared package plan</h3>
+            <ol>
+              <li><code>@listam/domain</code> owns domain types, Redux slices, selectors, migrations, and business rules.</li>
+              <li><code>@listam/protocol</code> owns command and event contracts for UIs, backend services, and future relay devices.</li>
+              <li><code>@listam/backend</code> owns Bare-compatible Autobase/Corestore/Hyperswarm service code.</li>
+              <li><code>@listam/client</code> owns mobile worklet RPC, Pear Desktop IPC, and headless P2P owner-control adapters.</li>
+              <li><code>@listam/logging</code> owns append-only log writing, the shared log row schema, redaction, rotation, diagnostics readers, and export helpers.</li>
+              <li><code>@listam/secrets</code> owns shared secret names, key fingerprints, migration contracts, redaction helpers, and platform secret-store interfaces.</li>
+              <li><code>@listam/grocery</code> owns category, translation, grouping, and icon intelligence currently living in UI modules.</li>
+            </ol>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Client adapter</th>
+                <th>Where it runs</th>
+                <th>Why it is needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mobile worklet RPC</td>
+                <td>Expo/React Native app</td>
+                <td>The backend runs inside the mobile process through BareKit IPC, so the app can command it without a local HTTP server.</td>
+              </tr>
+              <tr>
+                <td>Pear Desktop IPC</td>
+                <td>Pear Desktop app</td>
+                <td>The desktop app can use an embedded backend while sharing the same app-facing client API as mobile.</td>
+              </tr>
+              <tr>
+                <td>Headless P2P command stream</td>
+                <td>Always-on personal server</td>
+                <td>Encrypted request/response commands such as status, create invite, join invite, export, import, shutdown, topic configuration, and owned device management.</td>
+              </tr>
+              <tr>
+                <td>Headless P2P event stream</td>
+                <td>Always-on personal server</td>
+                <td>Encrypted live events for peer count, sync state, join progress, topic health, queue depth, backend errors, list updates, storage health, and owned device status.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <strong>Headless difference:</strong>
+            Mobile and desktop are user-facing apps that can embed or start a backend while the user
+            is actively using them. The headless instance is an always-on service on another owned
+            device. After initial pairing, its default configuration path should be an encrypted P2P
+            owner-control channel, so the user's mobile or desktop app can configure topics, inspect
+            health, and attach it to lists without requiring shared LAN access, exposed ports,
+            Tailscale, or a screen UI.
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Headless first milestone</th>
+                <th>Requirement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Long-lived peer</td>
+                <td>Run as an owned always-on peer and persist the same Autobase/Corestore data model.</td>
+              </tr>
+              <tr>
+                <td>Control and status</td>
+                <td>Create/join invites, expose peer count, sync state, base identity, storage status, and CLI commands for setup, status, invite, join, export, and shutdown.</td>
+              </tr>
+              <tr>
+                <td>Security defaults</td>
+                <td>Require pairing/auth for control operations and never expose raw control endpoints publicly by default.</td>
+              </tr>
+              <tr>
+                <td>Setup guidance</td>
+                <td>Ask which roles the device should perform and show the connection details needed to pair it with mobile or desktop.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="primitive-flow" id="state-manager-phase" data-nav-section>
+            <h3>State-manager phase</h3>
+            <ol>
+              <li>Add Redux Toolkit and create the initial mobile store first.</li>
+              <li>Move list state, sync status, join status, peer count, invite key, preferences, and loyalty-card metadata handles into slices.</li>
+              <li>Keep short-lived interaction state local when it only affects a modal, input, or gesture.</li>
+              <li>Replace direct <code>useState</code> ownership of replicated list data with Redux selectors and actions.</li>
+              <li>Move backend command side effects into listener middleware or typed thunks.</li>
+              <li>Keep the Bare worklet and RPC boundary as a platform adapter, not the owner of UI state.</li>
+            </ol>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Redux slice</th>
+                <th>State domain</th>
+                <th>Why split it this way</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>lists</code></td>
+                <td>Replicated list entities, ordering, selected list, and optimistic list operations.</td>
+                <td>Keeps durable app data separate from UI preferences and connection state.</td>
+              </tr>
+              <tr>
+                <td><code>sync</code></td>
+                <td>Backend readiness, peer count, invite key, join phase, sync health, and sync errors.</td>
+                <td>Makes networking and backend lifecycle visible to mobile, desktop, and headless clients.</td>
+              </tr>
+              <tr>
+                <td><code>preferences</code></td>
+                <td>Grid/list mode, categories, category headers, icon size, text size, and icon style.</td>
+                <td>Keeps local UI choices portable across mobile and desktop without mixing them into replicated data.</td>
+              </tr>
+              <tr>
+                <td><code>loyaltyCards</code></td>
+                <td>Local loyalty-card metadata handles until/unless records are later made replicated; barcode/QR payloads stay in secure storage.</td>
+                <td>Allows sensitive local-only data to remain outside shared list state and outside Redux traces.</td>
+              </tr>
+              <tr>
+                <td><code>ownedDevices</code></td>
+                <td>Known headless instances and future dongles, trust status, supported roles, and last-seen status.</td>
+                <td>Supports headless co-invite, personal servers, and later dongle onboarding without bloating list state.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <strong>Why slices:</strong>
+            A Redux slice is a focused Redux Toolkit module with one domain's state, reducers/actions,
+            and selectors. Slices avoid one giant app state object, make shared mobile/desktop logic
+            easier to test, and leave clean extension points for tasks, calendar ingestion, kanban
+            boards, configurable rules, and future personal-life-management features.
+          </div>
+
+          <div class="detail-list" id="technical-architecture-notes" data-nav-section>
+            <h3>Technical architecture notes</h3>
+            <div>
+              <strong>Package boundaries</strong>
+              <p>
+                Shared packages should separate pure domain code from platform code. Domain reducers,
+                selectors, protocol types, migrations, and grocery intelligence should stay usable in
+                any JavaScript runtime. Bare, Pear, React Native, P2P owner-control, and setup/recovery transport details
+                belong behind backend/client adapters so each app can swap transport without changing
+                list logic.
+              </p>
+            </div>
+            <div>
+              <strong>Replicated data authority</strong>
+              <p>
+                Redux should not become the durable database. Replicated list data remains authoritative
+                in Autobase/Corestore. Redux holds a local projection optimized for rendering,
+                optimistic interaction, and debugging. Backend snapshots and operation events reconcile
+                the Redux projection after persistence and peer replication.
+              </p>
+            </div>
+            <div>
+              <strong>Compatibility rule</strong>
+              <p>
+                Public command names, event names, operation versions, and RPC numeric values should be
+                treated as shared contracts. New behavior should append new commands or versioned fields
+                instead of changing old meanings, so mobile, desktop, and headless can update on
+                different schedules.
+              </p>
+            </div>
+            <div>
+              <strong>UI design system rule</strong>
+              <p>
+                Before implementing UI for any app or project, check for a project-local
+                <code>design-guide/</code> directory. When it exists, its design system docs, tokens,
+                component rules, and example screens are the UI source of truth and must guide
+                implementation and review before generic visual preferences.
+              </p>
+            </div>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Shared interface</th>
+                <th>Expected shape</th>
+                <th>Used by</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Commands</td>
+                <td><code>getStatus</code>, <code>requestListSnapshot</code>, <code>createInvite</code>, <code>joinInvite</code>, <code>addItem</code>, <code>updateItem</code>, <code>deleteItem</code>, <code>exportData</code></td>
+                <td>Mobile, desktop, headless CLI, and trusted admin tools. Snapshot requests hydrate app state; P2P log replication remains automatic below this command layer.</td>
+              </tr>
+              <tr>
+                <td>Events</td>
+                <td><code>statusChanged</code>, <code>listSnapshot</code>, <code>itemAdded</code>, <code>itemUpdated</code>, <code>itemDeleted</code>, <code>joinPhaseChanged</code>, <code>peerCountChanged</code>, <code>error</code></td>
+                <td>Redux listener middleware, desktop status panels, headless monitors.</td>
+              </tr>
+              <tr>
+                <td>Storage identity</td>
+                <td>Base key fingerprint, local writer key fingerprint, device id, role, and storage root.</td>
+                <td>Sync status screens, diagnostics, owned-device management.</td>
+              </tr>
+              <tr>
+                <td>Owned devices</td>
+                <td>Known headless instances and future dongles with trust status, supported roles, last seen, paired control channel metadata, and topic permissions.</td>
+                <td>Headless co-invite flow and future relay/storage device onboarding.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="primitive-flow" id="shared-command-event-flow" data-nav-section>
+            <h3>Shared command and event flow</h3>
+            <ol>
+              <li>The UI dispatches a Redux action such as add, update, delete, create invite, or join invite.</li>
+              <li>Redux listener middleware calls the active <code>@listam/client</code> adapter instead of importing platform APIs directly.</li>
+              <li>The adapter translates the command into mobile worklet RPC, Pear Desktop IPC, or the headless P2P owner-control stream.</li>
+              <li>The backend validates writability, appends to Autobase, updates the materialized view, and emits protocol events.</li>
+              <li>The adapter receives events through IPC callbacks or encrypted P2P owner-control events and dispatches normalized Redux events.</li>
+              <li>Selectors derive screen-ready state for list views, grid views, sync indicators, device lists, and diagnostics.</li>
+            </ol>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Headless surface</th>
+                <th>Technical responsibility</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CLI</td>
+                <td>Setup, status, invite creation, joining, export/import, shutdown, and service diagnostics.</td>
+                <td>Useful over SSH on always-on devices and for recovery when no desktop UI is available.</td>
+              </tr>
+              <tr>
+                <td>P2P owner-control</td>
+                <td>Default encrypted control plane for trusted user-owned apps after pairing.</td>
+                <td>Use it to configure topics, roles, storage policy, invites, queues, and diagnostics without depending on LAN ports or Tailscale.</td>
+              </tr>
+              <tr>
+                <td>Setup/recovery transports</td>
+                <td>Temporary pairing and recovery paths.</td>
+                <td>CLI/SSH, QR code, terminal pairing code, LAN HTTP/WebSocket, Bluetooth, USB, or Tailscale/MagicDNS can help establish or repair the P2P owner-control channel.</td>
+              </tr>
+              <tr>
+                <td>Holepunch peer</td>
+                <td>Durable personal peer for bootstrap, Autobase replication, encrypted storage, and async message relay.</td>
+                <td>Continues helping selected topics while mobile and desktop apps are closed.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="primitive-flow" id="p2p-owner-control" data-nav-section>
+            <h3>P2P owner-control strategy</h3>
+            <ol>
+              <li>Use QR code, terminal pairing code, LAN, Bluetooth, USB, Tailscale/MagicDNS, or CLI/SSH only to establish trust for the first connection.</li>
+              <li>Create a private owner-control topic between the trusted mobile/desktop app and the headless instance.</li>
+              <li>Send signed, nonce-protected, capability-scoped configuration commands over encrypted P2P streams instead of requiring a long-lived HTTP server to be reachable.</li>
+              <li>Keep owner-control separate from list replication topics, relay topics, and storage topics.</li>
+              <li>Use setup/recovery transports only when pairing is new, broken, or manually being repaired.</li>
+            </ol>
+          </div>
+
+          <div class="primitive-flow" id="headless-first-run" data-nav-section>
+            <h3>Headless first-run setup</h3>
+            <ol>
+              <li>The headless app starts on an owned always-on device and asks which capabilities should be enabled.</li>
+              <li>It generates or displays pairing information for the user's mobile or desktop app, such as device id, public key fingerprint, pairing code, and supported roles.</li>
+              <li>The user pairs the headless instance from a trusted app and establishes an encrypted P2P owner-control topic.</li>
+              <li>The headless instance receives credentials according to the honest current role boundary: full participant credentials for trusted devices, or no encryption key for blind helpers.</li>
+              <li>It reports status back over the owner-control event stream: peer count, topic health, storage usage, queue depth, protocol version, and recent errors.</li>
+            </ol>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Headless capability</th>
+                <th>What it does</th>
+                <th>Why it helps</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bootstrap helper</td>
+                <td>Stays online on allowed topics and helps the user's devices find a stable owned peer.</td>
+                <td>Improves reconnect behavior when phones and laptops are offline or changing networks.</td>
+              </tr>
+              <tr>
+                <td>Replication helper</td>
+                <td>Joins selected Autobase discovery topics and replicates content for lists the user allows.</td>
+                <td>Keeps the shared log available even when the primary UI apps are closed.</td>
+              </tr>
+              <tr>
+                <td>Storage helper</td>
+                <td>Retains encrypted replicated content under a configured storage policy; as a blind helper it should not receive the list encryption key.</td>
+                <td>Provides redundant user-owned storage without turning Listam into a hosted cloud service or implying read-only credentials that do not exist yet.</td>
+              </tr>
+              <tr>
+                <td>Async message helper</td>
+                <td>Queues encrypted store-and-forward messages for peers in the same allowed topics.</td>
+                <td>Lets peers exchange messages or wakeup hints even when they are not online at the same time.</td>
+              </tr>
+              <tr>
+                <td>Notification/reconnect helper</td>
+                <td>Tracks topic activity, queue depth, and peer availability for trusted owner clients.</td>
+                <td>Gives mobile and desktop better sync diagnostics and a future path to push-style notifications.</td>
+              </tr>
+              <tr>
+                <td>Diagnostics helper</td>
+                <td>Reports protocol version, storage health, topic health, peer counts, and recent errors.</td>
+                <td>Makes an always-on device understandable and maintainable without attaching a monitor.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="primitive-flow" id="headless-co-invite" data-nav-section>
+            <h3>Headless co-invite flow</h3>
+            <ol>
+              <li>A user joins someone else's list from mobile or desktop using the normal invite flow.</li>
+              <li>After that device becomes writable or receives the allowed access mode, the app offers to add the user's known headless instances.</li>
+              <li>The user selects one or more owned devices and chooses an access mode such as writer, storage, or relay.</li>
+              <li>The joined device creates a short-lived delegated invite scoped to the target owned device and access mode.</li>
+              <li>The headless instance accepts the delegated invite over its trusted owner-control channel.</li>
+              <li>For writer mode, the joined device appends <code>add-writer</code>. For trusted storage under the current substrate, the headless device must be treated as a full trusted participant if it receives list credentials. For blind storage or relay mode, it avoids list encryption credentials.</li>
+              <li>Delegated co-invites inherit lifetime, use-count, expiration, revocation, audit logging, and redaction rules from normal invites.</li>
+              <li>Future read-only or sync-only roles require the membership-authority and key-epoch work from C1–C3.</li>
+            </ol>
+          </div>
+
+          <div class="callout" id="logging-strategy" data-nav-section>
+            <strong>Logging principle:</strong>
+            Every app and service should write local append-only JSONL logs with the app or instance
+            name on each row. Logs are diagnostics, not replicated app state. They can be viewed from
+            mobile, desktop, headless CLI, or trusted owner-control diagnostics, and development builds
+            can request redacted log bundles from trusted peers for export.
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Log surface</th>
+                <th>Append target</th>
+                <th>Visible from</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mobile app</td>
+                <td><code>mobile.log.jsonl</code> plus embedded backend logs when available.</td>
+                <td>Mobile diagnostics screen, desktop peer diagnostics in development, exported bundles.</td>
+              </tr>
+              <tr>
+                <td>Desktop app</td>
+                <td><code>desktop.log.jsonl</code> plus embedded backend logs when available.</td>
+                <td>Desktop diagnostics screen, mobile peer diagnostics in development, exported bundles.</td>
+              </tr>
+              <tr>
+                <td>Headless app</td>
+                <td><code>headless.log.jsonl</code> and service/backend logs on the always-on device.</td>
+                <td>Headless CLI, trusted mobile/desktop owner-control diagnostics, exported bundles.</td>
+              </tr>
+              <tr>
+                <td>Backend service</td>
+                <td><code>backend.log.jsonl</code> when the backend runs as an embedded or standalone process.</td>
+                <td>The host app diagnostics view and merged development log exports.</td>
+              </tr>
+              <tr>
+                <td>Future dongle tooling</td>
+                <td><code>dongle.log.jsonl</code> in bridge or companion tooling when storage permits.</td>
+                <td>Owner-control diagnostics and hardware debugging exports.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Log row field</th>
+                <th>Purpose</th>
+                <th>Example values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ts</code>, <code>level</code></td>
+                <td>Sort events and filter by severity.</td>
+                <td><code>2026-05-27T12:00:00.000Z</code>, <code>info</code>, <code>warn</code>, <code>error</code>, <code>audit</code></td>
+              </tr>
+              <tr>
+                <td><code>app</code>, <code>instanceName</code>, <code>instanceId</code></td>
+                <td>Keep merged logs readable when several peers contribute rows.</td>
+                <td><code>mobile</code>, <code>desktop</code>, <code>headless</code>, <code>Romme iPhone</code></td>
+              </tr>
+              <tr>
+                <td><code>runtime</code>, <code>component</code>, <code>event</code></td>
+                <td>Identify which layer emitted the event.</td>
+                <td><code>react-native</code>, <code>bare</code>, <code>sync</code>, <code>p2p</code>, <code>peer_count_changed</code></td>
+              </tr>
+              <tr>
+                <td><code>topicId</code>, <code>baseId</code>, <code>requestId</code></td>
+                <td>Correlate commands, replication, topics, and backend responses without exposing raw keys.</td>
+                <td>Short redacted fingerprints and command correlation ids.</td>
+              </tr>
+              <tr>
+                <td><code>message</code>, <code>details</code></td>
+                <td>Human-readable summary plus structured metadata.</td>
+                <td>Redacted storage path, queue depth, peer count, join phase, or protocol version.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="primitive-flow" id="development-peer-log-flow" data-nav-section>
+            <h3>Development peer log request flow</h3>
+            <ol>
+              <li>The developer enables diagnostics sharing for a trusted device group or owner-control relationship.</li>
+              <li>A mobile, desktop, or headless instance sends <code>requestLogBundle</code> over the trusted debug or owner-control channel.</li>
+              <li>Peers return bounded, redacted JSONL bundles for the requested time range, levels, and components.</li>
+              <li>The requester merges rows by timestamp while preserving <code>app</code>, <code>instanceName</code>, and <code>instanceId</code>.</li>
+              <li>The app exports the bundle as a zip file, plain JSONL, email attachment, or platform share-sheet file.</li>
+            </ol>
+          </div>
+
+          <div class="detail-list" id="logging-controls" data-nav-section>
+            <h3>Logging controls</h3>
+            <div>
+              <strong>Levels</strong>
+              <p>
+                Use <code>trace</code> for very detailed development-only command/event flow,
+                <code>debug</code> for development diagnostics, <code>info</code> for normal lifecycle
+                milestones, <code>warn</code> for recoverable problems, <code>error</code> for failed
+                operations, <code>fatal</code> for startup or persistence failures, and
+                <code>audit</code> for security-relevant owner actions.
+              </p>
+            </div>
+            <div>
+              <strong>Rotation and retention</strong>
+              <p>
+                Start with smaller mobile/desktop retention, such as 10 MB files with 10 rotations,
+                and larger headless retention, such as 50 MB files with 20 rotations. Development can
+                keep more <code>debug</code> or <code>trace</code> data; production should default to
+                <code>info</code> and above.
+              </p>
+            </div>
+            <div>
+              <strong>Redaction</strong>
+              <p>
+                Redact before writing and before export. Owner-control tokens, pairing codes, invite
+                codes, base keys, writer keys, encryption keys, raw topic keys, auth headers, and local
+                API tokens should become short fingerprints or omitted values. Full user content should
+                also be omitted when a diagnostic event is useful without it.
+              </p>
+            </div>
+            <div>
+              <strong>Diagnostics filters</strong>
+              <p>
+                Diagnostics views should filter by app or instance name, level, component, topic/list
+                fingerprint, request or operation correlation id, time window, and warnings/errors only.
+              </p>
+            </div>
+            <div>
+              <strong>Useful events</strong>
+              <p>
+                Log startup/shutdown, backend readiness, Redux commands, adapter requests, invite and
+                pairing phases, peer count changes, replication progress, Autobase apply/snapshot,
+                headless role changes, queue depth, storage usage, exports/imports, and unhandled
+                errors.
+              </p>
+            </div>
+            <div>
+              <strong>Production boundary</strong>
+              <p>
+                Peer log requests should be disabled by default for normal production users. The user's
+                own paired headless instance may expose logs through explicit diagnostics actions over
+                owner-control, but logs should never be fetched from public endpoints.
+              </p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Key storage update:</strong>
+            Plaintext Autobase key and encryption-key text files are acceptable only as a
+            development/prototype shortcut. Production apps should migrate sensitive values into
+            platform secure storage and leave only redacted fingerprints in normal app files, logs,
+            and diagnostic exports.
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Secret or metadata</th>
+                <th>Production handling</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Autobase/base key</td>
+                <td>Store securely or as protected metadata, and log only a fingerprint.</td>
+                <td>It identifies or bootstraps a replicated base and should not appear raw in logs or exports.</td>
+              </tr>
+              <tr>
+                <td>Autobase encryption key</td>
+                <td>Store in platform secure storage, never as a long-lived plaintext app file.</td>
+                <td>It protects encrypted values; leaking it can expose replicated content.</td>
+              </tr>
+              <tr>
+                <td>Writer keys and owner-control tokens</td>
+                <td>Use platform secure storage and strict redaction.</td>
+                <td>They control write authority and trusted device administration.</td>
+              </tr>
+              <tr>
+                <td>Invite codes and pairing secrets</td>
+                <td>Keep short-lived, redact everywhere, and persist only when explicitly needed.</td>
+                <td>They can grant access during onboarding or recovery.</td>
+              </tr>
+              <tr>
+                <td>Corestore data, indexes, logs, snapshots</td>
+                <td>Keep in normal app storage with encrypted values where appropriate.</td>
+                <td>These are durable app files, but raw secret material should not live beside them.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="detail-list" id="secret-storage-plan" data-nav-section>
+            <h3>Secret storage plan</h3>
+            <div>
+              <strong>Mobile</strong>
+              <p>
+                Use iOS Keychain and Android Keystore-backed storage, such as Expo SecureStore or a
+                lower-level native adapter if the Bare bridge needs tighter control.
+              </p>
+            </div>
+            <div>
+              <strong>Desktop</strong>
+              <p>
+                Use the OS keychain where possible. If unavailable, use an encrypted key file unlocked
+                by a device-local key or user passphrase, with strict file permissions.
+              </p>
+            </div>
+            <div>
+              <strong>Headless</strong>
+              <p>
+                Use the OS keyring, TPM-backed secret storage, systemd credentials, encrypted local
+                key file, or user-provided passphrase depending on the device. Plain files should be
+                explicit development mode only.
+              </p>
+            </div>
+            <div>
+              <strong>Migration</strong>
+              <p>
+                On startup, detect legacy plaintext key files, validate them, write sensitive values
+                to the secure store, replace normal metadata with fingerprints, delete plaintext files
+                after success, and log only migration status. Provide a recovery path if secure storage
+                is unavailable or the user is moving to a new device.
+              </p>
+            </div>
+            <div>
+              <strong>Dongle tooling</strong>
+              <p>
+                Avoid storing raw application encryption keys on generic relay hardware unless the
+                device is explicitly acting as trusted storage for the owner.
+              </p>
+            </div>
+            <div>
+              <strong>Reference targets</strong>
+              <p>
+                Mobile secret storage should align with Expo SecureStore, Apple Keychain Services, and
+                Android Keystore-backed storage.
+              </p>
+            </div>
+          </div>
+
+          <table class="info-table" id="implementation-hardening" data-nav-section>
+            <thead>
+              <tr>
+                <th>Next implementation hardening</th>
+                <th>Required update</th>
+                <th>Acceptance signal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Plaintext secrets</td>
+                <td>
+                  Move encryption keys, writer keys, owner-control tokens, invite secrets, pairing
+                  secrets, and loyalty card barcode/QR payloads into platform secure storage.
+                </td>
+                <td>Legacy plaintext files and AsyncStorage loyalty records migrate once, then raw secrets are deleted.</td>
+              </tr>
+              <tr>
+                <td>Production logs</td>
+                <td>
+                  Replace verbose raw <code>console</code> logging with the shared logging layer,
+                  redacted fingerprints, production log-level gates, and repository ignore rules for
+                  local logs plus generated P2P key/invite files such as <code>autobase-key.txt</code>,
+                  <code>local-writer-key.txt</code>, <code>encryption-key.txt</code>, <code>invite.json</code>,
+                  <code>lista-*.txt</code>, and <code>lista-invite.json</code>.
+                </td>
+                <td>Automated checks prove base keys, encryption keys, writer keys, invite codes, peer keys, item payloads, and loyalty card data do not appear in logs or exports.</td>
+              </tr>
+              <tr>
+                <td>Invite lifecycle</td>
+                <td>
+                  Add revoke and rotate controls, visible lifetime, remaining use count, scoped access
+                  mode, expiration, and audit events.
+                </td>
+                <td>Bounded-use invites cannot add more peers after expiration, revocation, rotation, or use exhaustion.</td>
+              </tr>
+              <tr>
+                <td>Loyalty card privacy</td>
+                <td>
+                  Treat card names, barcode values, QR values, and barcode types as sensitive
+                  local-only data unless the user explicitly chooses future replication.
+                </td>
+                <td>Diagnostics, logs, Redux traces, and exports redact or exclude card payloads by default.</td>
+              </tr>
+              <tr>
+                <td>Recovery coverage</td>
+                <td>
+                  Add tests for item reduction, duplicate handling, category lookup, join rollback,
+                  corruption recovery, storage migration, and invite revoke/rotate behavior.
+                </td>
+                <td>CI exercises migration and recovery paths before desktop/headless extraction.</td>
+              </tr>
+              <tr>
+                <td>Dependency hygiene</td>
+                <td>
+                  Add direct dependencies for modules imported by loyalty card rendering, including
+                  <code>react-native-svg</code> and <code>qrcode-terminal</code>, and verify whether
+                  <code>@expo/vector-icons</code> should be direct.
+                </td>
+                <td>A dependency check fails when source files import undeclared runtime packages.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="detail-list" id="implementation-constraints" data-nav-section>
+            <h3>Implementation constraints</h3>
+            <div>
+              <strong>Security boundary</strong>
+              <p>
+                Owner-control tokens, pairing codes, invite codes, base keys, encryption keys, and
+                writer keys must be redacted from production logs and should not remain in plaintext
+                app files. Public internet exposure should require an explicit future decision, not a
+                default headless behavior.
+              </p>
+            </div>
+            <div>
+              <strong>Failure modes</strong>
+              <p>
+                Adapters should report typed failures for backend unavailable, not writable, pairing
+                timeout, invite expired, incompatible protocol version, storage locked, and auth
+                rejected. Redux should surface these in <code>sync</code> or <code>ownedDevices</code>
+                instead of hiding them in console logs.
+              </p>
+            </div>
+            <div>
+              <strong>Migration order</strong>
+              <p>
+                Run milestone-zero hardening first, refactor mobile onto the shared
+                Redux/protocol/client packages second, then extract the backend package, then build
+                desktop and headless. That keeps the current app working while each shared boundary is
+                proven by the existing product.
+              </p>
+            </div>
+          </div>
+
+          <div class="detail-list" id="future-direction" data-nav-section>
+            <h3>Future direction</h3>
+            <div>
+              <strong>Near-term model rules</strong>
+              <p>
+                Use stable item ids when available, preserve compatibility with legacy text-only
+                entries, normalize entities in Redux, keep operation contracts append-only and
+                versioned, and avoid embedding UI-only concepts into replicated backend operations.
+              </p>
+            </div>
+            <div>
+              <strong>Personal-life-management lists</strong>
+              <p>
+                The first milestone should keep current simple Listam behavior, but the domain model
+                should be ready for to-dos, simple tasks, calendar-ingested lists, kanban-style boards,
+                configurable rules, and additional personal-life-management features.
+              </p>
+            </div>
+            <div>
+              <strong>Dongle compatibility</strong>
+              <p>
+                Future USB dongles should work with every app using the Holepunch stack, not only
+                Listam. Keep relay envelopes generic and encrypted so dongles can provide bootstrap,
+                async messages, blind relay, reliable redundant storage, store-and-forward storage,
+                push notification relay, reconnection help, media streaming/distribution improvements,
+                and Bluetooth configuration for relay topics without understanding Listam payloads.
+              </p>
+            </div>
+            <div>
+              <strong>Prototype hardware</strong>
+              <p>
+                The dongle prototype path currently considers Seeed Studio XIAO ESP32S3, ESP32-S3
+                DevKitC-1 N16R8, SPI microSD card reader modules, and 32 GB microSDHC cards. The plan
+                keeps those devices as relay/storage appliances around generic Holepunch topics rather
+                than Listam-only hardware.
+              </p>
+            </div>
+            <div>
+              <strong>First milestone boundary</strong>
+              <p>
+                Prove current Listam parity across mobile, desktop, and headless first. Do not add new
+                list domains in the first milestone; add the architecture that makes them possible.
+                All three app surfaces should consume the shared package versions and existing simple list
+                operations should remain compatible.
+              </p>
+            </div>
+          </div>
+
+          <table class="info-table" id="test-plan" data-nav-section>
+            <thead>
+              <tr>
+                <th>Test area</th>
+                <th>What to prove</th>
+                <th>Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Redux and domain</td>
+                <td>Reducers, selectors, preferences, join state, and legacy migration are stable.</td>
+                <td>Add/update/delete, grouped selectors, peer status, and text-only item migration.</td>
+              </tr>
+              <tr>
+                <td>Backend and protocol</td>
+                <td>Command/event contracts stay compatible across the separate app repositories.</td>
+                <td>Snapshot sync, invite creation, join phases, peer count, errors, and RPC number compatibility.</td>
+              </tr>
+              <tr>
+                <td>Cross-app sync</td>
+                <td>Mobile, desktop, and headless can all join and replicate with each other.</td>
+                <td>Mobile-to-desktop, mobile-to-headless, desktop-to-headless, and headless restart persistence.</td>
+              </tr>
+              <tr>
+                <td>Manual acceptance</td>
+                <td>The first milestone feels like current Listam across all app surfaces.</td>
+                <td>Generate content on mobile, edit and complete it on desktop, delete content through headless, keep headless online, reopen mobile and verify sync, and compare implemented UI against any project-local <code>design-guide/</code> examples.</td>
+              </tr>
+              <tr>
+                <td>Logging and diagnostics</td>
+                <td>Append-only JSONL, redaction, rotation, export, and development peer-log requests are reliable.</td>
+                <td>Mobile/desktop/headless labels, secret redaction, retention defaults, merged exports, and trusted owner-control/debug log bundles.</td>
+              </tr>
+              <tr>
+                <td>Key storage and secrets</td>
+                <td>Legacy plaintext keys and AsyncStorage loyalty cards migrate into secure storage.</td>
+                <td>Secure startup secret handoff, desktop/headless fallback paths, raw-secret redaction, secure delete/export for loyalty records.</td>
+              </tr>
+              <tr>
+                <td>Invite lifecycle</td>
+                <td>Invite revocation, rotation, bounded use, expiration, and honest delegated headless co-invite modes work.</td>
+                <td>Writer/full-participant and blind storage/relay delegated co-invite tests plus exhausted/expired invite rejection.</td>
+              </tr>
+              <tr>
+                <td>Data recovery</td>
+                <td>Core list reduction and recovery paths survive replay, failed join, and corrupted local state.</td>
+                <td>Item reduction, duplicate handling, category lookup/grocery intelligence in CI, join rollback, Autobase/Corestore corruption recovery, and undeclared dependency checks.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout" id="assumptions" data-nav-section>
+            <strong>Assumptions:</strong>
+            Redux Toolkit is chosen; current Listam parity is the first milestone; milestone 1 uses
+            separate app repositories (<code>listam-mobile</code>, <code>listam-desktop</code>,
+            <code>listam-headless</code>) with versioned shared packages from <code>listam-shared</code>;
+            Pear Desktop and Pear Terminal/Bare are primary targets; Electron is only a fallback; new
+            list domains come after the foundation; future relay dongles remain generic for
+            Holepunch-stack apps; plaintext key files are legacy/development-only and should be migrated
+            before production release.
+          </div>
+
+          <div class="detail-list" id="phases" data-nav-section>
+            <h3>Phases</h3>
+            <div>
+              <strong>Pause gate, not a single commit</strong>
+              <p>
+                Each phase is a pause gate rather than necessarily one commit. Small phases land as a
+                single commit; larger phases (package extraction, desktop, headless) may span several
+                commits. Implementation must pause at the phase boundary - after the work is committed,
+                verified, and recorded - before the next phase begins, and the record must capture the
+                full commit range.
+              </p>
+            </div>
+            <div>
+              <strong>Two parallel tracks</strong>
+              <p>
+                After Phase 1 the work splits into a membership-crypto track (Phases 2-4: secret-storage
+                foundation, owner membership authority, key epochs / member-removal re-key) and a
+                data-model / extraction track (Phases 5-8: stable item IDs, in-place Redux migration,
+                shared-package extraction). The extraction track depends only on Phases 0-1, not on the
+                membership-crypto track, so it does not wait behind the re-key flow. Both reconverge
+                before the desktop/headless build.
+              </p>
+            </div>
+            <div>
+              <strong>Required phase record</strong>
+              <p>
+                After each phase, add or update a collapsible subsection in this plan and the dedicated
+                <a href="phases.html#phase-log">wiki phase log</a>. Each record must list all files
+                modified with reasons, all functions created/updated/deleted with reasons, a summary of
+                implementation decisions and actions, and the commit range, dependencies satisfied, and
+                acceptance signal met.
+              </p>
+            </div>
+            <div>
+              <strong>Commit-worthy phase sequence</strong>
+              <p>
+                Phase 0 test/CI/repo-hygiene bootstrap; Phase 1 invite safety and deep-link
+                confirmation; Phase 2 secret-storage foundation; Phase 3 membership authority and honest
+                revocation language; Phase 4 key epochs and member-removal re-key; Phase 5 stable item
+                IDs and backend reduction migration; Phase 6 in-place Redux Toolkit migration; Phase 7
+                pure shared-package extraction; Phase 8 backend/client extraction with platform adapter;
+                Phase 9 loyalty-card secrets and redaction routing; Phase 10 recovery, snapshots, and
+                storage durability; Phase 11 desktop parity; Phase 12 headless service and CLI parity;
+                Phase 13 owner-control protocol; Phase 14 cross-app acceptance and release readiness.
+              </p>
+            </div>
+          </div>
+
+          <a class="source" href="./listam-multi-app-plan.md">listam-multi-app-plan.md</a>
+          <a class="source" href="./phases.html">phases.html</a>
+          </section>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki — Desktop</title>
+    <meta
+      name="description"
+      content="Desktop-specific documentation for the planned Listam Pear Desktop app."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#desktop" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Desktop Overview</span>
+              </a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#headless" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Headless Overview</span>
+              </a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection">
+                <summary class="nav-subgroup" title="Planned, not implemented yet">
+                  <span class="status-icon planned" aria-hidden="true"></span>
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                </div>
+              </details>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-05-29</strong>
+          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Desktop · Pear Desktop · planned</span>
+            <h1>Desktop App</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: Pear, IPC, keyboard..." />
+          </label>
+        </header>
+
+        <section id="desktop" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Pear Desktop · planned</span>
+            <h2>Desktop Overview</h2>
+            <p class="section-lede">
+              Not implemented yet. Planned as an enhanced large-screen version of the mobile
+              experience that shares the same backend, domain logic, and shared packages.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-blue">
+              <h3>Runtime target</h3>
+              <p>
+                Build as a Pear Desktop application first, with Electron only as a fallback if Pear
+                blocks a concrete requirement. The desktop app uses Pear Desktop IPC for its embedded
+                backend path through the shared <code>@listam/client</code> adapter.
+              </p>
+            </article>
+            <article class="card accent-green">
+              <h3>First milestone</h3>
+              <p>
+                Current Listam parity: invite create/join, peer and sync status, list and grid views,
+                grocery grouping and icon intelligence, shared Redux/domain logic, and shared
+                backend/client packages.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Large-screen improvements</h3>
+              <p>
+                Denser list and grid layouts, keyboard-first actions, a larger multi-pane structure,
+                clearer sync and peer diagnostics, and tray/status affordances where Pear Desktop
+                supports them.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Device operations</h3>
+              <p>
+                Easier review of invites, peers, and owned headless-device connections, including the
+                headless P2P owner-control adapter when the desktop app observes a user's always-on
+                personal server.
+              </p>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Status:</strong>
+            The <code>listam-desktop</code> repository is currently empty. See the
+            <a href="plans.html#multi-app-plan">Multi-App Plan</a> for the full design and the
+            <a href="plans.html#review-findings">review findings</a> that gate it.
+          </div>
+        </section>
+
+        <section id="testing" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Verification</span>
+            <h2>Testing</h2>
+            <p class="section-lede">
+              How an implementation agent tests the desktop app and proves it interacts with mobile and
+              headless. See also the <a href="plans.html#implementation-plans">implementation plans</a>.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>Unit</h3>
+              <p>
+                The shared <code>@listam/domain</code>, <code>@listam/protocol</code>, and
+                <code>@listam/grocery</code> suites run in Node — identical to mobile.
+              </p>
+            </article>
+            <article class="card accent-blue">
+              <h3>Integration</h3>
+              <p>
+                The Pear Desktop IPC adapter passes the same <code>@listam/client</code> contract tests
+                as the worklet adapter; keyboard actions and multi-pane behavior; the diagnostics panel
+                reads backend events.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Manual / E2E</h3>
+              <p>
+                Parity checklist on macOS/Windows/Linux; tray/status where Pear supports it; compare the
+                UI against <code>listam-desktop/design-guide/</code>.
+              </p>
+            </article>
+            <article class="card">
+              <h3>How to run</h3>
+              <p>
+                Launch the Pear dev app; run the shared package suites with the Node runner; drive a
+                second instance (or a headless peer) for sync.
+              </p>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Interaction:</strong>
+            Desktop rows of the <a href="plans.html#implementation-plans">cross-instance matrix</a>:
+            mobile ↔ desktop generated/edited/completed/deleted content parity both directions,
+            desktop usable while mobile is offline, and desktop ↔ headless (join an invite created on
+            headless, drive owner-control from desktop, and sync content operations both ways).
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

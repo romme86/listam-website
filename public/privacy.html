@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Listam - Privacy Policy</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#000000",
+            "background-light": "#ffffff",
+            "background-dark": "#0a0a0a",
+            "surface-light": "#f3f3f3",
+            "surface-dark": "#1a1a1a",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["Space Mono", "monospace"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>.hexagram-line {
+    height: 12px;
+    width: 100%;
+    border-radius: 9999px;
+    background-color: currentColor;
+    margin-bottom: 8px;
+  }
+  .hexagram-broken {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .hexagram-broken span {
+    height: 12px;
+    width: 42%;
+    border-radius: 9999px;
+    background-color: currentColor;
+  }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-black dark:text-gray-100 font-sans antialiased transition-colors duration-300 min-h-screen flex flex-col items-center">
+<div class="fixed top-6 right-6 z-50">
+  <button class="p-2 rounded-full bg-surface-light dark:bg-surface-dark hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+    <span class="material-icons-round text-xl block dark:hidden">dark_mode</span>
+    <span class="material-icons-round text-xl hidden dark:block">light_mode</span>
+  </button>
+</div>
+<main class="w-full max-w-4xl px-6 py-12 md:py-24 flex flex-col items-center">
+  <div class="mb-12 w-24 md:w-32 text-black dark:text-white opacity-90">
+    <div class="hexagram-line"></div>
+    <div class="hexagram-line"></div>
+    <div class="hexagram-line"></div>
+    <div class="hexagram-line"></div>
+    <div class="hexagram-broken"><span></span><span></span></div>
+    <div class="hexagram-line"></div>
+  </div>
+  <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-16 text-center">Privacy Policy</h1>
+  <div class="w-full max-w-2xl space-y-16">
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="material-icons-round text-2xl text-gray-400">hub</span>
+        <h2 class="text-2xl font-bold">P2P &amp; Data</h2>
+      </div>
+      <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+        Listam is built on a peer-to-peer (P2P) architecture. We believe that your personal data should remain yours.
+        <br/><br/>
+        All grocery lists and items are <strong>stored locally</strong> on your device. When you share a list, data is synced directly between peers using the Hypercore protocol. We do not operate central servers to store your list data, meaning Saynode Operations AG has absolutely no access to your list contents, habits, or personal information.
+      </p>
+    </section>
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="material-icons-round text-2xl text-gray-400">bar_chart</span>
+        <h2 class="text-2xl font-bold">Analytics</h2>
+      </div>
+      <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+        We value your privacy and do not track your behavior within the app.
+        <br/><br/>
+        The only metrics we collect are aggregated, anonymous download statistics and standard crash reports provided directly by the App Store and Google Play Store. We do not use third-party analytics SDKs, tracking pixels, or advertising identifiers.
+      </p>
+    </section>
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="material-icons-round text-2xl text-gray-400">gavel</span>
+        <h2 class="text-2xl font-bold">Disclaimer</h2>
+      </div>
+      <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-gray-200 dark:border-gray-800">
+        <h3 class="font-bold text-lg mb-2">No Responsibility for Data Loss</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+          Because Listam operates without a central server, you are the sole custodian of your data. If you lose your device or delete the application without a backup, your lists cannot be recovered by us. We highly recommend regular device backups.
+        </p>
+        <div class="text-xs font-mono text-gray-500 dark:text-gray-500 uppercase tracking-wide leading-relaxed border-t border-gray-200 dark:border-gray-700 pt-6">
+          THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer class="mt-32 text-center text-sm text-gray-500 dark:text-gray-500 w-full border-t border-gray-100 dark:border-gray-900 pt-12">
+    <div class="flex items-center justify-center gap-8 mb-6 font-medium">
+      <a class="hover:text-black dark:hover:text-white transition-colors" href="/">Home</a>
+      <a class="hover:text-black dark:hover:text-white transition-colors" href="/wiki/">Wiki</a>
+      <a class="hover:text-black dark:hover:text-white transition-colors" href="https://github.com/SayNode/listam-website">GitHub</a>
+      <a class="hover:text-black dark:hover:text-white transition-colors" href="https://saynode.ch">Contact</a>
+    </div>
+    <p>© 2026 Saynode Operations AG</p>
+  </footer>
+</main>
+
+</body></html>

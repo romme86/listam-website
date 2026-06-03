@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki - Phases</title>
+    <meta
+      name="description"
+      content="Commit-worthy implementation phases and per-commit phase logs for the Listam multi-app plan."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#desktop" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Desktop Overview</span>
+              </a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#headless" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Headless Overview</span>
+              </a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection" open>
+                <summary class="nav-subgroup" title="Planned, not implemented yet">
+                  <span class="status-icon planned" aria-hidden="true"></span>
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                  <a href="plans.html#phases">Phases</a>
+                  <a href="phases.html#phase-log">Phase Log</a>
+                  <a href="phases.html#phase-0">Phase 0</a>
+                  <a href="phases.html#phase-1">Phase 1</a>
+                  <a href="phases.html#phase-2">Phase 2</a>
+                  <a href="phases.html#phase-3">Phase 3</a>
+                  <a href="phases.html#phase-4">Phase 4</a>
+                  <a href="phases.html#phase-5">Phase 5</a>
+                  <a href="phases.html#phase-6">Phase 6</a>
+                  <a href="phases.html#phase-7">Phase 7</a>
+                  <a href="phases.html#phase-8">Phase 8</a>
+                  <a href="phases.html#phase-9">Phase 9</a>
+                  <a href="phases.html#phase-10">Phase 10</a>
+                  <a href="phases.html#phase-11">Phase 11</a>
+                  <a href="phases.html#phase-12">Phase 12</a>
+                  <a href="phases.html#phase-13">Phase 13</a>
+                  <a href="phases.html#phase-14">Phase 14</a>
+                </div>
+              </details>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-06-03</strong>
+          <p>Phase log for the multi-app implementation plan.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Plans - phase log</span>
+            <h1>Implementation Phases</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: invite, Redux, headless..." />
+          </label>
+        </header>
+
+        <section id="phase-log" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Commit-worthy units</span>
+            <h2>Phase Log</h2>
+            <p class="section-lede">
+              These phases are the pause gates for implementing the multi-app plan. A phase is not
+              necessarily a single commit: small phases land as one commit, larger ones (package
+              extraction, desktop, headless) may span several. After each phase's work is committed and
+              verified, implementation pauses and this page receives a collapsible record for it.
+            </p>
+          </div>
+
+          <div class="callout" data-nav-section>
+            <strong>Pause rule:</strong>
+            finish one phase, verify it, commit it (one or more commits), update the plan and this wiki
+            page with the commit range, then pause before starting the next phase.
+          </div>
+
+          <div class="callout" data-nav-section>
+            <strong>Two parallel tracks:</strong>
+            after Phase 1 the work splits into a <em>membership-crypto track</em> (Phases 2-4:
+            secret-storage foundation, owner membership authority, key epochs / member-removal re-key)
+            and a <em>data-model / extraction track</em> (Phases 5-8: stable item IDs, in-place Redux
+            migration, shared-package extraction). The extraction track depends only on Phases 0-1, not
+            on the membership-crypto track, so it does not wait behind the re-key flow. Both reconverge
+            before the desktop/headless build. Each phase lists its dependencies explicitly.
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Required in each committed phase record</th>
+                <th>Why it exists</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>All files modified, with reasons</td>
+                <td>Shows the implementation footprint and why each file changed.</td>
+              </tr>
+              <tr>
+                <td>All functions created, updated, or deleted, with reasons</td>
+                <td>Captures behavior-level changes that are easy to miss in file summaries.</td>
+              </tr>
+              <tr>
+                <td>General summary of decisions and actions</td>
+                <td>Records tradeoffs, implementation choices, verification, and follow-up risk.</td>
+              </tr>
+              <tr>
+                <td>Commit range, commit message(s), and verification commands</td>
+                <td>Connects the wiki record to the exact code state that shipped for the phase. A phase may span several commits; record the full range.</td>
+              </tr>
+              <tr>
+                <td>Dependencies satisfied and acceptance signal met</td>
+                <td>Confirms the phase's prerequisites were in place and its acceptance criteria passed before the pause.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <details class="phase-record" id="phase-template" data-nav-section>
+            <summary>Phase record template</summary>
+            <h3>Files modified</h3>
+            <ul>
+              <li><code>path/to/file</code>: reason for modification</li>
+            </ul>
+            <h3>Functions created / updated / deleted</h3>
+            <ul>
+              <li><code>functionName</code>: created / updated / deleted - reason for action</li>
+            </ul>
+            <h3>Implementation summary</h3>
+            <p>Decisions, actions, verification, follow-up risks, commit range (one or more hashes), commit message(s), dependencies satisfied, and acceptance signal met.</p>
+          </details>
+
+          <details class="phase-record" id="phase-0" data-nav-section>
+            <summary>Phase 0 - Test, CI, and repo hygiene bootstrap (commits: pending)</summary>
+            <p>
+              Commit boundary: add a reproducible test runner, commit/un-gitignore the lockfile, a
+              dependency-hygiene check that fails on undeclared runtime imports, a secret/log grep gate,
+              a <code>no-console</code> lint rule for production code, and CI entry points; remove
+              committed runtime logs and ignore generated key/invite files. No product behavior change.
+            </p>
+            <p><strong>Depends on:</strong> none. <strong>Unblocks:</strong> all.</p>
+            <p><strong>Acceptance:</strong> CI installs from the lockfile and runs tests, lint, and the grep gate green; no committed logs or secret-shaped strings remain.</p>
+            <p>Pause gate: record the committed files/functions and wait before security fixes.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-1" data-nav-section>
+            <summary>Phase 1 - Invite safety and deep-link confirmation (commits: pending)</summary>
+            <p>
+              Commit boundary: stop automatic link joins, add pending-invite confirmation, enforce
+              invite expiry/use limits, remove unused plaintext invite persistence, and cover join
+              cancel/confirm/rollback tests.
+            </p>
+            <p><strong>Depends on:</strong> 0. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> a link cannot switch bases without explicit confirmation; expired or exhausted invites are rejected; cancel leaves the current base untouched.</p>
+            <p>Pause gate: record the committed files/functions and wait before the secret-storage foundation.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-2" data-nav-section>
+            <summary>Phase 2 - Secret-storage foundation, key material (commits: pending)</summary>
+            <p>
+              Commit boundary: introduce the platform secure-storage boundary in mobile (later extracted
+              to <code>@listam/secrets</code>), migrate existing plaintext key material into secure
+              storage, store fingerprints only in metadata/logs, pass secrets to the backend through the
+              platform adapter, and provide a recovery path when secure storage is unavailable.
+            </p>
+            <p><strong>Why first:</strong> Phases 3-4 mint new long-lived key material (owner authority key, per-epoch encryption keys) that must be born in secure storage, not retrofitted.</p>
+            <p><strong>Depends on:</strong> 0. <strong>Unblocks:</strong> 3, 4, 9.</p>
+            <p><strong>Acceptance:</strong> no plaintext key files remain after migration; the backend boots from adapter-passed secrets; migration is idempotent and re-readable.</p>
+            <p>Pause gate: record the committed files/functions and wait before membership authority.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-3" data-nav-section>
+            <summary>Phase 3 - Membership authority and honest revocation language (commits: pending)</summary>
+            <p>
+              Commit boundary: rename revoke semantics to "revoke invite," introduce owner-signed
+              membership records, reject non-owner writer additions, store the owner authority key via
+              the Phase 2 secrets boundary, and document that true member removal requires re-keying.
+            </p>
+            <p><strong>Depends on:</strong> 2. <strong>Unblocks:</strong> 4.</p>
+            <p><strong>Acceptance:</strong> a non-owner writer cannot add another writer; legacy single-user bases migrate once without losing the owner device; malformed, unsigned, or replayed membership ops are rejected.</p>
+            <p>Pause gate: record the committed files/functions and wait before key epochs.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-4" data-nav-section>
+            <summary>Phase 4 - Key epochs and member-removal re-key flow (commits: pending)</summary>
+            <p>
+              Commit boundary: add app-level membership epochs, encryption-key rotation/re-encryption
+              with epoch keys stored via the secrets boundary, old-epoch retirement, member-removal
+              audit events, and rollback tests for interrupted re-key.
+            </p>
+            <p><strong>Depends on:</strong> 3. <strong>Unblocks:</strong> -. (End of the membership-crypto track.)</p>
+            <p><strong>Acceptance:</strong> a removed device can no longer decrypt or append in the new epoch; an interrupted re-key restores the prior epoch and never leaves the base unreadable.</p>
+            <p>Pause gate: record the committed files/functions and wait before the desktop/headless build.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-5" data-nav-section>
+            <summary>Phase 5 - Stable item IDs and backend reduction migration (commits: pending)</summary>
+            <p>
+              Commit boundary: version list operations, backfill ids for legacy text-only entries,
+              reduce by id when present, keep legacy compatibility, and prove duplicate-name convergence.
+            </p>
+            <p><strong>Depends on:</strong> 0 (independent of the 2-4 membership-crypto track; may run in parallel). <strong>Unblocks:</strong> 6.</p>
+            <p><strong>Acceptance:</strong> the backend view and Redux projection agree on duplicate names; legacy text-only lists migrate without losing done state or order.</p>
+            <p>Pause gate: record the committed files/functions and wait before the Redux migration.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-6" data-nav-section>
+            <summary>Phase 6 - Redux Toolkit migration in mobile, in place (commits: pending)</summary>
+            <p>
+              Commit boundary: add the Redux Toolkit store and move list, sync, preferences,
+              loyalty-card metadata handles, and owned-devices state into slices normalized by id;
+              replace direct useState ownership of replicated list data with selectors and actions; keep
+              existing mobile behavior intact. No package extraction yet.
+            </p>
+            <p><strong>Depends on:</strong> 5. <strong>Unblocks:</strong> 7.</p>
+            <p><strong>Acceptance:</strong> mobile parity is unchanged with replicated state owned by Redux; the loyaltyCards slice holds only non-secret handles, never barcode/QR payloads.</p>
+            <p>Pause gate: record the committed files/functions and wait before package extraction.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-7" data-nav-section>
+            <summary>Phase 7 - Extract pure shared packages (commits: pending)</summary>
+            <p>
+              Commit boundary: extract <code>@listam/domain</code>, <code>@listam/protocol</code>,
+              <code>@listam/grocery</code>, <code>@listam/logging</code> (redaction helpers and log line
+              format), and <code>@listam/secrets</code> (the Phase 2 boundary) as versioned packages;
+              mobile consumes them; behavior intact.
+            </p>
+            <p><strong>Depends on:</strong> 2, 6. <strong>Unblocks:</strong> 8, 9.</p>
+            <p><strong>Acceptance:</strong> mobile builds against published package versions and the shared suites run in Node.</p>
+            <p>Pause gate: record the committed files/functions and wait before the backend/client extraction.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-8" data-nav-section>
+            <summary>Phase 8 - Extract backend/client with platform adapter (commits: pending)</summary>
+            <p>
+              Commit boundary: extract <code>@listam/backend</code> and <code>@listam/client</code> and
+              decouple the backend from BareKit globals (<code>BareKit.IPC</code>, <code>Bare.argv</code>,
+              <code>Bare.on('teardown')</code>) behind a platform-services adapter so it runs under the
+              mobile worklet and Node; keep per-platform <code>bare-pack</code> bundling an app-level step.
+            </p>
+            <p><strong>Depends on:</strong> 7. <strong>Unblocks:</strong> 11, 12.</p>
+            <p><strong>Acceptance:</strong> the backend runs under Node with no BareKit globals, and the same <code>@listam/client</code> contract suite passes on both the worklet and Node adapters.</p>
+            <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-9" data-nav-section>
+            <summary>Phase 9 - Loyalty-card secrets and redaction routing (commits: pending)</summary>
+            <p>
+              Commit boundary: move loyalty-card barcode/QR payloads into secure storage via the Phase 2
+              boundary, keep only non-secret handles in the Redux slice, route all logging through
+              <code>@listam/logging</code> redaction, and add export/diagnostic redaction tests.
+            </p>
+            <p><strong>Depends on:</strong> 2, 6, 7. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> Redux state, DevTools-style traces, and exports never contain card payloads or raw secrets; the AsyncStorage-to-secure-storage card migration is idempotent.</p>
+            <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-10" data-nav-section>
+            <summary>Phase 10 - Recovery, snapshots, and storage durability (commits: pending)</summary>
+            <p>
+              Commit boundary: replace destructive auto-wipe recovery with backup/quarantine/owner-confirmed
+              recovery, add materialized-view snapshots/checkpoints that resume the id-keyed reduction,
+              isolate storage roots, and add a real lock/lease with stale-lock recovery.
+            </p>
+            <p><strong>Depends on:</strong> 5 (the checkpoint sits on the id-keyed reduction), 8. <strong>Unblocks:</strong> 11, 12.</p>
+            <p><strong>Acceptance:</strong> a corrupt store never triggers silent deletion, headless nodes refuse auto-wipe, and the rebuild resumes from a checkpoint with bounded join-poll work.</p>
+            <p>Pause gate: record the committed files/functions and wait before desktop implementation.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-11" data-nav-section>
+            <summary>Phase 11 - Desktop parity surface (commits: pending)</summary>
+            <p>
+              Commit boundary: build the Pear Desktop app around the shared packages, match current
+              mobile parity, implement desktop IPC/client contracts, and compare UI against
+              <code>listam-desktop/design-guide/</code>. The desktop owner-control client is deferred to
+              Phase 13.
+            </p>
+            <p><strong>Depends on:</strong> 8, 10. <strong>Unblocks:</strong> 14.</p>
+            <p><strong>Acceptance:</strong> desktop reaches mobile parity, syncs with mobile through invite, and matches the desktop design-guide examples.</p>
+            <p>Pause gate: record the committed files/functions and wait before headless implementation.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-12" data-nav-section>
+            <summary>Phase 12 - Headless service and CLI parity (commits: pending)</summary>
+            <p>
+              Commit boundary: build the Pear Terminal/Bare headless app as a long-lived owned peer,
+              persist the data model, add CLI setup/status/invite/join/export/shutdown commands, enforce
+              blind-helper credential boundaries (a blind helper never receives the encryption key), and
+              add resource quotas on queues and storage. The owner-control protocol is Phase 13.
+            </p>
+            <p><strong>Depends on:</strong> 8, 10. <strong>Unblocks:</strong> 13, 14.</p>
+            <p><strong>Acceptance:</strong> a blind-storage instance replicates but cannot decrypt <code>view.get()</code>; a restart preserves identity, storage, and status.</p>
+            <p>Pause gate: record the committed files/functions and wait before the owner-control protocol.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-13" data-nav-section>
+            <summary>Phase 13 - Owner-control protocol (commits: pending)</summary>
+            <p>
+              Commit boundary: establish per-device key pairs at pairing, require every command to carry
+              a nonce/timestamp and signature, model capabilities as separate grants (status:read,
+              diagnostics:read, topics:configure, invite:create, export:create, import:apply,
+              service:shutdown), add device revocation and key rotation, and build the desktop and mobile
+              owner-control clients.
+            </p>
+            <p><strong>Depends on:</strong> 12. <strong>Unblocks:</strong> 14.</p>
+            <p><strong>Acceptance:</strong> headless refuses unsigned, replayed, expired, or out-of-scope commands, and a diagnostics-only client cannot shutdown, import, export, or configure topics.</p>
+            <p>Pause gate: record the committed files/functions and wait before full cross-app acceptance.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-14" data-nav-section>
+            <summary>Phase 14 - Cross-app acceptance matrix and release readiness (commits: pending)</summary>
+            <p>
+              Commit boundary: automate the private-bootstrap cross-instance matrix, prove
+              mobile/desktop/headless convergence, run the cumulative-migration chain on one base
+              (id-backfill, then owner-key adoption, then epoch, then secret-store), document manual
+              acceptance, and close first-milestone release risks.
+            </p>
+            <p><strong>Depends on:</strong> 11, 13. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> the headless-driven subset of the matrix runs in CI, the cumulative-migration chain passes, and each capability is "done" only when its matrix row passes.</p>
+            <p>Pause gate: record the committed files/functions and pause for milestone review before adding new list domains.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <a class="source" href="./plans.html#phases">plans.html#phases</a>
+          <a class="source" href="./listam-multi-app-plan.md">listam-multi-app-plan.md</a>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

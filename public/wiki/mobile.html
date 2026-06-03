@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki — Mobile</title>
+    <meta
+      name="description"
+      content="Mobile-specific documentation for the Listam Expo/React Native app."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#desktop" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Desktop Overview</span>
+              </a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#headless" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Headless Overview</span>
+              </a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection">
+                <summary class="nav-subgroup" title="Planned, not implemented yet">
+                  <span class="status-icon planned" aria-hidden="true"></span>
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                </div>
+              </details>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-05-29</strong>
+          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Mobile · Expo / React Native</span>
+            <h1>Mobile App</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: worklet, apply, loyalty..." />
+          </label>
+        </header>
+
+        <section id="structure" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Folder intent</span>
+            <h2>Project Structure</h2>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Role</th>
+                <th>Why it exists</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>app/</code></td>
+                <td>React Native application</td>
+                <td>All user-facing state, gestures, dialogs, preferences, and local UI features.</td>
+              </tr>
+              <tr>
+                <td><code>app/hooks/_useWorklet.ts</code></td>
+                <td>Runtime bridge</td>
+                <td>Starts the Bare bundle once and translates backend RPC messages into React state.</td>
+              </tr>
+              <tr>
+                <td><code>backend/</code></td>
+                <td>Embedded backend source</td>
+                <td>Owns canonical list mutations, Autobase setup, Corestore, P2P join, and cleanup.</td>
+              </tr>
+              <tr>
+                <td><code>rpc-commands.mjs</code></td>
+                <td>Shared command ABI</td>
+                <td>Keeps frontend and backend in sync without string command names.</td>
+              </tr>
+              <tr>
+                <td><code>assets/data/</code></td>
+                <td>Grocery taxonomy source</td>
+                <td>CSV inputs for category and translation generation.</td>
+              </tr>
+              <tr>
+                <td><code>scripts/</code></td>
+                <td>Build and generation helpers</td>
+                <td>Bundles the Bare backend and generates multilingual grocery lookup files.</td>
+              </tr>
+              <tr>
+                <td><code>website/</code></td>
+                <td>Public marketing/static site</td>
+                <td>Listam landing page, privacy page, and join link handling.</td>
+              </tr>
+              <tr>
+                <td><code>/wiki/</code></td>
+                <td>This study site (multi-app wiki)</td>
+                <td>Human-readable architecture docs for all Listam apps; a sibling folder of <code>listam-mobile</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="runtime" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Behavior</span>
+            <h2>Runtime Flows</h2>
+          </div>
+
+          <div class="flow">
+            <div>
+              <span>1</span>
+              <h3>App boot</h3>
+              <p>
+                <code>useWorklet</code> starts a singleton Bare worklet, passing the Expo document
+                directory as the backend base path. It also creates the frontend RPC client.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts">app/hooks/_useWorklet.ts:81</a>
+            </div>
+            <div>
+              <span>2</span>
+              <h3>Backend boot</h3>
+              <p>
+                The backend acquires a lock file, loads any saved base/encryption keys, starts an RPC
+                server, and initializes Autobase.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:50</a>
+            </div>
+            <div>
+              <span>3</span>
+              <h3>List mutation</h3>
+              <p>
+                Taps update React state optimistically and send <code>RPC_UPDATE</code>,
+                <code>RPC_ADD</code>, or <code>RPC_DELETE</code>. The backend serializes writes through
+                a promise chain before appending to Autobase.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs">backend/lib/item.mjs:8</a>
+            </div>
+            <div>
+              <span>4</span>
+              <h3>Replication</h3>
+              <p>
+                Hyperswarm joins the Autobase discovery key as a topic. Peer connections are passed to
+                <code>autobase.replicate(conn)</code>.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:404</a>
+            </div>
+          </div>
+
+          <div class="sequence">
+            <h3>Invite join sequence</h3>
+            <ol>
+              <li>Frontend parses an invite code or <code>listam.ch/join?invite=...</code> link.</li>
+              <li>Frontend sends <code>RPC_JOIN_KEY</code> to the worklet.</li>
+              <li>Guest opens a temporary Hyperswarm/BlindPairing candidate using the invite.</li>
+              <li>Host validates the invite, appends an <code>add-writer</code> operation, and confirms base credentials.</li>
+              <li>Guest reinitializes Autobase with the host base key and encryption key.</li>
+              <li>Guest replicates over the temporary connection, then waits until it becomes writable.</li>
+            </ol>
+            <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:462</a>
+          </div>
+        </section>
+
+        <section id="frontend" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">React Native layer</span>
+            <h2>Frontend Functionality</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card">
+              <h3>App composition</h3>
+              <p>
+                <code>app/index.tsx</code> is the composition root. It wires <code>useWorklet</code>,
+                <code>useSubscription</code>, join handling, preferences, list/grid rendering, loyalty
+                cards, and paywall gating.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/index.tsx">app/index.tsx:35</a>
+            </article>
+            <article class="card">
+              <h3>View modes</h3>
+              <p>
+                The standard list uses an animated inertial list with center-item scaling. The grid
+                view groups grocery items into categories and renders image cards with haptic feedback.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/intertial_scroll.tsx">intertial_scroll.tsx</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/VisualGridList.tsx">VisualGridList.tsx</a>
+            </article>
+            <article class="card">
+              <h3>Categories and icons</h3>
+              <p>
+                Category lookup uses generated multilingual maps, keyword fallback, substring matching,
+                and Levenshtein typo tolerance. Icon lookup normalizes item text, translates to English,
+                tries exact and partial matches, then falls back to letter icons.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/categoryLookup.ts">categoryLookup.ts:129</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/itemIconMap.ts">itemIconMap.ts:1680</a>
+            </article>
+            <article class="card">
+              <h3>Loyalty cards</h3>
+              <p>
+                The scanner captures QR/barcode data with Expo Camera. The viewer draws QR codes and
+                selected barcode formats with <code>react-native-svg</code>.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/LoyaltyCardScanner.tsx">LoyaltyCardScanner.tsx:29</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/LoyaltyCardViewer.tsx">LoyaltyCardViewer.tsx:176</a>
+            </article>
+          </div>
+        </section>
+
+        <section id="backend" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Bare worklet layer</span>
+            <h2>Backend Internals</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-red">
+              <h3>Mutable module state</h3>
+              <p>
+                <code>backend/lib/state.mjs</code> exports shared module-level variables and setters for
+                Autobase, Corestore, swarm, discovery, RPC, keys, pairing, current list, and join flags.
+                This is simple for an embedded singleton backend, but it depends on only one backend
+                instance touching storage.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/state.mjs">backend/lib/state.mjs</a>
+            </article>
+            <article class="card accent-green">
+              <h3>Singleton guard</h3>
+              <p>
+                The backend opens <code>lista.lock</code> with exclusive write mode. If another backend
+                is already running, the new instance throws before it can touch storage.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:58</a>
+            </article>
+            <article class="card accent-blue">
+              <h3>Autobase initialization</h3>
+              <p>
+                <code>initAutobase</code> tears down prior resources, opens <code>Corestore</code>, clears
+                stale boot/encryption metadata when joining a different base, enables encrypted values,
+                rebuilds the list view, starts Hyperswarm, sets up blind pairing, and sends an invite to
+                the frontend.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:291</a>
+            </article>
+            <article class="card accent-amber">
+              <h3>Apply function</h3>
+              <p>
+                The Autobase <code>apply</code> function is the reducer. It validates item payloads,
+                writes a materialized JSON view, updates <code>currentList</code>, and emits backend-to-
+                frontend RPC updates.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:239</a>
+            </article>
+          </div>
+        </section>
+
+        <section id="storage" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Persistence</span>
+            <h2>Storage and Local State</h2>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Storage</th>
+                <th>Owner</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Shopping list log and materialized view</td>
+                <td><code>{document}/lista-local</code></td>
+                <td>Bare backend</td>
+                <td>Corestore + Autobase, encrypted when Autobase has an encryption key.</td>
+              </tr>
+              <tr>
+                <td>Autobase base key</td>
+                <td><code>lista-autobase-key.txt</code></td>
+                <td>Bare backend</td>
+                <td>Plain hex file in app documents, loaded on restart.</td>
+              </tr>
+              <tr>
+                <td>Autobase encryption key</td>
+                <td><code>lista-encryption-key.txt</code></td>
+                <td>Bare backend</td>
+                <td>Plain hex file in app documents, loaded only when a base key exists.</td>
+              </tr>
+              <tr>
+                <td>Invite</td>
+                <td><code>lista-invite.json</code></td>
+                <td>Bare backend</td>
+                <td>Serialized by <code>saveInvite</code>; current code creates a fresh runtime invite.</td>
+              </tr>
+              <tr>
+                <td>UI preferences</td>
+                <td>AsyncStorage keys like <code>@lista_grid_view</code></td>
+                <td>React Native app</td>
+                <td>View mode, category switches, icon/list sizing, and icon variant.</td>
+              </tr>
+              <tr>
+                <td>Loyalty cards</td>
+                <td><code>@lista_loyalty_cards</code></td>
+                <td>React Native app</td>
+                <td>JSON array containing card name, barcode/QR data, and type.</td>
+              </tr>
+              <tr>
+                <td>Trial start</td>
+                <td><code>@lista_trial_start</code></td>
+                <td>React Native app</td>
+                <td>Local timestamp used for the 30-day trial calculation.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="libraries" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Dependency roles</span>
+            <h2>Libraries</h2>
+          </div>
+
+          <div class="library-grid">
+            <div><strong>React Native / Expo</strong><span>Mobile shell, app lifecycle, camera, linking, haptics, file paths.</span></div>
+            <div><strong>react-native-bare-kit</strong><span>Embeds and starts the packed Bare backend inside the app process.</span></div>
+            <div><strong>bare-rpc</strong><span>Typed-by-number IPC contract between frontend and worklet.</span></div>
+            <div><strong>Corestore</strong><span>Local Hypercore storage used by Autobase.</span></div>
+            <div><strong>Autobase</strong><span>Multi-writer append log and deterministic materialized view.</span></div>
+            <div><strong>Hyperswarm</strong><span>Peer discovery and replication connections.</span></div>
+            <div><strong>BlindPairing</strong><span>Invite flow that exchanges base and encryption credentials.</span></div>
+            <div><strong>z32</strong><span>Shareable encoding for blind-pairing invites.</span></div>
+            <div><strong>react-native-iap</strong><span>Subscription paywall, trial expiry, purchase and restore.</span></div>
+          </div>
+          <a class="source" href="https://github.com/SayNode/listam/blob/main/package.json">package.json:14</a>
+        </section>
+
+        <section id="quality" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Maintainability</span>
+            <h2>Conventions and Quality Notes</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card">
+              <h3>Conventions observed</h3>
+              <ul>
+                <li>Single quotes and no semicolon-heavy style in application files.</li>
+                <li>React state is colocated in the composition root for feature wiring.</li>
+                <li>Backend mutable singletons are centralized in <code>backend/lib/state.mjs</code>.</li>
+                <li>Generated lookup files are marked as auto-generated and sourced from CSV.</li>
+                <li>RPC command constants are numeric and shared from one file.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Quality gaps to track</h3>
+              <ul>
+                <li>No test files or test script were found.</li>
+                <li><code>package-lock.json</code> is ignored, so dependency resolution is not reproducible by default.</li>
+                <li>Committed logs and generated bundles make review noisy and may leak runtime details.</li>
+                <li><code>app/hooks/_useWorklet.ts</code> imports the iOS backend bundle while the Android import is commented.</li>
+                <li><code>react-native-svg</code> and <code>qrcode-terminal</code> are imported but not listed as direct dependencies.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="study" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Reading guide</span>
+            <h2>Study Path</h2>
+          </div>
+
+          <div class="study-path">
+            <article>
+              <span>01</span>
+              <h3>Start with the promise</h3>
+              <p>Read the README to understand why the architecture is local-first and P2P.</p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/README.md">README.md</a>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Follow the boot path</h3>
+              <p>Read <code>useWorklet</code>, then backend lock/key loading, then <code>initAutobase</code>.</p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts">_useWorklet.ts</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend.mjs</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">network.mjs</a>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Trace a mutation</h3>
+              <p>Start at a tap handler in <code>app/index.tsx</code>, cross RPC, append an op, then watch <code>apply</code> send a backend update.</p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/index.tsx">app/index.tsx:248</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs">item.mjs:17</a>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Trace joining</h3>
+              <p>Read the link parser, <code>RPC_JOIN_KEY</code>, blind-pairing candidate/member code, then the writable wait loop.</p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/index.tsx">app/index.tsx:68</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">network.mjs:462</a>
+            </article>
+            <article>
+              <span>05</span>
+              <h3>Study generated grocery intelligence</h3>
+              <p>Read the CSV generator scripts, then category grouping and icon lookup. This is a data-heavy subsystem disguised as UI polish.</p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/scripts/generate-category-lookup.mjs">generate-category-lookup.mjs</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/categoryGrouping.ts">categoryGrouping.ts</a>
+            </article>
+            <article>
+              <span>06</span>
+              <h3>Run the hardening checklist</h3>
+              <p>Use the Global security notes and the Plans review findings as a review checklist before release or wider collaboration.</p>
+              <a class="source" href="index.html#security">Security notes</a>
+              <a class="source" href="plans.html#review-findings">Review findings</a>
+            </article>
+          </div>
+        </section>
+
+        <section id="file-index" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Clickable map</span>
+            <h2>File Index</h2>
+          </div>
+
+          <div class="file-index">
+            <a href="https://github.com/SayNode/listam/blob/main/app/index.tsx"><strong>app/index.tsx</strong><span>Composition root, UI preferences, join handling, list mutation handlers.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts"><strong>app/hooks/_useWorklet.ts</strong><span>Starts the Bare worklet, owns frontend RPC handler, exposes backend state.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/app/hooks/useSubscription.ts"><strong>app/hooks/useSubscription.ts</strong><span>IAP setup, 30-day trial, purchase/restore, paywall gate.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs"><strong>backend/backend.mjs</strong><span>Backend entry, lock, RPC server, cleanup, Autobase apply reducer.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs"><strong>backend/lib/network.mjs</strong><span>Corestore/Autobase lifecycle, Hyperswarm, BlindPairing, join flow.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs"><strong>backend/lib/item.mjs</strong><span>Add/update/delete operations, validation, rebuild from persisted ops.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/key.mjs"><strong>backend/lib/key.mjs</strong><span>Plain-file persistence for base key, encryption key, invite JSON.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/state.mjs"><strong>backend/lib/state.mjs</strong><span>Shared backend singletons and state setters.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/app/components/categoryLookup.ts"><strong>categoryLookup.ts</strong><span>Dominant-language detection and category matching.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/app/components/itemIconMap.ts"><strong>itemIconMap.ts</strong><span>Manual and generated item-to-icon lookup logic.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/scripts/generate-category-lookup.mjs"><strong>generate-category-lookup.mjs</strong><span>Generates multilingual category data from CSV.</span></a>
+            <a href="https://github.com/SayNode/listam/blob/main/scripts/wrap-bare-bundle.mjs"><strong>wrap-bare-bundle.mjs</strong><span>Wraps packed Bare bundle as chunked base64 module.</span></a>
+          </div>
+        </section>
+
+        <section id="testing" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Verification</span>
+            <h2>Testing</h2>
+            <p class="section-lede">
+              How an implementation agent tests the mobile app in isolation and proves it interacts
+              with other instances. Pair this with the
+              <a href="plans.html#implementation-plans">implementation plans</a> and the cross-instance
+              matrix.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>Unit</h3>
+              <p>
+                Reducers/selectors; category lookup and grocery intelligence; item reduction/replay
+                order; id-migration of legacy text-only items (M1); redaction helpers (M5).
+              </p>
+            </article>
+            <article class="card accent-blue">
+              <h3>Integration</h3>
+              <p>
+                Worklet RPC round-trips (add/update/delete → backend → <code>SYNC_LIST</code> /
+                <code>*_FROM_BACKEND</code>); join success/timeout/rollback; secure-storage migration of
+                keys and loyalty cards; deep-link join requires confirmation (H2).
+              </p>
+            </article>
+            <article class="card">
+              <h3>Manual / E2E</h3>
+              <p>Parity checklist on iOS and Android; offline edit then reconnect-sync; restart persistence.</p>
+            </article>
+            <article class="card">
+              <h3>How to run</h3>
+              <p>
+                <code>npm test</code> (Jest/Vitest, added in milestone-zero); Expo dev client for manual
+                runs; two simulators for device-to-device.
+              </p>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Interaction:</strong>
+            Use the shared harness (separate storage roots + a private <code>--bootstrap</code>) to test
+            mobile ↔ mobile, mobile ↔ desktop, and mobile ↔ headless. Mobile rows of the
+            <a href="plans.html#implementation-plans">cross-instance matrix</a>: generated, edited,
+            completed, and deleted content converge; stays-synced-after-reopen; link-join confirmation
+            (H2); and id-based duplicate handling (M1).
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

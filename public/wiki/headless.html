@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki — Headless</title>
+    <meta
+      name="description"
+      content="Headless-specific documentation for the planned Listam always-on personal server."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#desktop" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Desktop Overview</span>
+              </a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#headless" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Headless Overview</span>
+              </a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection">
+                <summary class="nav-subgroup" title="Planned, not implemented yet">
+                  <span class="status-icon planned" aria-hidden="true"></span>
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                </div>
+              </details>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-05-29</strong>
+          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Headless · Pear Terminal / Bare · planned</span>
+            <h1>Headless App</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: owner-control, relay, CLI..." />
+          </label>
+        </header>
+
+        <section id="headless" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Pear Terminal / Bare · planned</span>
+            <h2>Headless Overview</h2>
+            <p class="section-lede">
+              Not implemented yet. Planned as an always-on personal server that runs on a device the
+              user owns (Raspberry Pi, mini PC, NAS) and acts as a durable personal peer — not a
+              central cloud service.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-amber">
+              <h3>Role</h3>
+              <p>
+                Run as a long-lived owned peer that persists the same Autobase/Corestore data model,
+                helps devices reconnect, and later coordinates with relay/storage dongles.
+              </p>
+            </article>
+            <article class="card accent-green">
+              <h3>First milestone</h3>
+              <p>
+                Create/join invites; expose peer count, sync state, base identity, and storage status;
+                CLI for setup, status, invite, join, export, and shutdown; and a P2P owner-control
+                command/event channel for trusted clients.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Capabilities (opt-in at setup)</h3>
+              <p>
+                Bootstrap helper, replication helper, storage helper, async message helper,
+                notification/reconnect helper, and diagnostics helper — each chosen during first-run
+                setup so the device only enables the roles the owner wants. Under the current
+                substrate, content-access roles must be treated as trusted full-participant roles;
+                blind storage/relay helpers should receive no list encryption key.
+              </p>
+            </article>
+            <article class="card accent-red">
+              <h3>Security gates</h3>
+              <p>
+                Require pairing/auth for control operations and never expose raw control endpoints
+                publicly by default. The owner-control admin channel needs signed per-device
+                capabilities, replay protection, owner-authorized membership, and key-rotation design
+                before implementation (see review findings C1–C3, H1).
+              </p>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Status:</strong>
+            The <code>listam-headless</code> repository is currently empty. See the
+            <a href="plans.html#multi-app-plan">Multi-App Plan</a> for owner-control, the co-invite
+            flow, and the <a href="plans.html#review-findings">review findings</a> (C1–C3, H1) that
+            must be resolved first.
+          </div>
+        </section>
+
+        <section id="testing" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Verification</span>
+            <h2>Testing</h2>
+            <p class="section-lede">
+              How an implementation agent tests the headless server and proves it interacts with mobile
+              and desktop. See also the <a href="plans.html#implementation-plans">implementation plans</a>
+              and the security findings.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>Unit</h3>
+              <p>
+                Backend service logic behind the Node runtime port (no BareKit globals); the
+                <code>apply</code> reducer; owner-signed membership verification (C3); corruption
+                quarantine/recovery (M4); redaction (M5).
+              </p>
+            </article>
+            <article class="card accent-red">
+              <h3>Integration</h3>
+              <p>
+                CLI (setup/status/invite/join/export/shutdown); owner-control auth — signed accepted,
+                unsigned/expired/replayed/out-of-scope rejected, capability scope, device revoke (H1);
+                a blind helper never receives the encryption key (C2); queue/storage quotas.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Soak</h3>
+              <p>
+                A long-lived peer stays up for hours with bounded storage/queue; restart preserves
+                identity, storage, and status.
+              </p>
+            </article>
+            <article class="card accent-blue">
+              <h3>How to run</h3>
+              <p>
+                <code>node headless.mjs --storage &lt;dir&gt; --bootstrap &lt;addr&gt;</code> from the
+                <code>listam-headless</code> repo; script invite/join against a second headless or a
+                desktop instance; runs headlessly in CI.
+              </p>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Interaction:</strong>
+            Headless is the always-on peer central to the
+            <a href="plans.html#implementation-plans">cross-instance matrix</a>: mobile ↔ headless
+            (stays online while mobile closed, accepts generated/edited/deleted content, reopen → sync),
+            desktop ↔ headless content-operation sync, the 3-way convergence test, and the security rows
+            — non-owner add-writer ignored (C3), blind-storage cannot
+            decrypt (C2), owner-control replay rejected (H1).
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

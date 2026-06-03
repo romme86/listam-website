@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki — Global</title>
+    <meta
+      name="description"
+      content="A CodeWiki-style study site for the Listam local-first P2P apps."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section" open>
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#desktop" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Desktop Overview</span>
+              </a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#headless" title="Planned, not implemented yet">
+                <span class="status-icon planned" aria-hidden="true"></span>
+                <span>Headless Overview</span>
+              </a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection">
+                <summary class="nav-subgroup" title="Planned, not implemented yet">
+                  <span class="status-icon planned" aria-hidden="true"></span>
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                </div>
+              </details>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-05-29</strong>
+          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Global · all Listam apps</span>
+            <h1>Listam CodeWiki</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: Corestore, Autobase, invite..." />
+          </label>
+        </header>
+
+        <section id="overview" class="page hero page-searchable">
+          <div class="hero-copy">
+            <div class="crumb">github.com/.../listam</div>
+            <h2>A local-first app family with a real embedded P2P backend.</h2>
+            <p>
+              Listam is a React Native shopping list app where the visible UI is deliberately thin.
+              The durable list state lives in a Bare worklet that runs inside the app process, writes
+              to Corestore/Autobase, and synchronizes peers over Hyperswarm. The same backend is
+              planned to power desktop and headless surfaces.
+            </p>
+            <div class="hero-actions">
+              <a href="mobile.html#study" class="button primary">Start Study Path</a>
+              <a href="index.html#architecture" class="button">View Architecture</a>
+            </div>
+          </div>
+          <div class="hero-panel" aria-label="Project summary">
+            <div class="metric">
+              <span>Runtime</span>
+              <strong>React Native + Bare</strong>
+            </div>
+            <div class="metric">
+              <span>State Authority</span>
+              <strong>Backend worklet</strong>
+            </div>
+            <div class="metric">
+              <span>Replication</span>
+              <strong>Autobase + Hyperswarm</strong>
+            </div>
+            <div class="metric">
+              <span>Tests Found</span>
+              <strong>0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section id="thesis" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Core thesis</span>
+            <h2>What this project is trying to prove</h2>
+          </div>
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>Offline is the default</h3>
+              <p>
+                The README frames the database as the source of truth and networking as opportunistic.
+                That design appears in the code: UI actions optimistically change React state, then send
+                RPC commands to the backend for canonical log append and replication.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/README.md">README.md</a>
+            </article>
+            <article class="card accent-blue">
+              <h3>The backend is not simulated</h3>
+              <p>
+                The mobile app starts a packed Bare bundle using <code>react-native-bare-kit</code>.
+                That bundle creates its own RPC server, Corestore, Autobase, Hyperswarm, and blind
+                pairing state.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts">app/hooks/_useWorklet.ts:81</a>
+            </article>
+          </div>
+        </section>
+
+        <section id="architecture" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">System map</span>
+            <h2>Architecture</h2>
+          </div>
+
+          <div class="architecture-map">
+            <div class="layer mobile">
+              <h3>React Native UI</h3>
+              <p>Header, list/grid views, join dialogs, loyalty cards, paywall</p>
+              <code>app/index.tsx</code>
+            </div>
+            <div class="connector">RPC over BareKit IPC</div>
+            <div class="layer backend">
+              <h3>Bare backend worklet</h3>
+              <p>Owns mutable list state, writer membership, networking, persistence</p>
+              <code>backend/backend.mjs</code>
+            </div>
+            <div class="branch-grid">
+              <div class="layer store">
+                <h3>Corestore</h3>
+                <p>Local Hypercore storage under app documents</p>
+              </div>
+              <div class="layer log">
+                <h3>Autobase</h3>
+                <p>Encrypted append log plus materialized JSON view</p>
+              </div>
+              <div class="layer swarm">
+                <h3>Hyperswarm</h3>
+                <p>DHT discovery and peer replication</p>
+              </div>
+              <div class="layer pairing">
+                <h3>BlindPairing</h3>
+                <p>Invite-based writer onboarding</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="note-grid">
+            <div class="note">
+              <strong>Boundary</strong>
+              <p>
+                Frontend files never open Corestore directly. They read/write through numeric RPC
+                commands defined in <a href="https://github.com/SayNode/listam/blob/main/rpc-commands.mjs">rpc-commands.mjs</a>.
+              </p>
+            </div>
+            <div class="note">
+              <strong>Reason for the split</strong>
+              <p>
+                React Native stays focused on interaction and rendering, while the Bare runtime can run
+                Node-like P2P libraries that are a poor fit for normal RN components.
+              </p>
+            </div>
+            <div class="note">
+              <strong>Important coupling</strong>
+              <p>
+                The RPC command numbers are a shared ABI, short for Application Binary Interface: the
+                low-level contract that lets separately built pieces of software call each other
+                correctly. In Listam, that contract is the fixed numeric vocabulary both runtimes use
+                to understand each other over <code>bare-rpc</code>. The symbolic names in
+                <a href="https://github.com/SayNode/listam/blob/main/rpc-commands.mjs">rpc-commands.mjs</a> make the code readable, but the
+                value that crosses the React Native/Bare boundary is the number itself. If
+                <code>RPC_ADD</code> stopped meaning <code>2</code> in one bundle while the other side
+                still dispatches command <code>2</code> as "add item," the frontend and backend would no
+                longer agree on what request was sent. Treat existing numbers as stable, append new
+                commands with new values, and rebuild/update both sides together when the table changes.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="data-model" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Shapes and contracts</span>
+            <h2>Data Structures</h2>
+          </div>
+
+          <div class="grid three">
+            <article class="card">
+              <h3><code>ListEntry</code></h3>
+              <pre><code>{
+  text: string
+  isDone: boolean
+  timeOfCompletion: EpochTimeStamp
+}</code></pre>
+              <p>
+                This is the public frontend item type. The backend appends richer items with
+                <code>id</code>, <code>listId</code>, <code>updatedAt</code>, and
+                <code>timestamp</code>, but the UI only relies on these three fields.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/_types.ts">app/components/_types.ts</a>
+            </article>
+
+            <article class="card">
+              <h3>Autobase operation</h3>
+              <pre><code>{ type: "add", value: item }
+{ type: "update", value: item }
+{ type: "delete", value: item }
+{ type: "add-writer", key: hex }</code></pre>
+              <p>
+                Operations are appended to Autobase, then the <code>apply</code> function materializes
+                them into a JSON view and notifies the frontend.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:239</a>
+            </article>
+
+            <article class="card">
+              <h3>Invite</h3>
+              <pre><code>{
+  id: hex,
+  invite: hex,
+  publicKey: hex,
+  expires: number
+}</code></pre>
+              <p>
+                Blind pairing invites are encoded with <code>z32</code> for sharing. A runtime invite
+                is reused up to ten times before rotation.
+              </p>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:168</a>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Identity rule:</strong>
+            The effective item key is <code>text</code>, not <code>id</code>. Add/update/delete logic
+            filters and maps by text, so duplicate grocery names collapse into one item. This is simple
+            and human-friendly, but it makes quantities or duplicate stores hard to model later.
+          </div>
+        </section>
+
+        <section id="p2p-primitives" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Local-first stack</span>
+            <h2>Corestore, Autobase, Hyperswarm, and BlindPairing</h2>
+          </div>
+
+          <div class="callout">
+            <strong>Simple mental model:</strong>
+            Corestore is the local disk container, Autobase is the shared append-only database,
+            Hyperswarm is how devices find and connect to each other, and BlindPairing is the
+            invitation handshake that lets a new device safely learn which Autobase to join.
+          </div>
+
+          <div class="primitive-grid">
+            <article class="primitive-card store">
+              <span class="primitive-label">Persistence layer</span>
+              <h3>Corestore</h3>
+              <p>
+                Corestore is a storage manager for Hypercore feeds. In this project it is the durable
+                home for the local writer core, the Autobase system cores, the materialized view, and
+                any peer cores that are opened by key.
+              </p>
+              <h4>Why Listam uses it</h4>
+              <p>
+                The app needs offline-first data that survives restarts. Corestore gives Autobase a
+                single local storage root under the app document directory, so the backend can rebuild
+                the list from persisted operations without a server.
+              </p>
+              <h4>Implementation details</h4>
+              <ul>
+                <li><code>initAutobase</code> creates <code>new Corestore(`${storagePath}-local`)</code>.</li>
+                <li>The worklet receives <code>baseDir</code> from Expo FileSystem and derives <code>storagePath</code> from it.</li>
+                <li>The local core's user data is inspected and sometimes cleared when joining a different base.</li>
+                <li>Static peer writer cores can be opened with <code>store.get({ key: peerKey })</code>.</li>
+                <li>On teardown, the store is flushed and closed after Autobase and swarm cleanup.</li>
+              </ul>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:301</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:50</a>
+            </article>
+
+            <article class="primitive-card log">
+              <span class="primitive-label">Shared database layer</span>
+              <h3>Autobase</h3>
+              <p>
+                Autobase is the multi-writer append log. Devices do not call a central API to change
+                the list. They append operations to their local writer, replicate those operations, and
+                let Autobase produce a deterministic view.
+              </p>
+              <h4>Why Listam uses it</h4>
+              <p>
+                A shopping list is a good fit for an operation log: add item, update item, delete item,
+                add writer. That log can be replayed after a restart and merged with peer logs when the
+                network becomes available.
+              </p>
+              <h4>Implementation details</h4>
+              <ul>
+                <li>Autobase is created with <code>valueEncoding: 'json'</code>, <code>encrypt: true</code>, and the saved or paired encryption key.</li>
+                <li>The <code>open</code> function returns a JSON view named <code>test</code>.</li>
+                <li>The <code>apply</code> function reduces <code>add</code>, <code>update</code>, <code>delete</code>, and <code>add-writer</code> operations.</li>
+                <li>Frontend writes are rejected until <code>autobase.writable</code> is true.</li>
+                <li>A promise chain serializes writes to avoid concurrent append/flush races.</li>
+              </ul>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:230</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs">backend/lib/item.mjs:8</a>
+            </article>
+
+            <article class="primitive-card swarm">
+              <span class="primitive-label">Network layer</span>
+              <h3>Hyperswarm</h3>
+              <p>
+                Hyperswarm is the peer discovery and connection layer. It finds other devices that are
+                interested in the same discovery topic, then gives the backend live connections that can
+                be handed to Autobase replication.
+              </p>
+              <h4>Why Listam uses it</h4>
+              <p>
+                The project goal is no central sync server. Hyperswarm lets devices discover each other
+                by topic and replicate directly when both sides are online.
+              </p>
+              <h4>Implementation details</h4>
+              <ul>
+                <li>The main swarm joins <code>autobase.discoveryKey</code>, not the raw base key.</li>
+                <li>Connections update peer count and call <code>autobase.replicate(conn)</code>.</li>
+                <li>Both <code>server</code> and <code>client</code> modes are enabled for the topic.</li>
+                <li>A temporary swarm is also created during invite joining to bootstrap pairing and early replication.</li>
+                <li>The temp swarm is cleaned up once the main swarm connects or the join flow finishes.</li>
+              </ul>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:404</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:494</a>
+            </article>
+
+            <article class="primitive-card pairing">
+              <span class="primitive-label">Invitation layer</span>
+              <h3>BlindPairing</h3>
+              <p>
+                BlindPairing is the controlled first-contact mechanism. A new device starts with only
+                an invite code. The host uses that invite to decide whether to reveal the base key,
+                encryption key, and writer permission path.
+              </p>
+              <h4>Why Listam uses it</h4>
+              <p>
+                A collaborator cannot replicate a private encrypted Autobase without the right base and
+                encryption credentials, and the host must add the collaborator as a writer. BlindPairing
+                provides that join handshake without a Listam-owned server.
+              </p>
+              <h4>Implementation details</h4>
+              <ul>
+                <li>The host creates an invite with <code>BlindPairing.createInvite(autobase.key)</code> and shares it as z32 text.</li>
+                <li>The guest sends its local writer key in <code>userData</code>.</li>
+                <li>The host appends <code>{ type: 'add-writer', key: writerKeyHex }</code> when writable.</li>
+                <li>The host confirms with <code>autobase.key</code> and <code>autobase.encryptionKey</code>.</li>
+                <li>The invite is reusable for up to ten successful pairings before rotation.</li>
+              </ul>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:168</a>
+              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:182</a>
+            </article>
+          </div>
+
+          <div class="primitive-flow">
+            <h3>How the four pieces compose in Listam</h3>
+            <ol>
+              <li><strong>Boot:</strong> the frontend starts the Bare worklet and passes the app document directory.</li>
+              <li><strong>Storage:</strong> the backend opens Corestore at <code>{document}/lista-local</code>.</li>
+              <li><strong>Database:</strong> Autobase opens or creates the encrypted multi-writer base inside that Corestore.</li>
+              <li><strong>Discovery:</strong> Hyperswarm joins the Autobase discovery key and replicates connections.</li>
+              <li><strong>Sharing:</strong> BlindPairing creates an invite so another device can receive base credentials.</li>
+              <li><strong>Authorization:</strong> the host appends <code>add-writer</code>, making the guest writable after replication.</li>
+              <li><strong>Rebuild:</strong> on restart, Listam replays the Autobase view and sends the rebuilt list to React Native.</li>
+            </ol>
+          </div>
+
+          <div class="detail-list">
+            <h3>Interesting implementation details</h3>
+            <div>
+              <strong>The temp swarm is doing real work.</strong>
+              <p>
+                During joining, the temporary Hyperswarm connection is intentionally kept alive after
+                blind pairing. The code comments explain that closing it would kill the live Noise
+                connection that can immediately bootstrap replication while the main DHT swarm is still
+                finding peers.
+              </p>
+            </div>
+            <div>
+              <strong>Changing bases requires clearing stale Autobase boot data.</strong>
+              <p>
+                When the guest joins a host base, <code>initAutobase</code> clears local-core user data
+                like <code>autobase/encryption</code> and <code>autobase/boot</code> if the stored
+                referrer does not match the new base key. That prevents the guest from accidentally
+                using an old encryption key for a new base.
+              </p>
+            </div>
+            <div>
+              <strong>Writable state is the real permission signal.</strong>
+              <p>
+                The guest may receive credentials before it is actually writable. The backend polls
+                <code>autobase.update()</code> for up to 120 seconds, syncs any replicated items along
+                the way, and only declares join success once write access or peer connection criteria are met.
+              </p>
+            </div>
+            <div>
+              <strong>The materialized view is intentionally simple.</strong>
+              <p>
+                The view stores entries with <code>op</code> fields and reconstructs the current list
+                with a <code>Map</code> keyed by item text. This keeps rebuild logic small, but it also
+                means duplicate item names collapse into one logical item.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="security" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Audit lens</span>
+            <h2>Security and Privacy Notes</h2>
+          </div>
+
+          <div class="risk-board">
+            <article class="risk good">
+              <h3>Strengths</h3>
+              <ul>
+                <li>No central list server is present in the app architecture.</li>
+                <li>Autobase is configured with <code>encrypt: true</code>.</li>
+                <li>Mutations are rejected when the local Autobase is not writable.</li>
+                <li>Backend duplicate instances are guarded by an exclusive lock file.</li>
+                <li>Camera permission is requested only for loyalty card scanning.</li>
+              </ul>
+            </article>
+            <article class="risk warn">
+              <h3>Review Carefully</h3>
+              <ul>
+                <li>Base keys, encryption keys, and invite data are stored as plain files, not Keychain/Keystore entries.</li>
+                <li>Verbose logs print base keys, local writer keys, invite codes, peer keys, and item payloads.</li>
+                <li>Invites are reusable up to ten pairings and do not have an obvious user-facing revocation control.</li>
+                <li>Joining shares the encryption key and adds the guest as a full writer/indexer. Membership is append-only — there is no <code>remove-writer</code>, so a peer cannot be removed once joined.</li>
+                <li>Any writer can add further writers via <code>add-writer</code> in <code>apply</code>; there is no owner-only membership authority.</li>
+                <li>Read access requires the encryption key, which also grants full decrypt — there is no read-only or sync-only credential to back "storage helper" / "relay-only" roles.</li>
+                <li>Deep links (<code>listam.ch/join?invite=</code>) auto-join with no confirmation and tear down the current base.</li>
+                <li>Invite expiry (<code>expires</code>) is stored but never enforced; <code>lista-invite.json</code> is persisted but never read back.</li>
+                <li>Loyalty card barcodes are stored in AsyncStorage rather than secure storage.</li>
+                <li>Autobase corruption recovery deletes the base and recreates a fresh one, silently destroying data and identity.</li>
+                <li>The app has no automated tests for join, corruption recovery, or storage migration.</li>
+              </ul>
+            </article>
+            <article class="risk fix">
+              <h3>Recommended Hardening</h3>
+              <ul>
+                <li>Design a membership-authority + encryption-key-rotation model so members can actually be removed; separate "revoke invite" (stop new joins) from "revoke access" (re-key and re-invite).</li>
+                <li>Restrict <code>add-writer</code> to an owner key, signature-verified in <code>apply</code>.</li>
+                <li>Require explicit user confirmation before any link-initiated join, and do not tear down the current base until confirmed.</li>
+                <li>Default invites to single-use with enforced expiry; delete the unused <code>lista-invite.json</code> persistence.</li>
+                <li>Move encryption keys, writer keys, owner-control tokens, invite secrets, pairing secrets, and loyalty card barcode data into platform secure storage.</li>
+                <li>Redact secrets and item/card payloads from logs, then add production log-level gates, a <code>no-console</code> lint rule, a CI secret-grep gate, and automated redaction tests.</li>
+                <li>Back up / export and require consent before any corruption-triggered wipe; never auto-wipe a headless storage node.</li>
+                <li>Add invite revoke/rotate controls, visible lifetime, bounded use counts, access-mode labels, expiration, and audit events.</li>
+                <li>Add tests for item reduction, duplicate handling, category lookup, join rollback, corruption recovery, storage migration, and invite lifecycle behavior.</li>
+                <li>Add direct dependencies for loyalty-card rendering imports such as <code>react-native-svg</code> and <code>qrcode-terminal</code>, then add an undeclared-import check.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Deeper analysis:</strong>
+            The <a href="plans.html#review-findings">Review Findings</a> in the Plans section rank these
+            issues by severity (C1–C3, H1–H3, M1–M5) and pair each with a concrete fix,
+            implementation plan, acceptance signal, and test expectation.
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

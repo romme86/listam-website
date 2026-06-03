@@ -897,7 +897,7 @@ After Phase 1, the work splits into two tracks that run independently and reconv
 Both tracks must land before Phase 10 onward.
 
 <details>
-<summary>Phase 0 - Test, CI, and repo hygiene bootstrap</summary>
+<summary>Phase 0 - Test, CI, and repo hygiene bootstrap (listam-mobile commit ef7b181)</summary>
 
 Commit boundary: add a reproducible test runner, commit/un-gitignore the lockfile, a dependency-hygiene check that fails on undeclared runtime imports, a secret/log grep gate, a `no-console` lint rule for production code, and CI entry points; remove committed runtime logs and add ignore rules for generated key/invite files (`autobase-key.txt`, `local-writer-key.txt`, `encryption-key.txt`, `invite.json`, `lista-*.txt`, `lista-invite.json`). No product behavior change.
 
@@ -906,6 +906,44 @@ Depends on: none. Unblocks: all.
 Acceptance: CI installs from the lockfile and runs tests, lint, and the grep gate green; no committed logs or secret-shaped strings remain in the repo.
 
 Pause gate: commit the bootstrap, record the modified files/functions, and wait before implementing security fixes.
+
+#### Files modified
+
+- `.gitignore`: un-ignore `package-lock.json` (lockfile is now committed); add `.DS_Store`, `__pycache__/`, `*.pyc`.
+- `package.json`: add `test`, `lint`, `check:deps`, `check:secrets`, and aggregate `ci` scripts; declare previously-undeclared runtime deps (`react-native-svg`, `qrcode-terminal`, `@expo/vector-icons`, `bare-path`, `bare-url`); add dev deps `eslint`, `typescript-eslint`.
+- `package-lock.json`: **added** — committed for reproducible `npm ci` installs (resolved with `--legacy-peer-deps` due to a pre-existing `react-native-screens` peer requiring RN >=0.82 while the app pins 0.81).
+- `eslint.config.mjs`: **added** — flat config enforcing `no-console` for `app/**` and `backend/**` production code; legacy files ratcheted to `warn`; scripts/tests exempt; generated bundles ignored.
+- `scripts/check-deps.mjs`: **added** — dependency-hygiene gate.
+- `scripts/check-secrets.mjs`: **added** — secret/log grep gate.
+- `.github/workflows/ci.yml`: **added** — runs `npm ci` + lint + check:deps + check:secrets + test on push/PR.
+- `backend/lib/key.mjs`, `backend/backend.mjs`, `backend/lib/network.mjs`, `app/hooks/_useWorklet.ts`: redact raw key/invite/writer/topic material from log statements (the log lines stay, only the secret values are dropped).
+- Deleted from the index: tracked `.DS_Store` files and `scripts/__pycache__/*.pyc`.
+
+#### Functions created / updated / deleted
+
+- `walk`, `packageName` (`scripts/check-deps.mjs`): created — recursive source walk and package-name extraction for the dependency gate.
+- `saveAutobaseKey`, `loadAutobaseKey`, `saveLocalWriterKey`, `loadLocalWriterKey` (`backend/lib/key.mjs`): updated — stop logging the raw key hex.
+- The `RPC_JOIN_KEY` / `add-writer` handlers (`backend/backend.mjs`) and `initAutobase` / `joinViaInvite` logging (`backend/lib/network.mjs`): updated — drop raw base/invite/writer/topic/encryption-key values from logs.
+- No functions deleted.
+
+#### Implementation summary
+
+- Discovered the repo could not `npm install` cleanly at all (no lockfile masked a `react-native-screens` peer conflict); committing a `--legacy-peer-deps`-resolved lockfile is the reproducible-install fix, and CI uses `npm ci --legacy-peer-deps`.
+- `no-console` is introduced as a ratchet: new code errors, the ~148 existing calls warn (and are tracked for the Phase 9 `@listam/logging` migration), so the rule lands green without doing Phase 9's work.
+- `typecheck` is intentionally **not** in the required `ci` gate: the repo has pre-existing type errors (duplicate keys in the generated `app/components/itemIconMap.ts`, an `IPC` type mismatch in `_useWorklet.ts`) that are out of Phase 0 scope. The `typecheck` script remains available.
+- The leftover UI changes from the prior checkpoint were preserved; only hygiene/tooling and secret-log redaction were touched.
+
+#### Verification
+
+- `npm ci --legacy-peer-deps` — installs from the committed lockfile.
+- `npm run ci` — green: `eslint .` 0 errors (148 grandfathered warnings); `check:deps` OK; `check:secrets` OK; 3 security tests pass; grocery tests pass.
+
+#### Follow-up risks / blockers
+
+- Pre-existing `tsc --noEmit` errors should be fixed and `typecheck` promoted into the gate (own change, not Phase 0).
+- ~148 grandfathered `no-console` warnings remain until the Phase 9 logger/redaction routing.
+- Large generated bundles (`app.android.js`, `app.android.mjs`, `backend.bundle.android.js`) are committed and excluded from the lint/secret scans; consider whether they should be tracked at all.
+- Commit was made on branch `phase-0-bootstrap` (not pushed).
 
 </details>
 

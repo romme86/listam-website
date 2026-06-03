@@ -203,7 +203,7 @@
           </details>
 
           <details class="phase-record" id="phase-0" data-nav-section>
-            <summary>Phase 0 - Test, CI, and repo hygiene bootstrap (commits: pending)</summary>
+            <summary>Phase 0 - Test, CI, and repo hygiene bootstrap (listam-mobile commit ef7b181)</summary>
             <p>
               Commit boundary: add a reproducible test runner, commit/un-gitignore the lockfile, a
               dependency-hygiene check that fails on undeclared runtime imports, a secret/log grep gate,
@@ -214,11 +214,39 @@
             <p><strong>Acceptance:</strong> CI installs from the lockfile and runs tests, lint, and the grep gate green; no committed logs or secret-shaped strings remain.</p>
             <p>Pause gate: record the committed files/functions and wait before security fixes.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>.gitignore</code>: un-ignore <code>package-lock.json</code>; add <code>.DS_Store</code>, <code>__pycache__/</code>, <code>*.pyc</code>.</li>
+              <li><code>package.json</code>: add <code>test</code>, <code>lint</code>, <code>check:deps</code>, <code>check:secrets</code>, and aggregate <code>ci</code> scripts; declare undeclared runtime deps (<code>react-native-svg</code>, <code>qrcode-terminal</code>, <code>@expo/vector-icons</code>, <code>bare-path</code>, <code>bare-url</code>); add dev deps <code>eslint</code>, <code>typescript-eslint</code>.</li>
+              <li><code>package-lock.json</code> (added): committed for reproducible <code>npm ci</code> (resolved with <code>--legacy-peer-deps</code> for a pre-existing <code>react-native-screens</code> RN-peer conflict).</li>
+              <li><code>eslint.config.mjs</code> (added): <code>no-console</code> for production code, legacy files ratcheted to warn.</li>
+              <li><code>scripts/check-deps.mjs</code> (added): dependency-hygiene gate.</li>
+              <li><code>scripts/check-secrets.mjs</code> (added): secret/log grep gate.</li>
+              <li><code>.github/workflows/ci.yml</code> (added): install + lint + check:deps + check:secrets + test.</li>
+              <li><code>backend/lib/key.mjs</code>, <code>backend/backend.mjs</code>, <code>backend/lib/network.mjs</code>, <code>app/hooks/_useWorklet.ts</code>: redact raw key/invite/writer/topic material from logs.</li>
+              <li>Untracked from the index: <code>.DS_Store</code> files and <code>scripts/__pycache__/*.pyc</code>.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>walk</code>, <code>packageName</code> (check-deps.mjs): created.</li>
+              <li><code>saveAutobaseKey</code>, <code>loadAutobaseKey</code>, <code>saveLocalWriterKey</code>, <code>loadLocalWriterKey</code> (key.mjs): updated — stop logging raw key hex.</li>
+              <li>RPC_JOIN_KEY / add-writer handlers (backend.mjs) and initAutobase / joinViaInvite logging (network.mjs): updated — drop raw secret values from logs.</li>
+              <li>None deleted.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              The repo could not <code>npm install</code> cleanly (no lockfile masked a
+              <code>react-native-screens</code> peer conflict); a committed
+              <code>--legacy-peer-deps</code> lockfile plus <code>npm ci --legacy-peer-deps</code> in CI is
+              the fix. <code>no-console</code> is a ratchet (new code errors, ~148 legacy calls warn,
+              tracked for the Phase 9 logger migration). <code>typecheck</code> is intentionally not in the
+              required gate because of pre-existing type errors (generated <code>itemIconMap.ts</code>
+              duplicate keys; an <code>IPC</code> type mismatch) that are out of Phase 0 scope. Leftover UI
+              changes were preserved; only tooling/hygiene and secret-log redaction were touched.
+              <strong>Verification:</strong> <code>npm ci --legacy-peer-deps</code> installs from the
+              lockfile; <code>npm run ci</code> is green (lint 0 errors, check:deps OK, check:secrets OK, 3
+              security tests pass, grocery tests pass). Committed on branch
+              <code>phase-0-bootstrap</code> (not pushed).
+            </p>
           </details>
 
           <details class="phase-record" id="phase-1" data-nav-section>

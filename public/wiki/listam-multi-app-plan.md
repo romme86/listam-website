@@ -978,7 +978,7 @@ Pause gate: commit the bootstrap, record the modified files/functions, and wait 
 </details>
 
 <details>
-<summary>Phase 1 - Invite safety and deep-link confirmation (H2, H3)</summary>
+<summary>Phase 1 - Invite safety and deep-link confirmation (listam-mobile commit ee0dd26)</summary>
 
 Commit boundary: stop automatic link joins, add pending-invite confirmation, enforce invite expiry/use limits, remove unused plaintext invite persistence (`lista-invite.json`), and cover join cancel/confirm/rollback tests.
 
@@ -987,6 +987,55 @@ Depends on: 0. Unblocks: -.
 Acceptance: a link cannot switch bases without explicit confirmation; expired or exhausted invites are rejected. Rollback: cancel leaves the current base/list untouched.
 
 Pause gate: commit the invite safety work, record the modified files/functions, and wait before changing membership authority.
+
+#### Files modified
+
+- `README.md`: documents Phase 1 invite safety behavior for the mobile repository.
+- `app/index.tsx`: routes manual joins and incoming deep links through explicit confirmation before sending `RPC_JOIN_KEY`; confirmation cancel only clears pending state.
+- `app/invite-confirmation.ts`: **added** - pure invite normalization, deep-link extraction, pending-confirmation, confirm, and cancel helper logic.
+- `app/app.ios.bundle.mjs`, `app/assets/backend.android.bundle.mjs`: regenerated packed Bare backend bundles so the mobile runtime includes the Phase 1 backend changes.
+- `backend/backend.mjs`: renames the plaintext invite path export to a legacy cleanup path and routes backend logging through the redacting logger boundary.
+- `backend/lib/network.mjs`: reserves invite use before accepting a candidate, rejects stale/expired/exhausted candidates, rotates invites after use/failure, removes legacy invite files, and restores the previous base/list on join failure.
+- `backend/lib/invite-policy.mjs`: adds explicit invite-use reservation semantics while keeping invite TTL/use checks centralized.
+- `backend/lib/invite-policy.test.mjs`: expands invite expiry/exhaustion coverage with reservation tests.
+- `backend/lib/invite-confirmation.test.mjs`: **added** - tests deep-link confirmation, cancel, confirm, invalid, and busy join decisions.
+- `backend/lib/join-rollback.mjs`: **added** - testable snapshot/restore helpers for join failure rollback.
+- `backend/lib/join-rollback.test.mjs`: **added** - covers rollback snapshots, visible-list restore, and previous-base restore.
+- `backend/lib/key.mjs`: renames invite cleanup to `deleteLegacyInviteFile`; backend key/encryption persistence logs go through the redacting logger.
+- `backend/lib/logger.mjs`: **added** - structured backend logger with redaction for key-, invite-, byte-, and item-shaped payloads.
+- `backend/lib/logger.test.mjs`: **added** - covers logger redaction and level parsing.
+- `backend/lib/item.mjs`: routes backend item mutation/rebuild logs through the redacting logger and avoids raw item payload logging.
+- `eslint.config.mjs`: makes backend production code use the logger boundary while allowing the logger itself to own the remaining backend `console.error`.
+
+#### Functions created / updated / deleted
+
+- `normalizeInvite`, `extractInviteFromInput`, `createJoinConfirmationRequest`, `resolveJoinConfirmation`, `extractInviteFromUrl` (`app/invite-confirmation.ts`): created - isolate and test the pending-invite confirmation contract.
+- `AppInner` join helpers/effects (`app/index.tsx`): updated - use the helper contract so deep links/manual codes cannot start a join until the user confirms.
+- `reserveInviteUse` (`backend/lib/invite-policy.mjs`): created - atomically consume the one allowed invite use before asynchronous BlindPairing work.
+- `isInviteUsable` (`backend/lib/invite-policy.mjs`): updated - delegates to the reservation policy for consistent missing/legacy/expired/exhausted handling.
+- `createInvite`, `rotateInviteAndNotifyFrontend`, `setupBlindPairing`, `joinViaInvite` (`backend/lib/network.mjs`): updated - enforce one-use/10-minute invites, close rejected candidates, remove the active invite during reserved candidate processing, and restore previous state after failed joins.
+- `createJoinRollbackSnapshot`, `restoreJoinRollbackSnapshot`, `cloneBuffer` (`backend/lib/join-rollback.mjs`): created - make rollback copying and restoration testable without a live swarm.
+- `deleteLegacyInviteFile` (`backend/lib/key.mjs`): created/renamed from `deleteInvite` - remove stale plaintext invite files without preserving an invite persistence API.
+- `deleteInvite` (`backend/lib/key.mjs`): deleted - replaced by legacy cleanup naming.
+- `redactForLog`, `redactString`, `parseLogArgs`, `logger.log`, `logger.info`, `logger.warn`, `logger.error`, `isBytes`, `isListItemShape` (`backend/lib/logger.mjs`): created - centralize structured backend log redaction.
+- `open`, `apply` (`backend/backend.mjs`), `addItem`, `updateItem`, `deleteItem`, `syncListToFrontend`, `rebuildListFromPersistedOps` (`backend/lib/item.mjs`), and key persistence helpers (`backend/lib/key.mjs`): updated - use the logger boundary and stop logging raw list/key-shaped values.
+
+#### Implementation summary
+
+- Deep links and pasted invite codes now create a pending confirmation instead of immediately joining. Cancel clears only the pending invite; confirm sends the join RPC only if the same invite is still pending.
+- Host invites remain in memory, are single-use, expire after 10 minutes, and are reserved before async candidate acceptance so a second candidate cannot reuse the same invite while the first is being processed.
+- The old `lista-invite.json`/`invite.json` plaintext invite persistence path is retained only as a legacy cleanup target; no invite material is written there.
+- Join failure snapshots the previous visible list and base/encryption keys, then restores them through a tested rollback helper.
+- The backend logger boundary was included in the implementation commit because the worktree already depended on it; it also keeps invite/key-shaped data redacted in the new Phase 1 paths. Shared-package logger extraction remains Phase 10.
+- Commit range: `ef7b181..ee0dd26` (`ee0dd26` - `Phase 1: invite safety and deep-link confirmation`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
+- Verification: `npm run test:security` (16 tests pass); `npm run ci` (green: lint 0 errors / 24 grandfathered app console warnings, check:deps OK, check:secrets OK, security tests pass, grocery tests pass); `npm run typecheck` still fails only on the pre-existing generated `itemIconMap.ts` duplicate keys and `_useWorklet.ts` IPC type mismatch already recorded in Phase 0; `npm run bundle:backend:ios`; `npm run bundle:backend:android`; `git diff --check`.
+
+#### Follow-up risks / blockers
+
+- The invite is still a writer-access BlindPairing capability until Phase 3 membership authority and Phase 4 re-keying land; true member removal is not solved in Phase 1.
+- Existing app-side console warnings remain in `app/index.tsx`, `_useWorklet.ts`, and `useSubscription.ts`; backend console use is now behind the redacting logger boundary.
+- The generated backend bundles remain committed runtime artifacts; Phase 1 updated the iOS/Android Bare backend bundles, but the larger generated Metro/Android bundles remain outside this phase.
+- Pre-existing `typecheck` failures remain and should be handled in their own change before promoting typecheck into CI.
 
 </details>
 

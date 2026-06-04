@@ -267,6 +267,7 @@ Acceptance signal:
 - Sequence the risky substrate work before product expansion: membership authority, invite lifecycle, deep-link confirmation, secret storage, and log enforcement come before desktop/headless trust features.
 - Stand up the separate app repositories and the shared package repository early, and decouple `@listam/backend` from BareKit-specific globals so the published backend package runs under mobile worklet, Pear Desktop, and headless Bare/Node alike.
 - Before implementing UI for any app or project, check for a project-local `design-guide/` directory. When it exists, its design system docs, tokens, component rules, and example screens are the UI source of truth and must guide implementation and review before generic visual preferences.
+- Treat UI internationalization as shared product infrastructure before desktop parity: user-facing strings, locale preferences, plural rules, date/number formatting, fallback behavior, and long-string/RTL layout checks should be solved once for mobile and desktop rather than retrofitted per app.
 - Treat headless roles as capability tiers with honest credential boundaries. The current safe tiers are trusted full participant and blind ciphertext helper; richer read-only/sync-only roles are future work.
 - Define contract tests at every boundary: RPC numbers, protocol events, package exports, storage migrations, owner-control commands, and cross-app sync.
 - Add a release gate checklist so each milestone has explicit "docs updated, wiki aligned, tests passing, security review updated" acceptance.
@@ -305,6 +306,7 @@ The shared repository publishes versioned npm packages consumed by all app repos
 - `@listam/client`: platform adapters for mobile worklet RPC, Pear Desktop IPC, and headless P2P owner-control clients.
 - `@listam/logging`: shared append-only log writer, log schema, redaction rules, rotation policy, diagnostics readers, and export helpers.
 - `@listam/secrets`: shared secret names, key fingerprints, migration contracts, redaction helpers, and platform secret-store interfaces.
+- `@listam/i18n`: typed UI message catalogs, locale detection/selection contracts, fallback rules, plural/date/number formatting helpers, and pseudo-locale test utilities.
 - `@listam/grocery`: grocery category, translation, grouping, and icon intelligence currently living in mobile UI modules.
 
 This keeps each application independently releasable while making shared updates explicit and repeatable through package versions. To make the shared `@listam/backend` package portable across all three apps, decouple it from BareKit-specific globals (`BareKit.IPC`, `Bare.argv`, `Bare.on('teardown')`) behind a small platform-services adapter, and keep per-platform `bare-pack` bundling an app-level build step.
@@ -335,7 +337,7 @@ The mobile app should be refactored first because it is the current working prod
 Key changes for the state-manager phase:
 
 - Add Redux Toolkit and create the initial store.
-- Move list state, sync status, join status, peer count, invite key, preferences, and loyalty-card metadata handles into slices.
+- Move list state, sync status, join status, peer count, invite key, preferences, locale choice, and loyalty-card metadata handles into slices.
 - Keep short-lived component state local when it is only UI interaction state, such as text input focus or modal visibility.
 - Replace direct `useState` ownership of replicated list data with Redux selectors and actions.
 - Move backend command side effects into listener middleware or typed thunks.
@@ -349,13 +351,34 @@ Initial slices:
 
 - `lists`: replicated list entities, ordering, selected list, and local optimistic list operations.
 - `sync`: backend readiness, peer count, invite key, join phase, sync health, and sync errors.
-- `preferences`: local UI choices such as grid/list mode, category toggles, category headers, icon size, text size, and icon style.
+- `preferences`: local UI choices such as grid/list mode, category toggles, category headers, icon size, text size, icon style, locale override, and follow-system-language setting.
 - `loyaltyCards`: local loyalty-card metadata handles until/unless those records are later made replicated; barcode/QR payloads stay in secure storage.
 - `ownedDevices`: known headless instances and future dongles, including display names, trust status, supported roles, and last-seen status.
 
 > **Review note (M3):** Do not route loyalty-card secrets (barcode/QR payloads) through the `loyaltyCards` slice — Redux state is serializable, inspectable, and often persisted, which conflicts with the secure-storage requirement. Keep only non-secret metadata/handles in Redux and read the secret payload on demand from secure storage.
 
 This structure makes the current app easier to split across mobile and desktop, and it leaves clean extension points for future domains such as tasks, calendar ingestion, kanban boards, configurable rules, and other personal-life-management features.
+
+## UI Internationalization Direction
+
+Listam already has grocery category/item translation data, but the UI chrome should have a separate internationalization layer. Grocery intelligence answers "what is this item called/grouped as"; UI internationalization answers "what does this screen, action, empty state, error, confirmation, and diagnostic label say."
+
+Implementation direction:
+
+- Create a shared `@listam/i18n` package or module before desktop parity so mobile and desktop use the same message keys, fallback chain, and formatting behavior.
+- Externalize user-facing UI strings from mobile screens, dialogs, settings, invite/join flows, diagnostics, loyalty-card screens, and desktop-shared components into typed catalogs.
+- Keep locale choice in the local `preferences` slice: follow system language by default, allow an explicit override, and persist it as local UI preference rather than replicated list data.
+- Support pluralization, interpolation, relative dates, numbers, byte sizes, and list formatting through structured helpers instead of string concatenation.
+- Keep grocery category/item translations in `@listam/grocery`, but expose a locale-aware resolver so UI copy and grocery labels share the same selected locale.
+- Add pseudo-locale and long-string testing, plus RTL metadata and smoke checks for any locale that needs right-to-left layout.
+- Review translated and pseudo-localized mobile/desktop screens against each project-local `design-guide/` examples so longer strings do not overlap controls, truncate critical copy, or break the kinetic/minimalist layout rules.
+
+Acceptance signal:
+
+- User-facing UI copy is routed through typed message keys, with CI failing on missing keys or unsupported interpolation parameters.
+- English plus at least one non-English catalog render in mobile; desktop consumes the same catalogs when built.
+- Pseudo-locale and long-string screenshots pass for the main list, invite/join confirmation, settings/preferences, diagnostics, and loyalty-card surfaces.
+- Locale selection survives restart, honors system-language fallback, and does not replicate to other devices unless a future explicit per-account preference model is added.
 
 ## Desktop App
 
@@ -731,6 +754,13 @@ Redux and domain tests:
 - selectors for active list, grouped list, peer status, and UI preferences
 - migration tests for legacy text-only items
 
+UI internationalization tests:
+
+- message-catalog completeness tests for every supported locale and namespace
+- interpolation/plural/date/number formatting tests for invite, sync, diagnostics, settings, and loyalty-card copy
+- pseudo-locale and long-string render tests for the main list, join confirmation, settings, diagnostics, and loyalty-card surfaces
+- locale preference tests for follow-system, explicit override, restart persistence, and fallback behavior
+
 Backend and protocol tests:
 
 - command/event contract tests for add, update, delete, snapshot sync, invite creation, join phases, peer count, and errors
@@ -785,7 +815,7 @@ Manual acceptance tests:
 - keep headless running while mobile is closed, then reopen mobile and verify sync
 - create an invite from headless and join from desktop
 - verify desktop remains useful without the mobile device online
-- compare each implemented UI against any project-local `design-guide/` design system and examples, including `listam-desktop/design-guide/` for desktop, and resolve mismatches before acceptance
+- compare each implemented UI against any project-local `design-guide/` design system and examples, including `listam-desktop/design-guide/` for desktop, in English and pseudo-localized/long-string modes, and resolve mismatches before acceptance
 
 ## Per-App Testing And Cross-Instance Interaction
 
@@ -811,7 +841,7 @@ Running several instances on one machine (or in CI) requires deterministic isola
 
 ### Desktop Testing
 
-- **Unit:** the shared `@listam/domain`, `@listam/protocol`, and `@listam/grocery` suites run in Node — identical to mobile.
+- **Unit:** the shared `@listam/domain`, `@listam/protocol`, `@listam/i18n`, and `@listam/grocery` suites run in Node — identical to mobile.
 - **Integration:** the Pear Desktop IPC adapter passes the same `@listam/client` contract tests as the worklet adapter; keyboard-action and multi-pane behavior; the diagnostics panel reads backend events.
 - **Manual / E2E:** the parity checklist on macOS/Windows/Linux; tray/status where Pear supports it; compare the UI against `listam-desktop/design-guide/`.
 - **How to run:** launch the Pear dev app; run the shared package suites with the Node runner; drive a second instance (or a headless peer) for sync.
@@ -894,7 +924,7 @@ After Phase 1, the work splits into two tracks that run independently and reconv
 - **Membership-crypto track (Phases 2-4):** secret-storage foundation, owner membership authority, and key epochs / member-removal re-key. This is the highest-uncertainty substrate work (findings C3 and C1). Secret storage comes first because Phases 3-4 mint new long-lived key material that must be born in secure storage, not retrofitted.
 - **Data-model and extraction track (Phases 5-8):** stable item IDs, the in-place Redux migration, and the shared-package extraction. It depends only on Phases 0-1, not on the membership-crypto track, so it does not wait behind the re-key flow.
 
-Both tracks must land before Phase 10 onward.
+Both tracks must land before Phase 11 onward. Phase 9 adds shared UI internationalization before desktop/headless screens are built; Phase 10 finishes loyalty-card secret migration and logging redaction before durability and release-readiness work.
 
 <details>
 <summary>Phase 0 - Test, CI, and repo hygiene bootstrap (listam-mobile commit ef7b181)</summary>
@@ -929,7 +959,7 @@ Pause gate: commit the bootstrap, record the modified files/functions, and wait 
 #### Implementation summary
 
 - Discovered the repo could not `npm install` cleanly at all (no lockfile masked a `react-native-screens` peer conflict); committing a `--legacy-peer-deps`-resolved lockfile is the reproducible-install fix, and CI uses `npm ci --legacy-peer-deps`.
-- `no-console` is introduced as a ratchet: new code errors, the ~148 existing calls warn (and are tracked for the Phase 9 `@listam/logging` migration), so the rule lands green without doing Phase 9's work.
+- `no-console` is introduced as a ratchet: new code errors, the ~148 existing calls warn (and are tracked for the Phase 10 `@listam/logging` migration), so the rule lands green without doing Phase 10's work.
 - `typecheck` is intentionally **not** in the required `ci` gate: the repo has pre-existing type errors (duplicate keys in the generated `app/components/itemIconMap.ts`, an `IPC` type mismatch in `_useWorklet.ts`) that are out of Phase 0 scope. The `typecheck` script remains available.
 - The leftover UI changes from the prior checkpoint were preserved; only hygiene/tooling and secret-log redaction were touched.
 
@@ -941,7 +971,7 @@ Pause gate: commit the bootstrap, record the modified files/functions, and wait 
 #### Follow-up risks / blockers
 
 - Pre-existing `tsc --noEmit` errors should be fixed and `typecheck` promoted into the gate (own change, not Phase 0).
-- ~148 grandfathered `no-console` warnings remain until the Phase 9 logger/redaction routing.
+- ~148 grandfathered `no-console` warnings remain until the Phase 10 logger/redaction routing.
 - Large generated bundles (`app.android.js`, `app.android.mjs`, `backend.bundle.android.js`) are committed and excluded from the lint/secret scans; consider whether they should be tracked at all.
 - Commit was made on branch `phase-0-bootstrap` (not pushed).
 
@@ -967,7 +997,7 @@ Commit boundary: introduce the platform secure-storage boundary in mobile (later
 
 Rationale: this precedes the membership-crypto work because Phases 3-4 create new long-lived key material (the owner authority key and per-epoch encryption keys) that must be born in secure storage rather than retrofitted.
 
-Depends on: 0. Unblocks: 3, 4, 9.
+Depends on: 0. Unblocks: 3, 4, 10.
 
 Acceptance: no plaintext key files remain after migration and the backend boots from adapter-passed secrets. Rollback: migration is idempotent and re-readable; an abort restores from the pre-migration plaintext until deletion is confirmed.
 
@@ -997,7 +1027,7 @@ Depends on: 3. Unblocks: -. (End of the membership-crypto track.)
 
 Acceptance: a removed device can no longer decrypt or append in the new epoch. Rollback: an interrupted re-key restores the prior epoch read-write and never leaves the base unreadable.
 
-Pause gate: commit the re-key flow, record the modified files/functions, and wait before the desktop/headless build (this track reconverges with the data-model track at Phase 10).
+Pause gate: commit the re-key flow, record the modified files/functions, and wait before the desktop/headless build (this track reconverges with the data-model track at Phase 11).
 
 </details>
 
@@ -1017,7 +1047,7 @@ Pause gate: commit the id migration, record the modified files/functions, and wa
 <details>
 <summary>Phase 6 - Redux Toolkit migration in mobile, in place</summary>
 
-Commit boundary: add the Redux Toolkit store and move list, sync, preferences, loyalty-card metadata handles, and owned-devices state into slices normalized by id; replace direct `useState` ownership of replicated list data with selectors and actions; keep existing mobile behavior intact. No package extraction yet.
+Commit boundary: add the Redux Toolkit store and move list, sync, preferences, locale choice, loyalty-card metadata handles, and owned-devices state into slices normalized by id; replace direct `useState` ownership of replicated list data with selectors and actions; keep existing mobile behavior intact. No package extraction yet.
 
 Depends on: 5. Unblocks: 7.
 
@@ -1032,7 +1062,7 @@ Pause gate: commit the in-place Redux migration, record the modified files/funct
 
 Commit boundary: extract `@listam/domain`, `@listam/protocol`, `@listam/grocery`, `@listam/logging` (including redaction helpers and the log line format), and `@listam/secrets` (the Phase 2 boundary) as versioned packages; mobile consumes them; behavior intact.
 
-Depends on: 2, 6. Unblocks: 8, 9.
+Depends on: 2, 6. Unblocks: 8, 9, 10.
 
 Acceptance: mobile builds against published package versions and the shared suites run in Node.
 
@@ -1045,7 +1075,7 @@ Pause gate: commit the pure-package extraction, record the modified files/functi
 
 Commit boundary: extract `@listam/backend` and `@listam/client`; decouple the backend from BareKit globals (`BareKit.IPC`, `Bare.argv`, `Bare.on('teardown')`) behind a platform-services adapter so it runs under the mobile worklet and Node; keep per-platform `bare-pack` bundling an app-level build step.
 
-Depends on: 7. Unblocks: 11, 12.
+Depends on: 7. Unblocks: 11, 12, 13.
 
 Acceptance: the backend runs under Node with no BareKit globals, and the same `@listam/client` contract suite passes on both the worklet and Node adapters.
 
@@ -1054,11 +1084,24 @@ Pause gate: commit the backend/client extraction, record the modified files/func
 </details>
 
 <details>
-<summary>Phase 9 - Loyalty-card secrets and redaction routing (M3, M5)</summary>
+<summary>Phase 9 - UI internationalization foundation</summary>
+
+Commit boundary: add shared UI i18n infrastructure (`@listam/i18n` or the equivalent shared module), typed message catalogs, locale detection/override in preferences, fallback behavior, plural/date/number formatting helpers, pseudo-locale utilities, and mobile UI string extraction for the parity surfaces. Keep grocery category/item translations in `@listam/grocery`, but route them through the same selected-locale resolver.
+
+Depends on: 6, 7. Unblocks: 12, 15.
+
+Acceptance: user-facing mobile UI copy is routed through typed message keys; English plus at least one non-English catalog render; missing keys fail CI; pseudo-locale/long-string checks pass for the main list, invite/join confirmation, settings/preferences, diagnostics, and loyalty-card surfaces. Rollback: language preference falls back to system/default locale without corrupting local preferences.
+
+Pause gate: commit the UI internationalization foundation, record the modified files/functions, and wait before redaction/durability or desktop implementation.
+
+</details>
+
+<details>
+<summary>Phase 10 - Loyalty-card secrets and redaction routing (M3, M5)</summary>
 
 Commit boundary: move loyalty-card barcode/QR payloads into secure storage via the Phase 2 boundary, keep only non-secret handles in the Redux slice, route all logging through `@listam/logging` redaction, and add export/diagnostic redaction tests.
 
-Depends on: 2, 6, 7. Unblocks: -.
+Depends on: 2, 6, 7. Unblocks: 11.
 
 Acceptance: Redux state, DevTools-style traces, and exports never contain card payloads or raw secrets. Rollback: the AsyncStorage-to-secure-storage card migration is idempotent.
 
@@ -1067,11 +1110,11 @@ Pause gate: commit the loyalty-card/redaction work, record the modified files/fu
 </details>
 
 <details>
-<summary>Phase 10 - Recovery, snapshots, and storage durability (M4)</summary>
+<summary>Phase 11 - Recovery, snapshots, and storage durability (M4)</summary>
 
 Commit boundary: replace destructive auto-wipe recovery with backup/quarantine/owner-confirmed recovery, add materialized-view snapshots/checkpoints that resume the id-keyed reduction, isolate storage roots, and add a real lock/lease with stale-lock recovery for multiple processes on one machine.
 
-Depends on: 5 (the checkpoint sits on the id-keyed reduction), 8. Unblocks: 11, 12.
+Depends on: 5 (the checkpoint sits on the id-keyed reduction), 8, 10. Unblocks: 12, 13.
 
 Acceptance: a corrupt Autobase/Corestore state never triggers silent deletion, headless nodes refuse auto-wipe, and the rebuild resumes from a checkpoint with bounded join-poll work.
 
@@ -1080,24 +1123,24 @@ Pause gate: commit the durability work, record the modified files/functions, and
 </details>
 
 <details>
-<summary>Phase 11 - Desktop parity surface</summary>
+<summary>Phase 12 - Desktop parity surface</summary>
 
-Commit boundary: build the Pear Desktop app around the shared packages, match current mobile parity, implement desktop IPC/client contracts, and compare UI against `listam-desktop/design-guide/`. The desktop owner-control client is deferred to Phase 13.
+Commit boundary: build the Pear Desktop app around the shared packages, match current mobile parity, implement desktop IPC/client contracts, consume the Phase 9 UI catalogs, and compare UI against `listam-desktop/design-guide/`. The desktop owner-control client is deferred to Phase 14.
 
-Depends on: 8, 10. Unblocks: 14.
+Depends on: 8, 9, 11. Unblocks: 15.
 
-Acceptance: desktop reaches mobile parity, syncs with mobile through invite, and matches the desktop design-guide examples.
+Acceptance: desktop reaches mobile parity, syncs with mobile through invite, uses the shared UI i18n catalogs, and matches the desktop design-guide examples in English and pseudo-localized/long-string modes.
 
 Pause gate: commit the desktop parity work, record the modified files/functions, and wait before headless implementation.
 
 </details>
 
 <details>
-<summary>Phase 12 - Headless service and CLI parity (C2)</summary>
+<summary>Phase 13 - Headless service and CLI parity (C2)</summary>
 
-Commit boundary: build the Pear Terminal/Bare headless app as a long-lived owned peer, persist the data model, add CLI setup/status/invite/join/export/shutdown commands, enforce blind-helper credential boundaries (a blind helper never receives the encryption key), and add resource quotas on queues and storage. The owner-control protocol is Phase 13.
+Commit boundary: build the Pear Terminal/Bare headless app as a long-lived owned peer, persist the data model, add CLI setup/status/invite/join/export/shutdown commands, enforce blind-helper credential boundaries (a blind helper never receives the encryption key), and add resource quotas on queues and storage. The owner-control protocol is Phase 14.
 
-Depends on: 8, 10. Unblocks: 13, 14.
+Depends on: 8, 11. Unblocks: 14, 15.
 
 Acceptance: a blind-storage instance replicates but cannot decrypt `view.get()`; a restart preserves identity, storage, and status.
 
@@ -1106,11 +1149,11 @@ Pause gate: commit the headless service work, record the modified files/function
 </details>
 
 <details>
-<summary>Phase 13 - Owner-control protocol (H1)</summary>
+<summary>Phase 14 - Owner-control protocol (H1)</summary>
 
 Commit boundary: establish per-device key pairs at pairing; require every command to carry a nonce/timestamp for replay protection and a signature; model capabilities as separate grants (`status:read`, `diagnostics:read`, `topics:configure`, `invite:create`, `export:create`, `import:apply`, `service:shutdown`); add device revocation and key rotation; build the desktop and mobile owner-control clients.
 
-Depends on: 12. Unblocks: 14.
+Depends on: 13. Unblocks: 15.
 
 Acceptance: headless refuses unsigned, replayed, expired, or out-of-scope commands, and a diagnostics-only client cannot shutdown, import, export, or configure topics.
 
@@ -1119,11 +1162,11 @@ Pause gate: commit the owner-control protocol, record the modified files/functio
 </details>
 
 <details>
-<summary>Phase 14 - Cross-app acceptance matrix and release readiness</summary>
+<summary>Phase 15 - Cross-app acceptance matrix and release readiness</summary>
 
 Commit boundary: automate the private-bootstrap cross-instance matrix, prove mobile/desktop/headless convergence, run the cumulative-migration chain on one base (id-backfill, then owner-key adoption, then epoch, then secret-store) to prove stacked migrations are forward-compatible, document manual acceptance, and close first-milestone release risks.
 
-Depends on: 11, 13. Unblocks: -.
+Depends on: 12, 14. Unblocks: -.
 
 Acceptance: the headless-driven subset of the matrix runs in CI, the cumulative-migration chain passes, and each capability is "done" only when its matrix row passes.
 

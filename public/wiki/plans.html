@@ -92,6 +92,7 @@
                   <a href="plans.html#app-targets">App Targets</a>
                   <a href="plans.html#shared-package-plan">Shared Packages</a>
                   <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#ui-internationalization">UI I18n</a>
                   <a href="plans.html#technical-architecture-notes">Technical Notes</a>
                   <a href="plans.html#shared-command-event-flow">Command Flow</a>
                   <a href="plans.html#p2p-owner-control">Owner Control</a>
@@ -518,7 +519,7 @@
               <tr>
                 <td><code>listam-shared</code></td>
                 <td>Versioned shared npm packages</td>
-                <td>Domain, protocol, backend, client adapters, logging, secrets, and grocery intelligence published for all app repos.</td>
+                <td>Domain, protocol, backend, client adapters, logging, secrets, UI internationalization, and grocery intelligence published for all app repos.</td>
               </tr>
             </tbody>
           </table>
@@ -533,7 +534,7 @@
             <tbody>
               <tr>
                 <td>First milestone</td>
-                <td>Current Listam list parity, invite creation/joining, peer and sync status, list/grid views, grocery grouping and icon intelligence, shared Redux/domain logic, and shared backend/client packages.</td>
+                <td>Current Listam list parity, invite creation/joining, peer and sync status, list/grid views, shared UI internationalization, grocery grouping and icon intelligence, shared Redux/domain logic, and shared backend/client packages.</td>
               </tr>
               <tr>
                 <td>Large-screen improvements</td>
@@ -559,6 +560,7 @@
               <li><code>@listam/client</code> owns mobile worklet RPC, Pear Desktop IPC, and headless P2P owner-control adapters.</li>
               <li><code>@listam/logging</code> owns append-only log writing, the shared log row schema, redaction, rotation, diagnostics readers, and export helpers.</li>
               <li><code>@listam/secrets</code> owns shared secret names, key fingerprints, migration contracts, redaction helpers, and platform secret-store interfaces.</li>
+              <li><code>@listam/i18n</code> owns typed UI message catalogs, locale detection/selection, fallback rules, plural/date/number formatting helpers, and pseudo-locale test utilities.</li>
               <li><code>@listam/grocery</code> owns category, translation, grouping, and icon intelligence currently living in UI modules.</li>
             </ol>
           </div>
@@ -636,7 +638,7 @@
             <h3>State-manager phase</h3>
             <ol>
               <li>Add Redux Toolkit and create the initial mobile store first.</li>
-              <li>Move list state, sync status, join status, peer count, invite key, preferences, and loyalty-card metadata handles into slices.</li>
+              <li>Move list state, sync status, join status, peer count, invite key, preferences, locale choice, and loyalty-card metadata handles into slices.</li>
               <li>Keep short-lived interaction state local when it only affects a modal, input, or gesture.</li>
               <li>Replace direct <code>useState</code> ownership of replicated list data with Redux selectors and actions.</li>
               <li>Move backend command side effects into listener middleware or typed thunks.</li>
@@ -665,8 +667,8 @@
               </tr>
               <tr>
                 <td><code>preferences</code></td>
-                <td>Grid/list mode, categories, category headers, icon size, text size, and icon style.</td>
-                <td>Keeps local UI choices portable across mobile and desktop without mixing them into replicated data.</td>
+                <td>Grid/list mode, categories, category headers, icon size, text size, icon style, locale override, and follow-system-language setting.</td>
+                <td>Keeps local UI choices portable across mobile and desktop without mixing them into replicated data or another device's language choice.</td>
               </tr>
               <tr>
                 <td><code>loyaltyCards</code></td>
@@ -687,6 +689,36 @@
             and selectors. Slices avoid one giant app state object, make shared mobile/desktop logic
             easier to test, and leave clean extension points for tasks, calendar ingestion, kanban
             boards, configurable rules, and future personal-life-management features.
+          </div>
+
+          <div class="detail-list" id="ui-internationalization" data-nav-section>
+            <h3>UI internationalization direction</h3>
+            <div>
+              <strong>Separate UI copy from grocery translation</strong>
+              <p>
+                Grocery category and item translations stay in <code>@listam/grocery</code>. Screen
+                titles, actions, empty states, errors, confirmations, diagnostics labels, settings copy,
+                and loyalty-card UI belong in a shared <code>@listam/i18n</code> layer so mobile and
+                desktop do not grow separate hardcoded strings.
+              </p>
+            </div>
+            <div>
+              <strong>Shared locale behavior</strong>
+              <p>
+                Locale choice lives in local preferences: follow the system language by default, allow an
+                explicit override, persist it locally, and fall back predictably. The same selected locale
+                should drive UI messages and the grocery-label resolver.
+              </p>
+            </div>
+            <div>
+              <strong>Layout acceptance</strong>
+              <p>
+                Add pseudo-locale and long-string checks for the main list, invite/join confirmation,
+                settings, diagnostics, and loyalty-card surfaces. Mobile and desktop screens must be
+                reviewed against any project-local <code>design-guide/</code> examples in English and
+                pseudo-localized modes before acceptance.
+              </p>
+            </div>
           </div>
 
           <div class="detail-list" id="technical-architecture-notes" data-nav-section>
@@ -1295,9 +1327,14 @@
                 <td>Mobile-to-desktop, mobile-to-headless, desktop-to-headless, and headless restart persistence.</td>
               </tr>
               <tr>
+                <td>UI internationalization</td>
+                <td>Shared message catalogs, locale preference behavior, fallback, formatting, and layout resilience work across user-facing apps.</td>
+                <td>Missing-key CI failures, plural/date/number formatting tests, pseudo-locale and long-string screens, and restart-persistent language choice.</td>
+              </tr>
+              <tr>
                 <td>Manual acceptance</td>
                 <td>The first milestone feels like current Listam across all app surfaces.</td>
-                <td>Generate content on mobile, edit and complete it on desktop, delete content through headless, keep headless online, reopen mobile and verify sync, and compare implemented UI against any project-local <code>design-guide/</code> examples.</td>
+                <td>Generate content on mobile, edit and complete it on desktop, delete content through headless, keep headless online, reopen mobile and verify sync, and compare implemented UI against any project-local <code>design-guide/</code> examples in English and pseudo-localized modes.</td>
               </tr>
               <tr>
                 <td>Logging and diagnostics</td>
@@ -1353,7 +1390,8 @@
                 data-model / extraction track (Phases 5-8: stable item IDs, in-place Redux migration,
                 shared-package extraction). The extraction track depends only on Phases 0-1, not on the
                 membership-crypto track, so it does not wait behind the re-key flow. Both reconverge
-                before the desktop/headless build.
+                before Phase 11 onward; Phase 9 adds shared UI internationalization and Phase 10 finishes
+                loyalty-card secret migration and logging redaction before durability and app-surface work.
               </p>
             </div>
             <div>
@@ -1374,9 +1412,10 @@
                 revocation language; Phase 4 key epochs and member-removal re-key; Phase 5 stable item
                 IDs and backend reduction migration; Phase 6 in-place Redux Toolkit migration; Phase 7
                 pure shared-package extraction; Phase 8 backend/client extraction with platform adapter;
-                Phase 9 loyalty-card secrets and redaction routing; Phase 10 recovery, snapshots, and
-                storage durability; Phase 11 desktop parity; Phase 12 headless service and CLI parity;
-                Phase 13 owner-control protocol; Phase 14 cross-app acceptance and release readiness.
+                Phase 9 UI internationalization foundation; Phase 10 loyalty-card secrets and redaction
+                routing; Phase 11 recovery, snapshots, and storage durability; Phase 12 desktop parity;
+                Phase 13 headless service and CLI parity; Phase 14 owner-control protocol; Phase 15
+                cross-app acceptance and release readiness.
               </p>
             </div>
           </div>

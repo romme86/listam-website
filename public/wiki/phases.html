@@ -104,6 +104,7 @@
                   <a href="phases.html#phase-12">Phase 12</a>
                   <a href="phases.html#phase-13">Phase 13</a>
                   <a href="phases.html#phase-14">Phase 14</a>
+                  <a href="phases.html#phase-15">Phase 15</a>
                 </div>
               </details>
             </div>
@@ -154,7 +155,9 @@
             and a <em>data-model / extraction track</em> (Phases 5-8: stable item IDs, in-place Redux
             migration, shared-package extraction). The extraction track depends only on Phases 0-1, not
             on the membership-crypto track, so it does not wait behind the re-key flow. Both reconverge
-            before the desktop/headless build. Each phase lists its dependencies explicitly.
+            before Phase 11 onward; Phase 9 adds shared UI internationalization and Phase 10 finishes
+            loyalty-card secret migration and logging redaction before durability and app-surface work.
+            Each phase lists its dependencies explicitly.
           </div>
 
           <table class="info-table">
@@ -238,7 +241,7 @@
               <code>react-native-screens</code> peer conflict); a committed
               <code>--legacy-peer-deps</code> lockfile plus <code>npm ci --legacy-peer-deps</code> in CI is
               the fix. <code>no-console</code> is a ratchet (new code errors, ~148 legacy calls warn,
-              tracked for the Phase 9 logger migration). <code>typecheck</code> is intentionally not in the
+              tracked for the Phase 10 logger migration). <code>typecheck</code> is intentionally not in the
               required gate because of pre-existing type errors (generated <code>itemIconMap.ts</code>
               duplicate keys; an <code>IPC</code> type mismatch) that are out of Phase 0 scope. Leftover UI
               changes were preserved; only tooling/hygiene and secret-log redaction were touched.
@@ -276,7 +279,7 @@
               platform adapter, and provide a recovery path when secure storage is unavailable.
             </p>
             <p><strong>Why first:</strong> Phases 3-4 mint new long-lived key material (owner authority key, per-epoch encryption keys) that must be born in secure storage, not retrofitted.</p>
-            <p><strong>Depends on:</strong> 0. <strong>Unblocks:</strong> 3, 4, 9.</p>
+            <p><strong>Depends on:</strong> 0. <strong>Unblocks:</strong> 3, 4, 10.</p>
             <p><strong>Acceptance:</strong> no plaintext key files remain after migration; the backend boots from adapter-passed secrets; migration is idempotent and re-readable.</p>
             <p>Pause gate: record the committed files/functions and wait before membership authority.</p>
             <h3>Files modified</h3>
@@ -344,7 +347,7 @@
             <summary>Phase 6 - Redux Toolkit migration in mobile, in place (commits: pending)</summary>
             <p>
               Commit boundary: add the Redux Toolkit store and move list, sync, preferences,
-              loyalty-card metadata handles, and owned-devices state into slices normalized by id;
+              locale choice, loyalty-card metadata handles, and owned-devices state into slices normalized by id;
               replace direct useState ownership of replicated list data with selectors and actions; keep
               existing mobile behavior intact. No package extraction yet.
             </p>
@@ -367,7 +370,7 @@
               format), and <code>@listam/secrets</code> (the Phase 2 boundary) as versioned packages;
               mobile consumes them; behavior intact.
             </p>
-            <p><strong>Depends on:</strong> 2, 6. <strong>Unblocks:</strong> 8, 9.</p>
+            <p><strong>Depends on:</strong> 2, 6. <strong>Unblocks:</strong> 8, 9, 10.</p>
             <p><strong>Acceptance:</strong> mobile builds against published package versions and the shared suites run in Node.</p>
             <p>Pause gate: record the committed files/functions and wait before the backend/client extraction.</p>
             <h3>Files modified</h3>
@@ -386,7 +389,7 @@
               <code>Bare.on('teardown')</code>) behind a platform-services adapter so it runs under the
               mobile worklet and Node; keep per-platform <code>bare-pack</code> bundling an app-level step.
             </p>
-            <p><strong>Depends on:</strong> 7. <strong>Unblocks:</strong> 11, 12.</p>
+            <p><strong>Depends on:</strong> 7. <strong>Unblocks:</strong> 11, 12, 13.</p>
             <p><strong>Acceptance:</strong> the backend runs under Node with no BareKit globals, and the same <code>@listam/client</code> contract suite passes on both the worklet and Node adapters.</p>
             <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
             <h3>Files modified</h3>
@@ -398,13 +401,34 @@
           </details>
 
           <details class="phase-record" id="phase-9" data-nav-section>
-            <summary>Phase 9 - Loyalty-card secrets and redaction routing (commits: pending)</summary>
+            <summary>Phase 9 - UI internationalization foundation (commits: pending)</summary>
+            <p>
+              Commit boundary: add shared UI i18n infrastructure (<code>@listam/i18n</code> or the
+              equivalent shared module), typed message catalogs, locale detection/override in
+              preferences, fallback behavior, plural/date/number formatting helpers, pseudo-locale
+              utilities, and mobile UI string extraction for the parity surfaces. Keep grocery
+              category/item translations in <code>@listam/grocery</code>, but route them through the same
+              selected-locale resolver.
+            </p>
+            <p><strong>Depends on:</strong> 6, 7. <strong>Unblocks:</strong> 12, 15.</p>
+            <p><strong>Acceptance:</strong> user-facing mobile UI copy is routed through typed message keys; English plus at least one non-English catalog render; missing keys fail CI; pseudo-locale/long-string checks pass for the main list, invite/join confirmation, settings/preferences, diagnostics, and loyalty-card surfaces.</p>
+            <p>Pause gate: record the committed files/functions and wait before redaction/durability or desktop implementation.</p>
+            <h3>Files modified</h3>
+            <p>Pending phase commit.</p>
+            <h3>Functions created / updated / deleted</h3>
+            <p>Pending phase commit.</p>
+            <h3>Implementation summary</h3>
+            <p>Pending phase commit.</p>
+          </details>
+
+          <details class="phase-record" id="phase-10" data-nav-section>
+            <summary>Phase 10 - Loyalty-card secrets and redaction routing (commits: pending)</summary>
             <p>
               Commit boundary: move loyalty-card barcode/QR payloads into secure storage via the Phase 2
               boundary, keep only non-secret handles in the Redux slice, route all logging through
               <code>@listam/logging</code> redaction, and add export/diagnostic redaction tests.
             </p>
-            <p><strong>Depends on:</strong> 2, 6, 7. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Depends on:</strong> 2, 6, 7. <strong>Unblocks:</strong> 11.</p>
             <p><strong>Acceptance:</strong> Redux state, DevTools-style traces, and exports never contain card payloads or raw secrets; the AsyncStorage-to-secure-storage card migration is idempotent.</p>
             <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
             <h3>Files modified</h3>
@@ -415,14 +439,14 @@
             <p>Pending phase commit.</p>
           </details>
 
-          <details class="phase-record" id="phase-10" data-nav-section>
-            <summary>Phase 10 - Recovery, snapshots, and storage durability (commits: pending)</summary>
+          <details class="phase-record" id="phase-11" data-nav-section>
+            <summary>Phase 11 - Recovery, snapshots, and storage durability (commits: pending)</summary>
             <p>
               Commit boundary: replace destructive auto-wipe recovery with backup/quarantine/owner-confirmed
               recovery, add materialized-view snapshots/checkpoints that resume the id-keyed reduction,
               isolate storage roots, and add a real lock/lease with stale-lock recovery.
             </p>
-            <p><strong>Depends on:</strong> 5 (the checkpoint sits on the id-keyed reduction), 8. <strong>Unblocks:</strong> 11, 12.</p>
+            <p><strong>Depends on:</strong> 5 (the checkpoint sits on the id-keyed reduction), 8, 10. <strong>Unblocks:</strong> 12, 13.</p>
             <p><strong>Acceptance:</strong> a corrupt store never triggers silent deletion, headless nodes refuse auto-wipe, and the rebuild resumes from a checkpoint with bounded join-poll work.</p>
             <p>Pause gate: record the committed files/functions and wait before desktop implementation.</p>
             <h3>Files modified</h3>
@@ -433,16 +457,16 @@
             <p>Pending phase commit.</p>
           </details>
 
-          <details class="phase-record" id="phase-11" data-nav-section>
-            <summary>Phase 11 - Desktop parity surface (commits: pending)</summary>
+          <details class="phase-record" id="phase-12" data-nav-section>
+            <summary>Phase 12 - Desktop parity surface (commits: pending)</summary>
             <p>
               Commit boundary: build the Pear Desktop app around the shared packages, match current
-              mobile parity, implement desktop IPC/client contracts, and compare UI against
-              <code>listam-desktop/design-guide/</code>. The desktop owner-control client is deferred to
-              Phase 13.
+              mobile parity, implement desktop IPC/client contracts, consume the Phase 9 UI catalogs,
+              and compare UI against <code>listam-desktop/design-guide/</code>. The desktop
+              owner-control client is deferred to Phase 14.
             </p>
-            <p><strong>Depends on:</strong> 8, 10. <strong>Unblocks:</strong> 14.</p>
-            <p><strong>Acceptance:</strong> desktop reaches mobile parity, syncs with mobile through invite, and matches the desktop design-guide examples.</p>
+            <p><strong>Depends on:</strong> 8, 9, 11. <strong>Unblocks:</strong> 15.</p>
+            <p><strong>Acceptance:</strong> desktop reaches mobile parity, syncs with mobile through invite, uses the shared UI i18n catalogs, and matches the desktop design-guide examples in English and pseudo-localized/long-string modes.</p>
             <p>Pause gate: record the committed files/functions and wait before headless implementation.</p>
             <h3>Files modified</h3>
             <p>Pending phase commit.</p>
@@ -452,15 +476,15 @@
             <p>Pending phase commit.</p>
           </details>
 
-          <details class="phase-record" id="phase-12" data-nav-section>
-            <summary>Phase 12 - Headless service and CLI parity (commits: pending)</summary>
+          <details class="phase-record" id="phase-13" data-nav-section>
+            <summary>Phase 13 - Headless service and CLI parity (commits: pending)</summary>
             <p>
               Commit boundary: build the Pear Terminal/Bare headless app as a long-lived owned peer,
               persist the data model, add CLI setup/status/invite/join/export/shutdown commands, enforce
               blind-helper credential boundaries (a blind helper never receives the encryption key), and
-              add resource quotas on queues and storage. The owner-control protocol is Phase 13.
+              add resource quotas on queues and storage. The owner-control protocol is Phase 14.
             </p>
-            <p><strong>Depends on:</strong> 8, 10. <strong>Unblocks:</strong> 13, 14.</p>
+            <p><strong>Depends on:</strong> 8, 11. <strong>Unblocks:</strong> 14, 15.</p>
             <p><strong>Acceptance:</strong> a blind-storage instance replicates but cannot decrypt <code>view.get()</code>; a restart preserves identity, storage, and status.</p>
             <p>Pause gate: record the committed files/functions and wait before the owner-control protocol.</p>
             <h3>Files modified</h3>
@@ -471,8 +495,8 @@
             <p>Pending phase commit.</p>
           </details>
 
-          <details class="phase-record" id="phase-13" data-nav-section>
-            <summary>Phase 13 - Owner-control protocol (commits: pending)</summary>
+          <details class="phase-record" id="phase-14" data-nav-section>
+            <summary>Phase 14 - Owner-control protocol (commits: pending)</summary>
             <p>
               Commit boundary: establish per-device key pairs at pairing, require every command to carry
               a nonce/timestamp and signature, model capabilities as separate grants (status:read,
@@ -480,7 +504,7 @@
               service:shutdown), add device revocation and key rotation, and build the desktop and mobile
               owner-control clients.
             </p>
-            <p><strong>Depends on:</strong> 12. <strong>Unblocks:</strong> 14.</p>
+            <p><strong>Depends on:</strong> 13. <strong>Unblocks:</strong> 15.</p>
             <p><strong>Acceptance:</strong> headless refuses unsigned, replayed, expired, or out-of-scope commands, and a diagnostics-only client cannot shutdown, import, export, or configure topics.</p>
             <p>Pause gate: record the committed files/functions and wait before full cross-app acceptance.</p>
             <h3>Files modified</h3>
@@ -491,15 +515,15 @@
             <p>Pending phase commit.</p>
           </details>
 
-          <details class="phase-record" id="phase-14" data-nav-section>
-            <summary>Phase 14 - Cross-app acceptance matrix and release readiness (commits: pending)</summary>
+          <details class="phase-record" id="phase-15" data-nav-section>
+            <summary>Phase 15 - Cross-app acceptance matrix and release readiness (commits: pending)</summary>
             <p>
               Commit boundary: automate the private-bootstrap cross-instance matrix, prove
               mobile/desktop/headless convergence, run the cumulative-migration chain on one base
               (id-backfill, then owner-key adoption, then epoch, then secret-store), document manual
               acceptance, and close first-milestone release risks.
             </p>
-            <p><strong>Depends on:</strong> 11, 13. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Depends on:</strong> 12, 14. <strong>Unblocks:</strong> -.</p>
             <p><strong>Acceptance:</strong> the headless-driven subset of the matrix runs in CI, the cumulative-migration chain passes, and each capability is "done" only when its matrix row passes.</p>
             <p>Pause gate: record the committed files/functions and pause for milestone review before adding new list domains.</p>
             <h3>Files modified</h3>

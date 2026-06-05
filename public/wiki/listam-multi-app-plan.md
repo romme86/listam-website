@@ -978,7 +978,7 @@ Pause gate: commit the bootstrap, record the modified files/functions, and wait 
 </details>
 
 <details>
-<summary>Phase 1 - Invite safety and deep-link confirmation (listam-mobile commit ee0dd26)</summary>
+<summary>Phase 1 - Invite safety and deep-link confirmation (listam-mobile commits ee0dd26, a585c4a)</summary>
 
 Commit boundary: stop automatic link joins, add pending-invite confirmation, enforce invite expiry/use limits, remove unused plaintext invite persistence (`lista-invite.json`), and cover join cancel/confirm/rollback tests.
 
@@ -1030,11 +1030,22 @@ Pause gate: commit the invite safety work, record the modified files/functions, 
 - Commit range: `ef7b181..ee0dd26` (`ee0dd26` - `Phase 1: invite safety and deep-link confirmation`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
 - Verification: `npm run test:security` (16 tests pass); `npm run ci` (green: lint 0 errors / 24 grandfathered app console warnings, check:deps OK, check:secrets OK, security tests pass, grocery tests pass); `npm run typecheck` still fails only on the pre-existing generated `itemIconMap.ts` duplicate keys and `_useWorklet.ts` IPC type mismatch already recorded in Phase 0; `npm run bundle:backend:ios`; `npm run bundle:backend:android`; `git diff --check`.
 
+#### Follow-up hardening (commit a585c4a)
+
+A frontend/TS-only follow-up that hardens the invite-safety work without touching the backend or the native Bare bundles, so no runtime artifacts changed:
+
+- `app/invite-confirmation.ts`: added `parseInviteLink` (strict scheme/host parse of incoming deep links) and `planIncomingLinkJoin` (pure link → confirmation decision); added a `confirmation-open` status so a *different* invite arriving while a dialog is open is suppressed instead of stacking a second dialog; the confirmation dialog now names the invite source and adds a warning when a link is not from `listam.ch`/`listam://`.
+- `app/index.tsx`: extracted `presentJoinConfirmation` so manual codes and deep links share one thin caller; the deep-link effect now routes through `planIncomingLinkJoin`; removed the two `console.log` calls that Phase 1 had added (no-console warnings 24 → 22).
+- `backend/lib/invite-confirmation.test.mjs`: **closes the deep-link wiring test gap** — adds automated coverage for the H2 acceptance cases that previously had none (cold-start link, foreground link, duplicate-link suppression, non-invite URL ignored, untrusted-host warning, busy-while-joining) plus `parseInviteLink` trust/host assertions.
+- Verification: `npm run ci` green (lint 0 errors / 22 grandfathered app console warnings, check:deps OK, check:secrets OK, 21 tests pass — up from 16 — grocery tests pass); `npx tsc --noEmit` still fails only on the pre-existing `itemIconMap.ts` duplicate keys and `_useWorklet.ts` IPC mismatch.
+- Commit `a585c4a` (`Phase 1 follow-up: test deep-link join wiring and harden link confirmation`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed). Full Phase 1 range: `ef7b181..a585c4a`.
+
 #### Follow-up risks / blockers
 
 - The invite is still a writer-access BlindPairing capability until Phase 3 membership authority and Phase 4 re-keying land; true member removal is not solved in Phase 1.
-- Existing app-side console warnings remain in `app/index.tsx`, `_useWorklet.ts`, and `useSubscription.ts`; backend console use is now behind the redacting logger boundary.
-- The generated backend bundles remain committed runtime artifacts; Phase 1 updated the iOS/Android Bare backend bundles, but the larger generated Metro/Android bundles remain outside this phase.
+- **Deferred by decision:** user-facing invite revoke/rotate controls and a live lifetime/use-count display (H3's full UI scope) are deferred to a dedicated invite-lifecycle phase rather than expanding Phase 1. The auto-rotation behavior (a fresh single-use invite is minted after each accept) is kept as-is by decision.
+- App-side `console` warnings remain in `_useWorklet.ts` and `useSubscription.ts`; the two Phase 1-added calls in `app/index.tsx` were removed in `a585c4a`, and backend console use is behind the redacting logger boundary.
+- The generated backend bundles remain committed runtime artifacts from `ee0dd26`; the follow-up did not regenerate them because it is frontend/TS-only, and the larger generated Metro/Android bundles remain outside this phase.
 - Pre-existing `typecheck` failures remain and should be handled in their own change before promoting typecheck into CI.
 
 </details>

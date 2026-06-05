@@ -363,11 +363,42 @@
             <p><strong>Acceptance:</strong> no plaintext key files remain after migration; the backend boots from adapter-passed secrets; migration is idempotent and re-readable.</p>
             <p>Pause gate: record the committed files/functions and wait before membership authority.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>package.json</code>, <code>package-lock.json</code>: add the Expo SDK-matched <code>expo-secure-store</code> dependency.</li>
+              <li><code>app/secret-storage-core.ts</code>: adds the testable secure-storage migration core, legacy key-file mapping, metadata fingerprints, idempotent migration, and recovery-mode behavior.</li>
+              <li><code>app/secrets.ts</code>: bridges the core to <code>expo-secure-store</code>, AsyncStorage metadata, and Expo legacy file reads/deletes.</li>
+              <li><code>app/hooks/_useWorklet.ts</code>: prepares backend boot secrets before starting Bare, passes them through argv, and handles backend secret-persistence RPCs without logging secret payloads.</li>
+              <li><code>rpc-commands.mjs</code>: adds <code>RPC_PERSIST_SECRET</code>.</li>
+              <li><code>backend/lib/secrets.mjs</code>: adds backend boot-payload parsing, secret fingerprints, and RPC requests for secure persistence/deletion.</li>
+              <li><code>backend/lib/key.mjs</code>: replaces plaintext key-file save/load with secure-adapter save/load helpers while keeping legacy invite-file deletion.</li>
+              <li><code>backend/backend.mjs</code>: loads the Autobase and encryption keys from adapter-passed boot secrets.</li>
+              <li><code>backend/lib/network.mjs</code>: persists guest secrets once writable and clears secure secrets during corruption recovery.</li>
+              <li><code>backend/lib/secret-storage.test.mjs</code>: covers migration, idempotent rereads, recovery mode, and backend persistence/delete requests.</li>
+              <li><code>app/app.ios.bundle.mjs</code>, <code>app/assets/backend.android.bundle.mjs</code>: regenerated Bare backend bundles.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created: <code>prepareBackendSecrets</code>, <code>persistBackendSecretRequest</code>, <code>secretStoreKey</code>, <code>normalizeSecretValue</code>, and <code>secretFingerprint</code> in <code>app/secret-storage-core.ts</code>.</li>
+              <li>Created: <code>createLegacySecretFileAdapter</code>, <code>prepareBackendSecretPayload</code>, and <code>persistBackendSecretFromPayload</code> in <code>app/secrets.ts</code>.</li>
+              <li>Created: <code>parseBootSecretPayload</code>, <code>getBootSecretBuffer</code>, <code>persistBackendSecret</code>, <code>deleteBackendSecret</code>, and <code>secretFingerprint</code> in <code>backend/lib/secrets.mjs</code>.</li>
+              <li>Updated: <code>useWorklet</code>/<code>startWorklet</code>, <code>loadAutobaseKey</code>, <code>saveAutobaseKey</code>, <code>loadEncryptionKey</code>, <code>saveEncryptionKey</code>, <code>loadLocalWriterKey</code>, <code>saveLocalWriterKey</code>, <code>initAutobase</code>, and <code>waitForWritable</code>.</li>
+              <li>Deleted: no public functions removed.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Mobile now migrates legacy plaintext key files into platform secure storage before the Bare
+              backend starts. The backend receives only an adapter-built boot payload, persists new key
+              material back through <code>RPC_PERSIST_SECRET</code>, and logs/stores only short
+              fingerprints in metadata. If secure storage is unavailable, migration leaves plaintext files
+              in place for recovery and boots from an adapter-passed recovery payload; generated secrets are
+              cached only for the current app session until secure storage becomes available.
+            </p>
+            <p>
+              Verification: <code>npm run bundle:backend:ios</code>; <code>npm run bundle:backend:android</code>;
+              <code>npm run ci</code> green with the existing 22 <code>no-console</code> warnings. <code>npm run typecheck</code>
+              still fails only on the pre-existing generated <code>itemIconMap.ts</code> duplicate keys and
+              the existing <code>_useWorklet.ts</code> BareKit IPC type mismatch.
+            </p>
           </details>
 
           <details class="phase-record" id="phase-3" data-nav-section>

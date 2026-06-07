@@ -402,21 +402,59 @@
           </details>
 
           <details class="phase-record" id="phase-3" data-nav-section>
-            <summary>Phase 3 - Membership authority and honest revocation language (commits: pending)</summary>
+            <summary>Phase 3 - Membership authority and honest revocation language (commit: c48aab6)</summary>
             <p>
               Commit boundary: rename revoke semantics to "revoke invite," introduce owner-signed
               membership records, reject non-owner writer additions, store the owner authority key via
               the Phase 2 secrets boundary, and document that true member removal requires re-keying.
             </p>
+            <p>Implementation commit: <code>c48aab6</code> (<code>Phase 3: add owner membership authority</code>) on <code>listam-mobile</code> branch <code>phase-0-bootstrap</code> (not pushed).</p>
             <p><strong>Depends on:</strong> 2. <strong>Unblocks:</strong> 4.</p>
             <p><strong>Acceptance:</strong> a non-owner writer cannot add another writer; legacy single-user bases migrate once without losing the owner device; malformed, unsigned, or replayed membership ops are rejected.</p>
             <p>Pause gate: record the committed files/functions and wait before key epochs.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>app/secret-storage-core.ts</code>, <code>app/hooks/_useWorklet.ts</code>: extended the secure-storage boot/persist boundary to carry <code>ownerAuthorityKey</code>, acknowledge durable secret writes, and clear stale invite keys.</li>
+              <li><code>app/index.tsx</code>, <code>app/invite-confirmation.ts</code>, <code>app/components/Header.tsx</code>: changed user-facing language from member revocation to invite revocation and kept non-owner devices ready without an invite key.</li>
+              <li><code>backend/lib/membership.mjs</code>: <strong>added</strong> - owner authority keypair normalization, signed membership record creation, signature verification, replay-aware membership reduction, and invite-owner checks.</li>
+              <li><code>backend/lib/membership.test.mjs</code>: <strong>added</strong> - covers legacy owner bootstrap, owner-signed writer addition, non-owner/cross-base rejection, malformed/unsigned/tampered records, and replay rejection.</li>
+              <li><code>backend/lib/secrets.mjs</code>, <code>backend/lib/key.mjs</code>, <code>backend/lib/state.mjs</code>, <code>backend/backend.mjs</code>: load, persist, redact, and keep current-base owner authority state through the Phase 2 adapter.</li>
+              <li><code>backend/lib/network.mjs</code>: bootstraps owner membership for new/legacy local bases, requires owner authority before creating or accepting invites, appends owner-signed membership records, clears owner authority on successful non-owner joins, and restores it on rollback.</li>
+              <li><code>backend/lib/join-rollback.mjs</code>, <code>backend/lib/join-rollback.test.mjs</code>, <code>backend/lib/secret-storage.test.mjs</code>, <code>backend/lib/logger.mjs</code>: added owner authority rollback, validation, and redaction coverage.</li>
+              <li>Generated Bare bundles: <code>app/app.ios.bundle.mjs</code>, <code>app/assets/backend.android.bundle.mjs</code>.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created: <code>createMembershipState</code>, <code>cloneMembershipState</code>, <code>createOwnerAuthorityKeyPair</code>, <code>ownerAuthorityPublicKeyHex</code>, <code>ownerAuthoritySecretKeyHex</code>, <code>ownerAuthorityMatchesState</code>, <code>canCreateMembershipInvite</code>, <code>nextMembershipSequence</code>, <code>createOwnerBootstrapRecord</code>, <code>createAddWriterMembershipRecord</code>, <code>createSignedMembershipRecord</code>, <code>isMembershipRecord</code>, and <code>reduceMembershipOperation</code>.</li>
+              <li>Created: <code>saveOwnerAuthorityKey</code>, <code>loadOwnerAuthorityKey</code>, <code>deleteOwnerAuthorityKey</code>, <code>ensureOwnerMembership</code>, and <code>sendInviteKeyToFrontend</code>.</li>
+              <li>Updated: <code>parseBootSecretPayload</code>, <code>getBootSecretBuffer</code>, <code>persistBackendSecret</code>, <code>normalizeSecretValue</code>, <code>prepareBackendSecrets</code>, <code>persistBackendSecretRequest</code>, <code>secretStoreKey</code>, <code>initAutobase</code>, <code>setupBlindPairing</code>, <code>createInvite</code>, <code>rotateInviteAndNotifyFrontend</code>, <code>joinViaInvite</code>, <code>apply</code>, <code>createJoinRollbackSnapshot</code>, and <code>restoreJoinRollbackSnapshot</code>.</li>
+              <li>Deleted: no public functions removed; legacy unsigned <code>add-writer</code> handling is now rejected instead of applied.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Mobile now treats membership as a project/base-level owner authority. Fresh and legacy
+              single-user local bases generate an owner authority keypair through the Phase 2 secret
+              boundary and append one signed membership bootstrap record for the existing owner device.
+              Invite acceptance now appends an owner-signed membership record bound to the current base;
+              <code>apply()</code> only adds writers when the record verifies and advances the membership
+              sequence.
+            </p>
+            <p>
+              Non-owner writers cannot create or accept usable invites because they do not hold the
+              owner authority secret. Joining another base clears the previous owner authority key, while
+              join rollback restores it. Legacy unsigned <code>add-writer</code> ops, malformed records,
+              unsigned/tampered records, wrong-base records, wrong-owner records, and replayed sequence
+              numbers are rejected. UI/share copy now says invites can be revoked before use and that
+              removing a joined device requires Phase 4 re-keying.
+            </p>
+            <p>
+              Verification: <code>npm run bundle:backend:ios</code>; <code>npm run bundle:backend:android</code>;
+              <code>npm run ci</code> (green: lint 0 errors / existing 22 app console warnings,
+              check:deps OK, check:secrets OK, 32 security tests pass, grocery tests pass);
+              <code>git diff --check</code>. <code>npm run typecheck</code> still fails only on the
+              pre-existing generated <code>itemIconMap.ts</code> duplicate keys and
+              <code>_useWorklet.ts</code> BareKit IPC type mismatch.
+            </p>
           </details>
 
           <details class="phase-record" id="phase-4" data-nav-section>

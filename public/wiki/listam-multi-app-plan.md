@@ -1070,11 +1070,44 @@ Pause gate: commit the secret-storage foundation, record the modified files/func
 
 Commit boundary: rename revoke semantics to "revoke invite," introduce owner-signed membership records, reject non-owner writer additions, store the owner authority key via the Phase 2 secrets boundary, and document that true member removal requires re-keying.
 
+Implementation commit: `c48aab6` (`Phase 3: add owner membership authority`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
+
 Depends on: 2. Unblocks: 4.
 
 Acceptance: a non-owner writer cannot add another writer; legacy single-user bases migrate once without losing the existing owner device. Rollback: a tightly scoped legacy migration window; malformed, unsigned, or replayed membership ops are rejected.
 
 Pause gate: commit the membership authority work, record the modified files/functions, and wait before implementing key epochs.
+
+#### Files modified
+
+- `app/secret-storage-core.ts`, `app/hooks/_useWorklet.ts`: extended the secure-storage boot/persist boundary to carry `ownerAuthorityKey`, acknowledge durable secret writes, and clear stale invite keys.
+- `app/index.tsx`, `app/invite-confirmation.ts`, `app/components/Header.tsx`: changed user-facing language from member revocation to invite revocation and kept non-owner devices in a ready state without an invite key.
+- `backend/lib/membership.mjs`: **added** - owner authority keypair normalization, signed membership record creation, signature verification, replay-aware membership reduction, and invite-owner checks.
+- `backend/lib/membership.test.mjs`: **added** - covers legacy owner bootstrap, owner-signed writer addition, non-owner/cross-base rejection, malformed/unsigned/tampered records, and replay rejection.
+- `backend/lib/secrets.mjs`, `backend/lib/key.mjs`, `backend/lib/state.mjs`, `backend/backend.mjs`: load, persist, redact, and keep current-base owner authority state through the Phase 2 adapter.
+- `backend/lib/network.mjs`: bootstrap owner membership for new/legacy local bases, require owner authority before creating or accepting invites, append owner-signed membership records instead of legacy `add-writer`, clear owner authority on successful non-owner joins, and restore it on rollback.
+- `backend/lib/join-rollback.mjs`, `backend/lib/join-rollback.test.mjs`: snapshot and restore owner authority key material when a join fails.
+- `backend/lib/secret-storage.test.mjs`, `backend/lib/logger.mjs`: added owner authority key validation and log redaction.
+- Generated Bare bundles: `app/app.ios.bundle.mjs`, `app/assets/backend.android.bundle.mjs`.
+
+#### Functions created / updated / deleted
+
+- Created: `createMembershipState`, `cloneMembershipState`, `createOwnerAuthorityKeyPair`, `ownerAuthorityPublicKeyHex`, `ownerAuthoritySecretKeyHex`, `ownerAuthorityMatchesState`, `canCreateMembershipInvite`, `nextMembershipSequence`, `createOwnerBootstrapRecord`, `createAddWriterMembershipRecord`, `createSignedMembershipRecord`, `isMembershipRecord`, and `reduceMembershipOperation` (`backend/lib/membership.mjs`).
+- Created: `saveOwnerAuthorityKey`, `loadOwnerAuthorityKey`, and `deleteOwnerAuthorityKey` (`backend/lib/key.mjs`).
+- Created: `ensureOwnerMembership` and `sendInviteKeyToFrontend` (`backend/lib/network.mjs`).
+- Updated: `parseBootSecretPayload`, `getBootSecretBuffer`, `persistBackendSecret`, and `normalizeSecretValue` to support 32-byte base/encryption secrets and a 64-byte owner authority secret.
+- Updated: `prepareBackendSecrets`, `persistBackendSecretRequest`, `secretStoreKey`, and `normalizeSecretValue` in the app secret boundary for `ownerAuthorityKey`.
+- Updated: `initAutobase`, `setupBlindPairing`, `createInvite`, `rotateInviteAndNotifyFrontend`, `joinViaInvite`, and `apply` to enforce owner-signed membership records.
+- Updated: `createJoinRollbackSnapshot` and `restoreJoinRollbackSnapshot` to include owner authority rollback.
+- Deleted: no public functions removed; legacy unsigned `add-writer` handling is now rejected instead of applied.
+
+#### Implementation summary
+
+Mobile now treats membership as a project/base-level owner authority. On a fresh or legacy single-user local base, the backend generates an owner authority keypair through the Phase 2 secret boundary and appends one signed `membership` bootstrap record for the existing owner device. Invite acceptance no longer appends unsigned `add-writer`; the owner signs an `add-writer` membership record bound to the current base, and `apply()` only adds writers when that record verifies against the recorded owner authority and advances the membership sequence.
+
+Non-owner writers cannot create or accept usable invites because they do not hold the owner authority secret; the backend clears stale invite keys when the current device is not the owner. Joining another base clears the previous owner authority key, while join rollback restores the previous keypair/base/list snapshot. Legacy unsigned `add-writer` ops, malformed membership records, unsigned/tampered records, wrong-base records, wrong-owner records, and replayed membership sequence numbers are rejected. The UI/share copy now says invites can be revoked before use and that removing a joined device requires Phase 4 re-keying.
+
+Verification: `npm run bundle:backend:ios`; `npm run bundle:backend:android`; `npm run ci` (green: lint 0 errors / existing 22 app console warnings, check:deps OK, check:secrets OK, 32 security tests pass, grocery tests pass); `git diff --check`. `npm run typecheck` still fails only on the pre-existing generated `itemIconMap.ts` duplicate keys and `_useWorklet.ts` BareKit IPC type mismatch.
 
 </details>
 

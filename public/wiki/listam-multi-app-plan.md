@@ -286,6 +286,37 @@ Redux Toolkit is the better fit for the intended future direction:
 
 Autobase/Corestore remains the durable local-first source of truth for replicated data. Redux becomes the UI projection, command dispatcher, and shared app-state model.
 
+## Multiple Lists, Types, And Grouping (Future Direction)
+
+Listam's product direction is that a user can create, group, and manage many lists, each of its own type — shopping, to-do, task, calendar-derived, kanban, and later configurable types. The first milestone does not build this, but its substrate decisions must not foreclose it. This section records the model and the one load-bearing decision that the membership-crypto work (Phases 3-4) and the reduction migration (Phase 5) depend on. Lists are organized into **projects**: a project holds multiple lists, and a user is invited to a project — not to an individual list. "Project" is the user-facing name for what the substrate calls a space (one base) and what the headless co-invite flow already calls a "shared space."
+
+### Model: Project → List → Item
+
+- **Project (= space = one base)** — the user-facing shareable container: one Autobase/Corestore base, one encryption key, one invite/join boundary, holding multiple lists. A user is invited to a project and can belong to several at once — a default personal project plus shared ones. Today's single base is exactly one default personal project.
+- **List** — a typed collection inside a project, with a stable id, a `type` (shopping, todo, task, calendar, kanban, …), and metadata (name, ordering, optional folder). Items already carry `listId` (`backend/lib/item.mjs`); the field is reserved now and partitioned later.
+- **Folder (optional)** — lightweight organization of lists *within* a project; it is not a sharing boundary.
+- **Item** — unchanged in shape; it gains a required `listId` and reduces per list.
+
+This widens the current code onto the future model instead of rewriting it: one base = one personal project, today's flat list = one default list of type `shopping`, and every item's `listId` defaults to that list.
+
+### Load-bearing decision: the sharing boundary is the project, not the list
+
+Sharing, membership, owner authority, key epochs, and member-removal re-key (Phases 3-4) operate on the **project (= base)**. A user is invited to a project as a whole; every list inside it is visible to the project's members.
+
+- **Why:** the Autobase/BlindPairing substrate has exactly one membership and one encryption key per base (see C2). Per-*list* sharing inside one project is cryptographically unsupported and would require the not-yet-existent permission model. Putting the boundary at the project matches the product ("you are invited to a project that holds multiple lists") and keeps Phases 2-4 unchanged and honest.
+- **Consequence:** a list belongs to exactly one project; sharing a list with a different audience means putting it in a different project. "Move list to another project" is therefore a first-class future operation and is a re-encryption/migration between bases, not a metadata flip. The UI must say this plainly.
+- **Clean split:** *many lists within one project* is a reduction + UI change (cheap; Phase 5 makes it forward-compatible). *Many projects at once* is multi-base management (the heavier, deferred work) — and the expected steady state, since every user has at least a personal project plus any shared ones.
+
+### Milestone 1: forward-compatible, not built
+
+This plan keeps exactly one personal project with one default list and only makes the substrate ready:
+
+- **Phase 5** versioned operations carry `listId` and `type` as required-going-forward fields with a single implicit default list, so adding lists later needs no second op-version migration; the reduction partitions by `listId` (N=1 today).
+- **Phase 6**'s `lists` slice is a normalized library of typed lists + their project/folder grouping + a selected list/project, with N=1 today.
+- **Phases 3-4** fix the membership/encryption boundary at the project; no per-list permission concept is introduced.
+
+Deferred to the post-parity milestone (after Phase 15's review gate): projects (create/join/leave a project that holds multiple lists); list create/rename/delete and type selection; folders and cross-list reordering within a project; running multiple projects at once (multi-base: per-project swarm, lock/lease, storage roots, peer/sync state, and join-as-add instead of join-switch — see the singleton-lock and join-state findings); and type-specific behaviors (kanban columns, calendar ingestion, configurable rules). These are enumerated as indicative phases in "Future Milestone (Post-Parity)" at the end of the Phases section.
+
 ## Repository And Package Topology
 
 Use separate application repositories for milestone 1:
@@ -349,7 +380,7 @@ A Redux slice is a focused Redux Toolkit module for one state domain. It contain
 
 Initial slices:
 
-- `lists`: replicated list entities, ordering, selected list, and local optimistic list operations.
+- `lists`: the normalized library of typed lists (each with a stable id and `type`), their project/folder grouping, ordering, the selected list/project, and local optimistic list operations. Milestone 1 holds exactly one default list in one default project (the N=1 case); see "Multiple Lists, Types, And Grouping (Future Direction)."
 - `sync`: backend readiness, peer count, invite key, join phase, sync health, and sync errors.
 - `preferences`: local UI choices such as grid/list mode, category toggles, category headers, icon size, text size, icon style, locale override, and follow-system-language setting.
 - `loyaltyCards`: local loyalty-card metadata handles until/unless those records are later made replicated; barcode/QR payloads stay in secure storage.
@@ -708,6 +739,8 @@ Future domains:
 - configurable state machines and rules
 - additional personal-life-management features
 
+Each future domain is a list **type** within the Project → List → Item model: a project holds many lists, each list has a `type`, and items reduce per `listId`. The first milestone ships one default list of type `shopping` in one default project. See "Multiple Lists, Types, And Grouping (Future Direction)" for the model, the per-project sharing decision, and what is deferred.
+
 ## Future Dongle Compatibility
 
 The dongles should not be Listam-specific. They should work with every app using the Holepunch stack.
@@ -744,7 +777,7 @@ The first milestone should prove current Listam parity across three app surfaces
 - invite and join flow works across app types
 - existing simple list operations remain compatible
 
-Do not add new list domains in the first milestone. Add the architecture that makes them possible.
+Do not add new list domains, multiple list instances, projects, or list grouping in the first milestone. Add the architecture that makes them possible: keep one personal project (one base) with a single default list, but make the reduction, operation schema, and Redux library shape forward-compatible with many typed lists grouped into projects, as defined in "Multiple Lists, Types, And Grouping (Future Direction)."
 
 ## Test Plan
 
@@ -880,7 +913,8 @@ Acceptance: the headless-driven subset of this matrix runs in CI; mobile/desktop
 - Shared modules are distributed as versioned npm packages from `listam-shared`.
 - Pear Desktop and Pear Terminal/Bare are the primary targets.
 - Electron is only a fallback if Pear cannot satisfy a concrete desktop requirement.
-- The first milestone should not implement new list types yet.
+- The first milestone should not implement new list types, multiple list instances, or grouping yet, but its operation schema, reduction, and Redux library shape must be forward-compatible with them.
+- A project (one Autobase base, a.k.a. a space) is the unit of sharing, membership, and encryption, and holds multiple lists; a user is invited to a project, not to a single list. A list is a typed collection inside a project. Per-project (not per-list) sharing is the chosen granularity. See "Multiple Lists, Types, And Grouping (Future Direction)."
 - Future relay dongles should remain generic for Holepunch-stack apps, not tied only to Listam.
 - Plaintext key files are legacy/development-only and should be migrated before production release.
 
@@ -1072,6 +1106,8 @@ Commit boundary: rename revoke semantics to "revoke invite," introduce owner-sig
 
 Implementation commit: `c48aab6` (`Phase 3: add owner membership authority`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
 
+Scope (multiple lists): membership, owner authority, and the encryption boundary are fixed at the **project (= space = base)**, the container a user is invited to via invite/join. No per-list permission concept is introduced, so the future projects/multiple-lists work inherits per-project sharing unchanged. See "Multiple Lists, Types, And Grouping (Future Direction)."
+
 Depends on: 2. Unblocks: 4.
 
 Acceptance: a non-owner writer cannot add another writer; legacy single-user bases migrate once without losing the existing owner device. Rollback: a tightly scoped legacy migration window; malformed, unsigned, or replayed membership ops are rejected.
@@ -1082,10 +1118,11 @@ Pause gate: commit the membership authority work, record the modified files/func
 
 - `app/secret-storage-core.ts`, `app/hooks/_useWorklet.ts`: extended the secure-storage boot/persist boundary to carry `ownerAuthorityKey`, acknowledge durable secret writes, and clear stale invite keys.
 - `app/index.tsx`, `app/invite-confirmation.ts`, `app/components/Header.tsx`: changed user-facing language from member revocation to invite revocation and kept non-owner devices in a ready state without an invite key.
-- `backend/lib/membership.mjs`: **added** - owner authority keypair normalization, signed membership record creation, signature verification, replay-aware membership reduction, and invite-owner checks.
-- `backend/lib/membership.test.mjs`: **added** - covers legacy owner bootstrap, owner-signed writer addition, non-owner/cross-base rejection, malformed/unsigned/tampered records, and replay rejection.
-- `backend/lib/secrets.mjs`, `backend/lib/key.mjs`, `backend/lib/state.mjs`, `backend/backend.mjs`: load, persist, redact, and keep current-base owner authority state through the Phase 2 adapter.
-- `backend/lib/network.mjs`: bootstrap owner membership for new/legacy local bases, require owner authority before creating or accepting invites, append owner-signed membership records instead of legacy `add-writer`, clear owner authority on successful non-owner joins, and restore it on rollback.
+- `backend/lib/membership.mjs`: **added** - owner authority keypair normalization, signed membership record creation, signature verification, replay-aware membership reduction, invite-owner checks, and `reduceMembershipLog` (rebuild membership state from an ordered list of persisted records).
+- `backend/lib/membership.test.mjs`: **added** - covers legacy owner bootstrap, owner-signed writer addition, non-owner/cross-base rejection, malformed/unsigned/tampered records, replay rejection, restart durability (state rebuilt from the persisted log, sequence high-water mark survives, reused-sequence records dropped on full replay, duplicate bootstraps ignored), and that rejected ops carry no writer-add effect.
+- `backend/lib/item.mjs`: `rebuildListFromPersistedOps` skips membership view entries; **added** `readPersistedMembershipRecords` to read the membership records `apply()` persisted into the view.
+- `backend/lib/secrets.mjs`, `backend/lib/key.mjs`, `backend/lib/state.mjs`, `backend/backend.mjs`: load, persist, redact, and keep current-base owner authority state through the Phase 2 adapter; `apply()` now persists accepted membership records into the linearized view so the reduced state survives restart.
+- `backend/lib/network.mjs`: bootstrap owner membership for new/legacy local bases, require owner authority before creating or accepting invites, append owner-signed membership records instead of legacy `add-writer`, clear owner authority on successful non-owner joins, restore it on rollback, and rebuild membership state from the persisted log on init before bootstrapping.
 - `backend/lib/join-rollback.mjs`, `backend/lib/join-rollback.test.mjs`: snapshot and restore owner authority key material when a join fails.
 - `backend/lib/secret-storage.test.mjs`, `backend/lib/logger.mjs`: added owner authority key validation and log redaction.
 - Generated Bare bundles: `app/app.ios.bundle.mjs`, `app/assets/backend.android.bundle.mjs`.
@@ -1095,6 +1132,7 @@ Pause gate: commit the membership authority work, record the modified files/func
 - Created: `createMembershipState`, `cloneMembershipState`, `createOwnerAuthorityKeyPair`, `ownerAuthorityPublicKeyHex`, `ownerAuthoritySecretKeyHex`, `ownerAuthorityMatchesState`, `canCreateMembershipInvite`, `nextMembershipSequence`, `createOwnerBootstrapRecord`, `createAddWriterMembershipRecord`, `createSignedMembershipRecord`, `isMembershipRecord`, and `reduceMembershipOperation` (`backend/lib/membership.mjs`).
 - Created: `saveOwnerAuthorityKey`, `loadOwnerAuthorityKey`, and `deleteOwnerAuthorityKey` (`backend/lib/key.mjs`).
 - Created: `ensureOwnerMembership` and `sendInviteKeyToFrontend` (`backend/lib/network.mjs`).
+- Created: `reduceMembershipLog` (`backend/lib/membership.mjs`) and `readPersistedMembershipRecords` (`backend/lib/item.mjs`).
 - Updated: `parseBootSecretPayload`, `getBootSecretBuffer`, `persistBackendSecret`, and `normalizeSecretValue` to support 32-byte base/encryption secrets and a 64-byte owner authority secret.
 - Updated: `prepareBackendSecrets`, `persistBackendSecretRequest`, `secretStoreKey`, and `normalizeSecretValue` in the app secret boundary for `ownerAuthorityKey`.
 - Updated: `initAutobase`, `setupBlindPairing`, `createInvite`, `rotateInviteAndNotifyFrontend`, `joinViaInvite`, and `apply` to enforce owner-signed membership records.
@@ -1107,14 +1145,26 @@ Mobile now treats membership as a project/base-level owner authority. On a fresh
 
 Non-owner writers cannot create or accept usable invites because they do not hold the owner authority secret; the backend clears stale invite keys when the current device is not the owner. Joining another base clears the previous owner authority key, while join rollback restores the previous keypair/base/list snapshot. Legacy unsigned `add-writer` ops, malformed membership records, unsigned/tampered records, wrong-base records, wrong-owner records, and replayed membership sequence numbers are rejected. The UI/share copy now says invites can be revoked before use and that removing a joined device requires Phase 4 re-keying.
 
-Verification: `npm run bundle:backend:ios`; `npm run bundle:backend:android`; `npm run ci` (green: lint 0 errors / existing 22 app console warnings, check:deps OK, check:secrets OK, 32 security tests pass, grocery tests pass); `git diff --check`. `npm run typecheck` still fails only on the pre-existing generated `itemIconMap.ts` duplicate keys and `_useWorklet.ts` BareKit IPC type mismatch.
+**Post-review hardening (membership state durability).** The first cut held membership state only in a module global that was reset on every `initAutobase` and never written to the persisted view. Because Autobase (v7) does not re-run `apply` over already-applied history on reopen, that state was lost on restart: the owner re-bootstrapped on every launch and the sequence counter reset to 1, so the next writer added after a restart reused a sequence number and was rejected as a `replay` by any peer replaying the full log — a writer-set divergence. Fix: `apply()` now persists each accepted membership record into the linearized view, `readPersistedMembershipRecords` + `reduceMembershipLog` rebuild the membership state from that durable log on init (before bootstrap), and `ensureOwnerMembership` therefore bootstraps exactly once. This satisfies the "migrate **once**" acceptance criterion, which the in-memory version did not.
+
+Deviations and deferred items recorded during review:
+
+- **Legacy migration window vs. strict rejection.** The C3 plan suggested accepting raw unsigned `add-writer` during a "tightly scoped legacy migration window, then reject." The implementation instead rejects legacy unsigned `add-writer` outright (the owner's own writer is re-authorized by the bootstrap record). This is stricter and simpler; the trade-off is that a pre-Phase-3 base with a *second* legacy-added writer would not re-authorize that writer (only single-user prototype bases exist today, so this is currently moot). Recorded as an intentional deviation.
+- **Owner-key loss recovery is deferred to Phase 4.** If the secure-stored owner authority key is lost, the base becomes permanently un-administrable (no further writers can be added). The C3 plan called for a recovery path "before making owner-only membership mandatory"; this is folded into Phase 4's re-key/epoch work rather than solved here, and is called out explicitly so it is not silently missing.
+- **Join is a destructive, irreversible base switch.** `joinViaInvite` deletes the previous base's owner authority key before switching; on success it is unrecoverable (rollback only restores it on failure). The join confirmation copy was strengthened to warn that joining "gives up ownership of your current list on this device — you will not be able to switch back to it here." Non-destructive multi-base membership remains deferred to the post-parity milestone.
+
+Verification: `npm run bundle:backend:ios`; `npm run bundle:backend:android`; `npm run ci` (green: lint 0 errors / existing 22 app console warnings, check:deps OK, check:secrets OK, 36 security tests pass, grocery tests pass); `git diff --check`. `npm run typecheck` still fails only on the pre-existing generated `itemIconMap.ts` duplicate keys and `_useWorklet.ts` BareKit IPC type mismatch.
+
+> **Open follow-up (live reorg durability):** membership state is now durable across restart, but the in-memory `membershipState` maintained during live `apply` shares the same "derived state not reset on Autobase reorg" pattern as `currentList`. Re-deriving membership from the persisted view after a reorg/truncation (not only on init) is tracked with the lower-severity full-view-replay finding.
 
 </details>
 
 <details>
-<summary>Phase 4 - Key epochs and member-removal re-key flow (C1)</summary>
+<summary>Phase 4 - Key epochs and member-removal re-key flow (C1) (listam-mobile commit 9b43c23)</summary>
 
 Commit boundary: add app-level membership epochs, encryption-key rotation/re-encryption with epoch keys stored via the secrets boundary, old-epoch retirement, member-removal audit events, and rollback tests for interrupted re-key.
+
+Implementation commit: `9b43c23` (`Phase 4: key epochs, member-removal re-key, and owner recovery`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
 
 Depends on: 3. Unblocks: -. (End of the membership-crypto track.)
 
@@ -1122,12 +1172,47 @@ Acceptance: a removed device can no longer decrypt or append in the new epoch. R
 
 Pause gate: commit the re-key flow, record the modified files/functions, and wait before the desktop/headless build (this track reconverges with the data-model track at Phase 11).
 
+#### Design: an app-level epoch encryption layer (not Autobase re-keying)
+
+C1 called for "a new encryption epoch or base." Because the Autobase encryption key cannot be rotated in place (C2), this phase adds an **app-level epoch key** that encrypts each list operation (XChaCha20-Poly1305) *inside* the existing Autobase encryption. List ops become opaque `epoch-list-op` envelopes carrying an epoch number, nonce, and ciphertext; only writers holding the current epoch key can read them. Removing a member rotates to a new epoch key, distributes it to the *remaining* writers as sealed per-writer grants (hypercore-crypto `encrypt` to each writer's epoch public key), and re-encrypts the current list as a snapshot under the new key. The removed device keeps the base/Autobase key (it can still replicate and read history and membership metadata) but never receives the new epoch key, so it cannot read content created after removal, and Autobase `removeWriter` drops its append capability. This is the honest boundary: **forward-secrecy of content plus loss of write access**, not total eviction.
+
+#### Files modified / added
+
+- `backend/lib/key-epochs.mjs` (**added**): epoch key generation/hashing, per-writer sealed epoch-key grants (`createEpochGrants`/`decryptEpochGrantForWriter`), and authenticated `epoch-list-op` encrypt/decrypt with the epoch number bound as AAD.
+- `backend/lib/membership.mjs`: owner-signed `remove-writer` records; epoch fields on bootstrap/add-writer/remove-writer; reducer support for epoch advance, `removed-writer` rejection (a removed writer cannot be re-added), stale-epoch/missing-grant/replay rejection; and `buildMembershipRoster` for the frontend.
+- `backend/lib/rekey.mjs` (**added**): `performMemberRemovalRekey` — the dependency-injected re-key orchestration. Validates owner authority, builds grants + the signed record, then runs the epoch flip + membership append + re-encrypted snapshot as a **single `enqueueWrite` unit** so list writes cannot interleave. Pre-commit failures roll back to the prior epoch; a post-commit snapshot failure is retried (bounded) and reported as a degraded success rather than rolled back or silently dropped.
+- `backend/lib/writer-removal.mjs` (**added**): `removeWriterAtConsensus` — performs the Autobase-layer removal and reports `unsupported` / `not-removable` / `error` loudly instead of swallowing, since the integrity half of removal depends on it.
+- `backend/lib/owner-recovery.mjs` (**added**): owner-key-loss recovery (deferred from Phase 3). The recovery code is the 32-byte ed25519 seed embedded in the owner secret, z32-encoded; it re-derives the keypair and is verified against the owner public key the base records, so it works for pre-Phase-4 bases with no bootstrap change.
+- `backend/lib/item.mjs`: list appends now route through `prepareListAppendOperation` (epoch-encrypt when an epoch is active); `enqueueWrite` exported for re-key serialization; `rebuildListFromPersistedOps` handles `list` snapshot ops; membership records skipped during list rebuild.
+- `backend/lib/network.mjs`: `removeMemberAndRotateEpoch` (thin wrapper over `rekey.mjs`), `recoverOwnerAuthority`, `sendOwnerRecoveryCodeToFrontend`, `broadcastMembershipRoster`; join handshake carries epoch key + epoch and the joiner's epoch public key; epoch secrets persisted/rolled back alongside owner authority.
+- `backend/lib/key.mjs`, `secrets.mjs`, `state.mjs`, `logger.mjs`: epoch key + epoch encryption key through the Phase 2 secrets boundary; recovery-code log redaction.
+- `backend/backend.mjs`: `apply` decrypts/epoch-gates list ops, persists membership records, distributes granted epoch keys, removes writers via `removeWriterAtConsensus`, and broadcasts the roster; new RPC commands `RPC_GET_MEMBERS`, `RPC_GET_OWNER_RECOVERY_CODE`, `RPC_RECOVER_OWNER`, `RPC_REMOVE_MEMBER`.
+- `app/components/MembersDialog.tsx` (**added**) + `Header.tsx`, `index.tsx`, `hooks/_useWorklet.ts`: a Members screen (reachable from the drawer) to view members, remove a member (owner only, with confirmation), reveal the owner recovery code for offline backup, and restore ownership on a device that lost it.
+- Generated Bare bundles regenerated (`app/app.ios.bundle.mjs`, `app/assets/backend.android.bundle.mjs`).
+
+#### Deviations and deferred items
+
+- **Epoch layer, not base re-keying.** Re-key rotates the app-level epoch key, not the Autobase encryption key (which the substrate cannot rotate in place). A removed member keeps the base key and can still replicate and read history + membership metadata (writer keys, epoch hashes, grant ciphertexts); confidentiality is forward-only. Documented as the honest boundary.
+- **Integrity depends on Autobase `removeWriter`.** The epoch layer enforces confidentiality; write-integrity against a removed member relies on `removeWriter`. Its failure is now surfaced loudly (and the frontend warned) rather than swallowed, but a runtime without `removeWriter` cannot fully evict a writer.
+- **Post-commit snapshot failure is a degraded success.** Once the removal + epoch advance commit (append-only, irreversible), a failed re-encrypted snapshot is retried and reported, not rolled back; existing members are unaffected, but writers joining *after* such a re-key may need a manual sync until a snapshot lands.
+- **Owner recovery code is a bearer secret.** The code is the owner authority seed; anyone holding it can administer the project. It is revealed to the owner for offline backup only and redacted from logs. Recovery requires the base to still record an owner.
+
+#### Verification
+
+`npm run bundle:backend:ios`; `npm run bundle:backend:android`; `npm run ci` (green: lint 0 errors / 22 pre-existing app console warnings, check:deps OK, check:secrets OK, **62 security tests pass**, grocery tests pass). `npm run typecheck` still fails only on the pre-existing generated `itemIconMap.ts` duplicate keys and the `_useWorklet.ts` BareKit IPC type mismatch; the new UI/bridge code adds no type errors.
+
+New test coverage: `key-epochs.test.mjs` (grant isolation, epoch-bound authenticated decryption, key hashing), `rekey.test.mjs` (removal + epoch advance with the emitted record verified through the real reducer; pre-commit rollback; rollback when no prior epoch key; post-commit snapshot retry that does **not** roll back; success-on-retry; single serialized write unit; guard rejections), `owner-recovery.test.mjs` (code round-trip, owner-public-key verification, wrong-owner/malformed/whitespace handling, seed ≠ full secret), `writer-removal.test.mjs` (success, unsupported, not-removable, throwing, optional `removeable`), plus member-removal reducer and roster tests in `membership.test.mjs`.
+
+> **Open follow-ups:** member-removal records persisted into the view re-derive membership state on restart, but the live-`apply` membership state shares the "derived state not reset on Autobase reorg" pattern tracked with the full-view-replay finding. The remove-member UI surfaces writer keys but not human-friendly device names (no device-naming model yet). True per-list (sub-project) removal remains out of scope — removal is per project/base, consistent with the sharing-boundary decision.
+
 </details>
 
 <details>
 <summary>Phase 5 - Stable item IDs and backend reduction migration (M1)</summary>
 
 Commit boundary: version list operations, backfill ids for legacy text-only entries, reduce by id when present, keep legacy compatibility, and prove duplicate-name convergence.
+
+Forward-compat (multiple lists): the versioned operation schema also carries `listId` and a list `type`, defaulting every legacy and new item to a single implicit default list of type `shopping`, so the later multiple-lists milestone adds lists without a second op-version migration. The reduction partitions by `listId` (N=1 today). See "Multiple Lists, Types, And Grouping (Future Direction)."
 
 Depends on: 0. Independent of the 2-4 membership-crypto track and may run in parallel with it. Unblocks: 6.
 
@@ -1141,6 +1226,8 @@ Pause gate: commit the id migration, record the modified files/functions, and wa
 <summary>Phase 6 - Redux Toolkit migration in mobile, in place</summary>
 
 Commit boundary: add the Redux Toolkit store and move list, sync, preferences, locale choice, loyalty-card metadata handles, and owned-devices state into slices normalized by id; replace direct `useState` ownership of replicated list data with selectors and actions; keep existing mobile behavior intact. No package extraction yet.
+
+Forward-compat (multiple lists): the `lists` slice is shaped as a normalized library of typed lists plus their project/folder grouping and a selected list/project, with exactly one list today; this is the N=1 case of the future multiple-lists model, not a single-list slice that has to be reshaped later. See "Multiple Lists, Types, And Grouping (Future Direction)."
 
 Depends on: 5. Unblocks: 7.
 
@@ -1263,6 +1350,18 @@ Depends on: 12, 14. Unblocks: -.
 
 Acceptance: the headless-driven subset of the matrix runs in CI, the cumulative-migration chain passes, and each capability is "done" only when its matrix row passes.
 
-Pause gate: commit the acceptance work, record the modified files/functions, and pause for milestone review before adding new list domains.
+Pause gate: commit the acceptance work, record the modified files/functions, and pause for milestone review before adding new list domains, multiple list instances, or grouping.
 
 </details>
+
+### Future Milestone (Post-Parity): Projects, Multiple Typed Lists, And Grouping
+
+After the Phase 15 review gate, a dedicated milestone builds the projects/multiple-lists product on top of the forward-compatible substrate above (Project → List → Item, per-project sharing). Indicative phases:
+
+- **Lists within a project:** activate the reserved `listId`/`type` schema — list create/rename/delete, type selection, per-list views, and reordering, all inside the single personal project. Mostly reduction + UI; no new crypto.
+- **Folders/grouping:** folders/sections that organize lists within a project, with replicated folder metadata and ordering.
+- **List types:** type-specific behaviors (kanban columns, calendar ingestion, task/state-machine rules), each added as a versioned, append-only operation set so older instances degrade gracefully.
+- **Multiple projects (multi-base):** create, join, and leave projects, and run more than one at once — the personal project plus joined shared projects — which requires per-project swarm/storage-root/lock-lease isolation (the singleton-lock and join-state findings), per-project peer/sync state, and join-as-add instead of join-switch.
+- **Move list between projects:** a re-encryption/migration of a list from one base to another, used when a list needs a different sharing audience than its current project.
+
+Sequencing note: lists-within-a-project and folders can ship before multiple projects; multiple projects depends on the durability/lock work (Phase 11) and the membership/epoch substrate (Phases 3-4) being in place.

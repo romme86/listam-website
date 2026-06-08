@@ -416,17 +416,18 @@
             <ul>
               <li><code>app/secret-storage-core.ts</code>, <code>app/hooks/_useWorklet.ts</code>: extended the secure-storage boot/persist boundary to carry <code>ownerAuthorityKey</code>, acknowledge durable secret writes, and clear stale invite keys.</li>
               <li><code>app/index.tsx</code>, <code>app/invite-confirmation.ts</code>, <code>app/components/Header.tsx</code>: changed user-facing language from member revocation to invite revocation and kept non-owner devices ready without an invite key.</li>
-              <li><code>backend/lib/membership.mjs</code>: <strong>added</strong> - owner authority keypair normalization, signed membership record creation, signature verification, replay-aware membership reduction, and invite-owner checks.</li>
-              <li><code>backend/lib/membership.test.mjs</code>: <strong>added</strong> - covers legacy owner bootstrap, owner-signed writer addition, non-owner/cross-base rejection, malformed/unsigned/tampered records, and replay rejection.</li>
-              <li><code>backend/lib/secrets.mjs</code>, <code>backend/lib/key.mjs</code>, <code>backend/lib/state.mjs</code>, <code>backend/backend.mjs</code>: load, persist, redact, and keep current-base owner authority state through the Phase 2 adapter.</li>
-              <li><code>backend/lib/network.mjs</code>: bootstraps owner membership for new/legacy local bases, requires owner authority before creating or accepting invites, appends owner-signed membership records, clears owner authority on successful non-owner joins, and restores it on rollback.</li>
+              <li><code>backend/lib/membership.mjs</code>: <strong>added</strong> - owner authority keypair normalization, signed membership record creation, signature verification, replay-aware membership reduction, invite-owner checks, and <code>reduceMembershipLog</code> (rebuild state from the persisted record log).</li>
+              <li><code>backend/lib/membership.test.mjs</code>: <strong>added</strong> - covers legacy owner bootstrap, owner-signed writer addition, non-owner/cross-base rejection, malformed/unsigned/tampered records, replay rejection, restart durability (state rebuilt from the log, sequence high-water mark survives, reused-sequence records dropped on full replay, duplicate bootstraps ignored), and that rejected ops add no writer.</li>
+              <li><code>backend/lib/item.mjs</code>: <code>rebuildListFromPersistedOps</code> skips membership view entries; <strong>added</strong> <code>readPersistedMembershipRecords</code> to read the membership records <code>apply()</code> persisted into the view.</li>
+              <li><code>backend/lib/secrets.mjs</code>, <code>backend/lib/key.mjs</code>, <code>backend/lib/state.mjs</code>, <code>backend/backend.mjs</code>: load, persist, redact, and keep current-base owner authority state through the Phase 2 adapter; <code>apply()</code> now persists accepted membership records into the linearized view so the reduced state survives restart.</li>
+              <li><code>backend/lib/network.mjs</code>: bootstraps owner membership for new/legacy local bases, requires owner authority before creating or accepting invites, appends owner-signed membership records, clears owner authority on successful non-owner joins, restores it on rollback, and rebuilds membership state from the persisted log on init before bootstrapping.</li>
               <li><code>backend/lib/join-rollback.mjs</code>, <code>backend/lib/join-rollback.test.mjs</code>, <code>backend/lib/secret-storage.test.mjs</code>, <code>backend/lib/logger.mjs</code>: added owner authority rollback, validation, and redaction coverage.</li>
               <li>Generated Bare bundles: <code>app/app.ios.bundle.mjs</code>, <code>app/assets/backend.android.bundle.mjs</code>.</li>
             </ul>
             <h3>Functions created / updated / deleted</h3>
             <ul>
               <li>Created: <code>createMembershipState</code>, <code>cloneMembershipState</code>, <code>createOwnerAuthorityKeyPair</code>, <code>ownerAuthorityPublicKeyHex</code>, <code>ownerAuthoritySecretKeyHex</code>, <code>ownerAuthorityMatchesState</code>, <code>canCreateMembershipInvite</code>, <code>nextMembershipSequence</code>, <code>createOwnerBootstrapRecord</code>, <code>createAddWriterMembershipRecord</code>, <code>createSignedMembershipRecord</code>, <code>isMembershipRecord</code>, and <code>reduceMembershipOperation</code>.</li>
-              <li>Created: <code>saveOwnerAuthorityKey</code>, <code>loadOwnerAuthorityKey</code>, <code>deleteOwnerAuthorityKey</code>, <code>ensureOwnerMembership</code>, and <code>sendInviteKeyToFrontend</code>.</li>
+              <li>Created: <code>saveOwnerAuthorityKey</code>, <code>loadOwnerAuthorityKey</code>, <code>deleteOwnerAuthorityKey</code>, <code>ensureOwnerMembership</code>, <code>sendInviteKeyToFrontend</code>, <code>reduceMembershipLog</code>, and <code>readPersistedMembershipRecords</code>.</li>
               <li>Updated: <code>parseBootSecretPayload</code>, <code>getBootSecretBuffer</code>, <code>persistBackendSecret</code>, <code>normalizeSecretValue</code>, <code>prepareBackendSecrets</code>, <code>persistBackendSecretRequest</code>, <code>secretStoreKey</code>, <code>initAutobase</code>, <code>setupBlindPairing</code>, <code>createInvite</code>, <code>rotateInviteAndNotifyFrontend</code>, <code>joinViaInvite</code>, <code>apply</code>, <code>createJoinRollbackSnapshot</code>, and <code>restoreJoinRollbackSnapshot</code>.</li>
               <li>Deleted: no public functions removed; legacy unsigned <code>add-writer</code> handling is now rejected instead of applied.</li>
             </ul>
@@ -448,9 +449,31 @@
               removing a joined device requires Phase 4 re-keying.
             </p>
             <p>
+              <strong>Post-review hardening (membership state durability).</strong> The first cut held
+              membership state only in a module global that was reset on every <code>initAutobase</code>
+              and never written to the persisted view. Because Autobase (v7) does not re-run
+              <code>apply</code> over already-applied history on reopen, that state was lost on restart:
+              the owner re-bootstrapped on every launch and the sequence counter reset to 1, so the next
+              writer added after a restart reused a sequence number and was rejected as a <code>replay</code>
+              by any peer replaying the full log — a writer-set divergence. Fix: <code>apply()</code> now
+              persists each accepted membership record into the linearized view,
+              <code>readPersistedMembershipRecords</code> + <code>reduceMembershipLog</code> rebuild
+              membership state from that durable log on init (before bootstrap), and
+              <code>ensureOwnerMembership</code> therefore bootstraps exactly once — satisfying the
+              "migrate <em>once</em>" acceptance criterion the in-memory version did not.
+            </p>
+            <p>
+              Deviations / deferred (recorded during review): legacy unsigned <code>add-writer</code> is
+              rejected outright rather than accepted during a migration window (stricter; only single-user
+              prototype bases exist today); owner-key loss recovery is deferred to Phase 4's re-key work
+              and called out explicitly rather than left silent; and join remains a destructive,
+              irreversible base switch (the previous base's owner key is deleted on success), so the join
+              confirmation copy now warns that joining gives up ownership of the current list on that device.
+            </p>
+            <p>
               Verification: <code>npm run bundle:backend:ios</code>; <code>npm run bundle:backend:android</code>;
               <code>npm run ci</code> (green: lint 0 errors / existing 22 app console warnings,
-              check:deps OK, check:secrets OK, 32 security tests pass, grocery tests pass);
+              check:deps OK, check:secrets OK, 36 security tests pass, grocery tests pass);
               <code>git diff --check</code>. <code>npm run typecheck</code> still fails only on the
               pre-existing generated <code>itemIconMap.ts</code> duplicate keys and
               <code>_useWorklet.ts</code> BareKit IPC type mismatch.
@@ -458,7 +481,7 @@
           </details>
 
           <details class="phase-record" id="phase-4" data-nav-section>
-            <summary>Phase 4 - Key epochs and member-removal re-key flow (commits: pending)</summary>
+            <summary>Phase 4 - Key epochs and member-removal re-key flow (listam-mobile commit 9b43c23)</summary>
             <p>
               Commit boundary: add app-level membership epochs, encryption-key rotation/re-encryption
               with epoch keys stored via the secrets boundary, old-epoch retirement, member-removal
@@ -467,12 +490,48 @@
             <p><strong>Depends on:</strong> 3. <strong>Unblocks:</strong> -. (End of the membership-crypto track.)</p>
             <p><strong>Acceptance:</strong> a removed device can no longer decrypt or append in the new epoch; an interrupted re-key restores the prior epoch and never leaves the base unreadable.</p>
             <p>Pause gate: record the committed files/functions and wait before the desktop/headless build.</p>
-            <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
-            <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
-            <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <h3>Design: an app-level epoch encryption layer (not Autobase re-keying)</h3>
+            <p>
+              Because the Autobase encryption key cannot be rotated in place (C2), this phase adds an
+              app-level <strong>epoch key</strong> that encrypts each list operation
+              (XChaCha20-Poly1305) <em>inside</em> the Autobase encryption. Removing a member rotates to
+              a new epoch key, distributes it to the remaining writers as sealed per-writer grants, and
+              re-encrypts the current list as a snapshot under the new key. The removed device keeps the
+              base key (it can still replicate and read history + membership metadata) but never receives
+              the new epoch key, and Autobase <code>removeWriter</code> drops its append capability — so
+              the honest boundary is <strong>forward-secrecy of content plus loss of write access</strong>,
+              not total eviction.
+            </p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><code>backend/lib/key-epochs.mjs</code> (<strong>added</strong>): epoch key generation/hashing, sealed per-writer epoch-key grants, and authenticated <code>epoch-list-op</code> encrypt/decrypt with the epoch number bound as AAD.</li>
+              <li><code>backend/lib/membership.mjs</code>: owner-signed <code>remove-writer</code> records; epoch advance; removed-writer / stale-epoch / missing-grant / replay rejection; <code>buildMembershipRoster</code>.</li>
+              <li><code>backend/lib/rekey.mjs</code> (<strong>added</strong>): <code>performMemberRemovalRekey</code> — re-key orchestration serialized through the list write chain, with pre-commit rollback and a bounded post-commit snapshot retry (degraded success, not silent failure).</li>
+              <li><code>backend/lib/writer-removal.mjs</code> (<strong>added</strong>): <code>removeWriterAtConsensus</code> — surfaces Autobase removal failures (unsupported / not-removable / error) instead of swallowing them.</li>
+              <li><code>backend/lib/owner-recovery.mjs</code> (<strong>added</strong>): owner-key-loss recovery (deferred from Phase 3). The code is the owner ed25519 seed, verified against the base-recorded owner key; works for pre-Phase-4 bases.</li>
+              <li><code>backend/lib/item.mjs</code>: list appends epoch-encrypt via <code>prepareListAppendOperation</code>; <code>enqueueWrite</code> exported for re-key serialization; snapshot (<code>list</code>) ops handled on rebuild.</li>
+              <li><code>backend/lib/network.mjs</code>, <code>backend/backend.mjs</code>, <code>key.mjs</code>, <code>secrets.mjs</code>, <code>state.mjs</code>, <code>logger.mjs</code>: RPC wiring (members/recovery), roster + recovery broadcasts, epoch-secret persistence/rollback, join handshake carries epoch material, recovery-code redaction.</li>
+              <li><code>app/components/MembersDialog.tsx</code> (<strong>added</strong>) + <code>Header.tsx</code>, <code>index.tsx</code>, <code>hooks/_useWorklet.ts</code>: a Members screen to view members, remove a member (owner only, confirmed), reveal the owner recovery code, and restore ownership on a device that lost it.</li>
+              <li>Generated Bare bundles regenerated.</li>
+            </ul>
+            <h3>Deviations and deferred items</h3>
+            <ul>
+              <li><strong>Epoch layer, not base re-keying:</strong> a removed member keeps the base key and can still replicate/read history + membership metadata; confidentiality is forward-only.</li>
+              <li><strong>Integrity depends on Autobase <code>removeWriter</code>:</strong> its failure is now surfaced loudly (and the frontend warned) rather than swallowed.</li>
+              <li><strong>Post-commit snapshot failure is a degraded success:</strong> retried and reported, not rolled back; writers joining after such a re-key may need a manual sync.</li>
+              <li><strong>Owner recovery code is a bearer secret:</strong> it is the owner seed, shown for offline backup only and redacted from logs.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              <code>npm run bundle:backend:ios</code>; <code>npm run bundle:backend:android</code>;
+              <code>npm run ci</code> (green: lint 0 errors / 22 pre-existing app console warnings,
+              check:deps OK, check:secrets OK, <strong>62 security tests pass</strong>, grocery tests pass).
+              <code>npm run typecheck</code> still fails only on the pre-existing generated
+              <code>itemIconMap.ts</code> duplicate keys and the <code>_useWorklet.ts</code> BareKit IPC
+              type mismatch; the new UI/bridge code adds no type errors. New suites: <code>key-epochs.test.mjs</code>,
+              <code>rekey.test.mjs</code>, <code>owner-recovery.test.mjs</code>, <code>writer-removal.test.mjs</code>,
+              plus member-removal reducer and roster tests in <code>membership.test.mjs</code>.
+            </p>
           </details>
 
           <details class="phase-record" id="phase-5" data-nav-section>

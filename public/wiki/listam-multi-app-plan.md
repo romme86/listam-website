@@ -1164,7 +1164,7 @@ Verification: `npm run bundle:backend:ios`; `npm run bundle:backend:android`; `n
 
 Commit boundary: add app-level membership epochs, encryption-key rotation/re-encryption with epoch keys stored via the secrets boundary, old-epoch retirement, member-removal audit events, and rollback tests for interrupted re-key.
 
-Implementation commit: `9b43c23` (`Phase 4: key epochs, member-removal re-key, and owner recovery`) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
+Implementation commits: `9b43c23` (`Phase 4: key epochs, member-removal re-key, and owner recovery`) and follow-up `8782b7c` (read the re-key snapshot inside the serialized write unit so a list write ordered ahead of the re-key cannot be omitted) on `listam-mobile` branch `phase-0-bootstrap` (not pushed).
 
 Depends on: 3. Unblocks: -. (End of the membership-crypto track.)
 

@@ -1208,7 +1208,7 @@ New test coverage: `key-epochs.test.mjs` (grant isolation, epoch-bound authentic
 </details>
 
 <details>
-<summary>Phase 5 - Stable item IDs and backend reduction migration (M1)</summary>
+<summary>Phase 5 - Stable item IDs and backend reduction migration (M1) (listam-mobile commit 9392cfa)</summary>
 
 Commit boundary: version list operations, backfill ids for legacy text-only entries, reduce by id when present, keep legacy compatibility, and prove duplicate-name convergence.
 
@@ -1219,6 +1219,40 @@ Depends on: 0. Independent of the 2-4 membership-crypto track and may run in par
 Acceptance: the backend materialized view and Redux projection agree on duplicate names; legacy text-only lists migrate without losing done state or order. Rollback: mixed legacy/new operation logs replay correctly.
 
 Pause gate: commit the id migration, record the modified files/functions, and wait before the Redux migration.
+
+Implementation commit: `9392cfa` (`Phase 5: stable item IDs and id-keyed reduction migration`) on `listam-mobile` branch `main` (not pushed).
+
+#### Design: id-keyed reduction over a versioned op log, with one shared identity module
+
+Operations gained a `version` (1), a `listId` (default `default`), and a list `type` (default `shopping`). Items reduce by a **stable id**: an explicit `id`/`itemId` when present, otherwise a backfilled `legacy-<fnv1a(listId\0text)>` derived from legacy text-only entries. The materialized view is a Map keyed by `${listId}\0${id}`, partitioned by `listId` (N=1 today), so two items that share a name no longer collapse into one — the duplicate-name bug the old text-keyed reduction had. Identity, normalization, and last-write-wins live in a single pure module, **`list-identity.mjs`**, imported by *both* the backend reducer and the UI projection, so the acceptance ("the view and the projection agree on duplicate names") holds by construction rather than by two implementations happening to match.
+
+#### Files modified / added
+
+- `list-identity.mjs` (**added**, repo root, beside `rpc-commands.mjs`): the shared source of truth — `normalizeListId/Type`, `legacyItemId`, `normalizeItemId`, `identityKey`, `isStaleUpdate`, and the array projection (`normalizeListEntries`, `upsertListEntry`, `updateListEntry`, `deleteListEntry`). Pure JS, so it bundles under bare-pack for the worklet and under Metro for the UI.
+- `backend/lib/list-reducer.mjs` (**added**): the op-version schema and the Map-based id-keyed reduction (`createListOperation`, `createListViewEntry`, `normalizeViewEntry`, `reduceListViewEntries`, `applyOperationToList`); delegates all identity to `list-identity.mjs`.
+- `backend/lib/list-reducer.test.mjs` (**added**): versioning, legacy-id backfill without losing done state/order, id-keyed duplicate-name convergence, mixed legacy/new replay, listId partitioning, and stale-update last-write-wins.
+- `backend/lib/list-projection-parity.test.mjs` (**added**): drives the same op sequence through the backend Map reduction and the UI array projection and asserts identical id/order/text/done — a guard against the two ever drifting.
+- `app/listProjection.ts`: reduced to a thin **typed** wrapper over `list-identity.mjs` (no logic of its own); also consumed by the Phase 6 `listsSlice`.
+- `backend/backend.mjs`: `apply` normalizes each op (`normalizeListOperation`), appends a versioned view entry (`createListViewEntry`), and updates the in-memory list via `applyOperationToList`; `RPC_ADD` accepts either a bare string (legacy) or `{ text, listId, listType }`.
+- `backend/lib/item.mjs`: `addItem(text, listId, listType)` defaults to the implicit shopping list; add/update/delete build versioned ops; `validateItem` delegates to `normalizeListItem`; `rebuildListFromPersistedOps` now replays the whole view log through `reduceListViewEntries`.
+- `backend/lib/network.mjs`: seed in-memory `currentList` from the rebuilt/replicated list on init and on first writable sync.
+- `backend/lib/rekey.mjs` + `rekey.test.mjs`: the member-removal epoch snapshot is now a versioned `createListOperation('list', …)`, so a re-key cannot silently drop the op version / listId / type.
+- `app/components/_types.ts`: `ListEntry` gains optional `id`/`itemId`/`listId`/`listType`/`updatedAt`/`timestamp`/`author`.
+- `app/components/VisualGridList.tsx`, `intertial_scroll.tsx`: React list keys use the stable `identityKey` instead of `text`+`timeOfCompletion`, so reconciliation survives renames and duplicate names.
+- `app/listEntry.json` (**removed**): dead/unreferenced schema whose `required` set had drifted from reality; the real validation is `validateItem`/`normalizeListItem`.
+
+#### Deviations and deferred items
+
+- **One shared module instead of two copies.** Rather than leave the backend reducer and the UI projection as parallel implementations of the same hashing/identity rules (the original divergence risk), both import `list-identity.mjs`. Full package extraction into `@listam/domain` remains Phase 7; this is the minimal in-place dedup plus a parity test.
+- **`updatedAt` is now load-bearing, but not a field-level merge.** Updates resolve by last-write-wins on `updatedAt` (a stale edit cannot revert a newer item), order-independent across replay. Concurrent edits to *different* fields of the same item still clobber whole-object, because every update ships the full item; true field-level/CRDT merge is left to future work.
+- **Rename became an in-place update.** Renaming preserves the item's stable id (so convergence holds), done state, and position instead of the prior delete+add; a not-yet-migrated peer keying by text treats a rename as a new entry until it updates (transient, inherent to any migration).
+- **The UI data-flow lands with Phase 6.** The Redux migration (Phase 6) was developed alongside this phase and replaced the Phase 5 `index.tsx`/`_useWorklet.ts` wiring, so this commit carries the backend reduction, the shared module, the component key fixes, and the type/schema changes; the id-keyed reduction's UI consumption (and the rename change) ride with the Phase 6 commit. The pause gate is otherwise honored — Phase 5 is its own commit.
+
+#### Verification
+
+`node --test backend/lib/*.test.mjs` → **73 pass** (was 68; +1 stale-update reducer test, +4 projection-parity tests). `npx tsc --noEmit` reports only the pre-existing generated `itemIconMap.ts` duplicate-key errors; the Phase 5 files add no type errors. The Bare bundles were not regenerated and the full `npm run ci` was not re-run here because the frontend is mid-Phase-6.
+
+> **Open follow-ups:** the id-keyed reduction has no checkpoint yet — rebuild replays the full view log (Phase 11 adds materialized-view snapshots that resume this reduction). Field-level concurrent-edit merge remains unsolved (whole-object LWW by `updatedAt`). `listProjection.ts` is a thin TS wrapper over the shared module; collapsing the `.mjs`/`.ts` seam fully is the Phase 7 package extraction.
 
 </details>
 
@@ -1234,6 +1268,32 @@ Depends on: 5. Unblocks: 7.
 Acceptance: mobile parity is unchanged with replicated state owned by Redux; the `loyaltyCards` slice holds only non-secret handles (M3), never barcode/QR payloads.
 
 Pause gate: commit the in-place Redux migration, record the modified files/functions, and wait before package extraction.
+
+#### Phase 6 implementation record
+
+Files modified:
+
+- `listam-mobile/package.json`, `package-lock.json`: added `@reduxjs/toolkit` and `react-redux`.
+- `listam-mobile/app/store/store.ts`, `hooks.ts`: app-local Redux store and typed hooks.
+- `listam-mobile/app/store/listsSlice.ts`: normalized project/folder/list/item library, selected project/list, and selected-list selectors/actions.
+- `listam-mobile/app/store/syncSlice.ts`, `preferencesSlice.ts`, `loyaltyCardsSlice.ts`, `devicesSlice.ts`: sync status, persisted preferences plus locale choice, non-secret loyalty-card handles, and normalized member/device roster.
+- `listam-mobile/app/hooks/_useWorklet.ts`: backend RPC events now dispatch Redux actions for list, sync, and device state.
+- `listam-mobile/app/index.tsx`: Redux provider, selector-driven preferences/list data, optimistic list actions, and loyalty-card handle hydration while keeping barcode/QR payloads out of Redux.
+- `listam-mobile/app/components/Header.tsx`, `MembersDialog.tsx`: consume store-level card/device types.
+
+Functions created / updated:
+
+- Created `store`, `useAppDispatch`, `useAppSelector`.
+- Created `selectedListItemsSynced`, `selectedListItemsReplaced`, `listItemAdded`, `listItemUpdated`, `listItemDeleted`, `selectSelectedListItems`, and `selectListLibrary`.
+- Created `selectSyncState`, `selectPreferences`, `selectMembershipRoster`, `selectLoyaltyCardHandles`, `toLoyaltyCardHandle`, and the associated slice reducers/actions.
+- Updated `useWorklet`, `AppInner`, `Header`, and `MembersDialog`.
+- Added `parseStoredLoyaltyCards`, `indexLoyaltyCardPayloads`, and `serializeLoyaltyCardPayloads`.
+
+Implementation summary:
+
+Mobile replicated list state now lives in a normalized Redux `lists` library shaped for the future multiple-list model, with the current app still operating as one selected personal project/folder/shopping list. Worklet readiness, peer count, invite key, join phase, and membership roster are Redux-owned. Preferences are Redux-owned and persisted, including the locale-choice slot. The `loyaltyCards` slice stores only non-secret handles (`id`, `name`, `type`, `payloadRef`); existing barcode/QR payloads remain in the legacy AsyncStorage payload path and in memory only for viewing until the Phase 10 secure-storage move.
+
+Verification: `npm run lint` passed with 22 existing console warnings; `npm run check:deps`, `npm run check:secrets`, and `npm run test` passed. Full `npm run typecheck` remains blocked by the pre-existing generated `itemIconMap.ts` duplicate-key errors; filtering those known errors produced no new TypeScript output from the Redux migration.
 
 </details>
 

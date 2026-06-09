@@ -641,11 +641,41 @@
             <p><strong>Acceptance:</strong> mobile builds against published package versions and the shared suites run in Node.</p>
             <p>Pause gate: record the committed files/functions and wait before the backend/client extraction.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-mobile/package.json</code>, <code>package-lock.json</code>: added local workspace packages and <code>test:shared</code>.</li>
+              <li><code>listam-mobile/packages/domain/</code>: list identity, array projection, list operation reduction, declarations, and shared tests.</li>
+              <li><code>listam-mobile/packages/protocol/</code>: RPC command ids.</li>
+              <li><code>listam-mobile/packages/grocery/</code>: grocery text/category logic, generated translation data, grouping, declarations, and shared tests.</li>
+              <li><code>listam-mobile/packages/logging/</code>: redaction helpers, structured log formatting, logger factory, declarations, and shared tests.</li>
+              <li><code>listam-mobile/packages/secrets/</code>: secret validation, fingerprints, boot/persistence payload helpers, adapter-neutral secret migration/persistence, declarations, and shared tests.</li>
+              <li>Mobile app/backend wrappers now consume package APIs; React Native asset maps and backend RPC persistence remain app/backend-local.</li>
+              <li>Grocery generators/tests and dependency scanning are package-aware; iOS and Android backend bundles were regenerated.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created package exports for list identity/projection/reduction: <code>normalizeListId</code>, <code>normalizeItemId</code>, <code>identityKey</code>, <code>upsertListEntry</code>, <code>createListOperation</code>, <code>reduceListOperations</code>, and related helpers.</li>
+              <li>Created package exports for RPC command constants.</li>
+              <li>Created package exports for grocery lookup/grouping: <code>normalizeGroceryText</code>, <code>getCategoryForItem</code>, <code>detectDominantLanguage</code>, and <code>groupByCategory</code>.</li>
+              <li>Created package exports for logging: <code>redactForLog</code>, <code>redactString</code>, <code>parseLogArgs</code>, <code>formatLogLine</code>, <code>createLogger</code>, and <code>logger</code>.</li>
+              <li>Created package exports for secrets: <code>normalizeSecretValue</code>, <code>secretFingerprint</code>, <code>parseBackendSecretPayload</code>, <code>parseSecretAck</code>, <code>prepareBackendSecrets</code>, and <code>persistBackendSecretRequest</code>.</li>
+              <li>Updated app/backend wrappers and tests to import package APIs instead of app-local copies.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Pure shared behavior is now packaged under versioned local packages (<code>0.7.0</code>) and consumed by
+              mobile, backend tests, and bundling through normal package imports. The old root/backend shared modules
+              are thin compatibility adapters. Platform-specific work stays outside the packages: backend RPC persistence
+              remains in <code>backend/lib/secrets.mjs</code>, and React Native image <code>require()</code> maps remain
+              in <code>app/components/itemIconMap.ts</code>. Grocery generated data now lives in <code>@listam/grocery</code>,
+              and the generators write package ESM outputs.
+            </p>
+            <p>
+              Verification: <code>npm run check:deps</code>, <code>npm run check:secrets</code>,
+              <code>npm run lint</code>, and <code>npm test</code> passed. <code>npm run bundle:backend:ios</code> and
+              <code>npm run bundle:backend:android</code> passed and regenerated both backend bundles. Full
+              <code>npm run typecheck</code> remains blocked only by the pre-existing generated
+              <code>itemIconMap.ts</code> duplicate-key errors.
+            </p>
           </details>
 
           <details class="phase-record" id="phase-8" data-nav-section>
@@ -660,11 +690,40 @@
             <p><strong>Acceptance:</strong> the backend runs under Node with no BareKit globals, and the same <code>@listam/client</code> contract suite passes on both the worklet and Node adapters.</p>
             <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-mobile/package.json</code>, <code>package-lock.json</code>: added local workspace dependencies for <code>@listam/backend</code> and <code>@listam/client</code>.</li>
+              <li><code>listam-mobile/packages/backend/</code>: extracted backend startup/runtime code, package metadata, BareKit and Node platform adapters, filesystem adapter wiring, and Node smoke tests.</li>
+              <li><code>listam-mobile/backend/backend.mjs</code>: reduced to the app-level BareKit boot shim; per-platform <code>bare-pack</code> bundling still starts here.</li>
+              <li><code>listam-mobile/packages/client/</code>: added shared RPC event decoding, worklet/Node adapter fixtures, declarations, and contract tests.</li>
+              <li><code>listam-mobile/app/hooks/_useWorklet.ts</code>: now consumes <code>decodeBackendRequest</code> while preserving Redux updates, haptics, and notifications.</li>
+              <li>iOS and Android backend bundle outputs were regenerated from the app-level entry.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>createBackendPaths</code>, <code>startBackend</code>, <code>shutdownBackend</code>, <code>handleFrontendRequest</code>, and <code>reconcileLegacyKeyFiles</code> in <code>@listam/backend</code>.</li>
+              <li>Created <code>createBareKitPlatform</code>, <code>createNodePlatform</code>, and <code>createNodeRpc</code> platform adapters.</li>
+              <li>Created <code>setBackendFs</code> and <code>getBackendFs</code>; updated backend key/network helpers to use the selected platform filesystem.</li>
+              <li>Created <code>decodeBackendRequest</code>, <code>decodeWithClientAdapter</code>, <code>encodePayload</code>, <code>dataToString</code>, <code>nodeClientAdapter</code>, and <code>workletClientAdapter</code> in <code>@listam/client</code>.</li>
+              <li>Updated the worklet RPC callback to switch on typed client events for secret persistence, lifecycle messages, sync, item mutations, resets, and invite keys.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              The backend runtime now lives in <code>@listam/backend</code> behind an explicit
+              <code>startBackend(platform)</code> boundary. BareKit globals are limited to the app shim
+              and <code>@listam/backend/platform/bare-kit</code>; the backend package root imports under
+              plain Node with no <code>Bare</code> or <code>BareKit</code> globals. <code>@listam/client</code>
+              owns frontend/backend event decoding, with the same contract suite run against worklet-shaped
+              byte payloads and Node-shaped payloads.
+            </p>
+            <p>
+              Verification: <code>npm run test:shared</code>, <code>npm run check:deps</code>,
+              <code>npm run check:secrets</code>, <code>npm run lint</code>, and <code>npm test</code>
+              passed. <code>npm run bundle:backend:ios</code> and <code>npm run bundle:backend:android</code>
+              passed and regenerated both backend bundles. A one-off Node <code>startBackend(createNodePlatform(...))</code>
+              start/shutdown smoke passed outside the sandbox because Hyperswarm socket binding is blocked inside
+              the sandbox. Full <code>npm run typecheck</code> remains blocked only by the pre-existing generated
+              <code>itemIconMap.ts</code> duplicate-key errors.
+            </p>
           </details>
 
           <details class="phase-record" id="phase-9" data-nav-section>

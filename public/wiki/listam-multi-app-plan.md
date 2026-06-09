@@ -1308,6 +1308,36 @@ Acceptance: mobile builds against published package versions and the shared suit
 
 Pause gate: commit the pure-package extraction, record the modified files/functions, and wait before the backend/client extraction.
 
+#### Phase 7 implementation record
+
+Files modified:
+
+- `listam-mobile/package.json`, `package-lock.json`: added local workspace packages `@listam/domain`, `@listam/protocol`, `@listam/grocery`, `@listam/logging`, and `@listam/secrets`; added `test:shared`.
+- `listam-mobile/packages/domain/`: extracted list identity, array projection, and list operation reduction with Node shared tests.
+- `listam-mobile/packages/protocol/`: extracted RPC command ids.
+- `listam-mobile/packages/grocery/`: extracted grocery text normalization, category/order/translation data, category lookup, grouping, and Node shared tests.
+- `listam-mobile/packages/logging/`: extracted redaction helpers, log-row parsing, JSON log-line formatting, logger factory, and Node shared tests.
+- `listam-mobile/packages/secrets/`: extracted secret names/files, validation, fingerprints, boot payload parsing, persistence payload helpers, adapter-neutral secret migration/persistence, and Node shared tests.
+- `listam-mobile/app/listProjection.ts`, `app/secret-storage-core.ts`, `app/secrets.ts`, and grocery component helpers: now consume the shared packages, with React Native asset icon maps kept app-local.
+- `listam-mobile/backend/lib/list-reducer.mjs`, `logger.mjs`, `secrets.mjs`, backend protocol imports, and related tests: now consume package APIs through thin backend adapters where platform RPC is still needed.
+- `listam-mobile/scripts/check-deps.mjs`, `generate-category-lookup.mjs`, `generate-item-translations.mjs`, and `test-grocery-intelligence.mjs`: package-aware dependency scanning, generated grocery package outputs, and package-backed grocery tests.
+- `listam-mobile/app/app.ios.bundle.mjs` and `app/assets/backend.android.bundle.mjs`: regenerated backend bundles against package imports.
+
+Functions created / updated:
+
+- Created package exports for `normalizeListId`, `normalizeListType`, `legacyItemId`, `normalizeItemId`, `identityKey`, `normalizeListEntry`, `normalizeListEntries`, `upsertListEntry`, `updateListEntry`, `deleteListEntry`, `createListOperation`, `normalizeListOperation`, `reduceListOperations`, `reduceListViewEntries`, and `applyOperationToList`.
+- Created package exports for RPC command constants.
+- Created package exports for `toRawLookupText`, `normalizeGroceryText`, `getFirstAsciiLetter`, `containsLookupTerm`, `detectDominantLanguage`, `getCategoryForItem`, `getDisplayCategoryName`, and `groupByCategory`.
+- Created package exports for `redactForLog`, `redactString`, `parseLogArgs`, `formatLogLine`, `createLogger`, and `logger`.
+- Created package exports for `secretStoreKey`, `normalizeSecretValue`, `parseSecretName`, `secretFingerprint`, `parseBackendSecretPayload`, `getBackendSecretValue`, `createPersistSecretPayload`, `createDeleteSecretPayload`, `parseSecretAck`, `prepareBackendSecrets`, and `persistBackendSecretRequest`.
+- Updated app/backend wrappers and tests to import package APIs instead of app-local copies.
+
+Implementation summary:
+
+Pure shared behavior is now packaged under versioned local packages (`0.7.0`) and consumed by mobile, backend tests, and bundling through normal package imports. The old root/backend shared modules are thin compatibility adapters, while platform-specific work stays outside the packages: backend RPC persistence remains in `backend/lib/secrets.mjs`, and React Native image `require()` maps remain in `app/components/itemIconMap.ts`. Grocery generated data now lives in `@listam/grocery`, and the generators write package ESM outputs.
+
+Verification: `npm run check:deps`, `npm run check:secrets`, `npm run lint`, and `npm test` passed. `npm run bundle:backend:ios` and `npm run bundle:backend:android` passed and regenerated both backend bundles. Full `npm run typecheck` remains blocked only by the pre-existing generated `itemIconMap.ts` duplicate-key errors.
+
 </details>
 
 <details>
@@ -1320,6 +1350,32 @@ Depends on: 7. Unblocks: 11, 12, 13.
 Acceptance: the backend runs under Node with no BareKit globals, and the same `@listam/client` contract suite passes on both the worklet and Node adapters.
 
 Pause gate: commit the backend/client extraction, record the modified files/functions, and wait before recovery/durability changes.
+
+#### Phase 8 implementation record
+
+Files modified:
+
+- `listam-mobile/package.json`, `package-lock.json`: added local workspace dependencies for `@listam/backend` and `@listam/client`.
+- `listam-mobile/packages/backend/`: extracted the backend runtime graph into a package, including backend startup, platform adapters, package-local filesystem adapter wiring, Node smoke tests, and package metadata.
+- `listam-mobile/backend/backend.mjs`: reduced the app-level backend entry to a BareKit boot shim that imports `startBackend` from `@listam/backend/backend` and `createBareKitPlatform` from `@listam/backend/platform/bare-kit`.
+- `listam-mobile/packages/client/`: added the shared frontend/backend RPC event contract, worklet and Node adapter fixtures, declarations, and contract tests.
+- `listam-mobile/app/hooks/_useWorklet.ts`: replaced local backend-event JSON decoding with `decodeBackendRequest` from `@listam/client` while preserving the existing Redux updates, haptics, and notifications.
+- `listam-mobile/app/app.ios.bundle.mjs` and `app/assets/backend.android.bundle.mjs`: regenerated iOS and Android backend bundles from the app-level BareKit entry.
+
+Functions created / updated:
+
+- Created `createBackendPaths`, `startBackend`, `shutdownBackend`, `handleFrontendRequest`, and `reconcileLegacyKeyFiles` in `@listam/backend`.
+- Created `createBareKitPlatform` for the mobile worklet and `createNodePlatform` / `createNodeRpc` for Node-hosted backend tests.
+- Created `setBackendFs` and `getBackendFs` so package internals use the platform filesystem selected by `startBackend(platform)` instead of importing `bare-fs` in Node-safe modules.
+- Updated backend key/network helpers to use the package filesystem adapter; updated backend id generation to use `hypercore-crypto` instead of a Bare-only crypto import.
+- Created `decodeBackendRequest`, `decodeWithClientAdapter`, `encodePayload`, `dataToString`, `nodeClientAdapter`, and `workletClientAdapter` in `@listam/client`.
+- Updated `useWorklet`'s RPC callback to switch on typed client events for secret persistence, lifecycle messages, list sync, backend item mutations, resets, and invite keys.
+
+Implementation summary:
+
+The backend runtime now lives in `@listam/backend` behind an explicit `startBackend(platform)` boundary. BareKit globals are limited to the app-level shim and the `@listam/backend/platform/bare-kit` adapter; the backend package root imports under plain Node with no `Bare` or `BareKit` globals. The Node platform adapter supplies path resolution, filesystem services, teardown registration, and an in-process RPC shim for contract tests. `@listam/client` owns the frontend/backend event decoding contract, and the same suite runs against worklet-shaped byte payloads and Node-shaped payloads.
+
+Verification: `npm run test:shared`, `npm run check:deps`, `npm run check:secrets`, `npm run lint`, and `npm test` passed. `npm run bundle:backend:ios` and `npm run bundle:backend:android` passed and regenerated both backend bundles. A one-off Node `startBackend(createNodePlatform(...))` start/shutdown smoke passed outside the sandbox because Hyperswarm socket binding is blocked inside the sandbox. Full `npm run typecheck` remains blocked only by the pre-existing generated `itemIconMap.ts` duplicate-key errors.
 
 </details>
 

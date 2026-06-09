@@ -814,7 +814,7 @@
           </details>
 
           <details class="phase-record" id="phase-11" data-nav-section>
-            <summary>Phase 11 - Recovery, snapshots, and storage durability (commits: pending)</summary>
+            <summary>Phase 11 - Recovery, snapshots, and storage durability (listam-mobile commit 7c0fd3a)</summary>
             <p>
               Commit boundary: replace destructive auto-wipe recovery with backup/quarantine/owner-confirmed
               recovery, add materialized-view snapshots/checkpoints that resume the id-keyed reduction,
@@ -824,11 +824,48 @@
             <p><strong>Acceptance:</strong> a corrupt store never triggers silent deletion, headless nodes refuse auto-wipe, and the rebuild resumes from a checkpoint with bounded join-poll work.</p>
             <p>Pause gate: record the committed files/functions and wait before desktop implementation.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-mobile/packages/backend/lib/recovery.mjs</code> (new): corruption-signature detection, recovery-policy gate, and intact quarantine-by-rename with a redacted-fingerprint manifest.</li>
+              <li><code>listam-mobile/packages/backend/lib/storage-lease.mjs</code> (new): JSON storage lease with owner/role metadata, TTL expiry, heartbeat renewal, stale-lease recovery, lost-lease detection, and own-lease-only release.</li>
+              <li><code>listam-mobile/packages/backend/lib/view-checkpoint.mjs</code> (new): materialized-view checkpoint that resumes the id-keyed reduction from the last processed index, with tail verification and full-replay fallback on truncation/reorg.</li>
+              <li><code>listam-mobile/packages/backend/lib/network.mjs</code>: the corruption auto-wipe is replaced by a pendingRecovery state plus <code>performStorageRecovery</code> (retry / owner-approved quarantine-then-fresh-base); the checkpoint resets on base teardown/switch.</li>
+              <li><code>listam-mobile/packages/backend/backend.mjs</code>: storage lease replaces the <code>wx</code> lock; storage-namespace roots (<code>lista-&lt;ns&gt;</code> + per-root lease); recovery policy from the platform; RPC_RECOVER_STORAGE handler.</li>
+              <li><code>listam-mobile/packages/backend/lib/item.mjs</code>, <code>lib/state.mjs</code>: rebuilds route through one shared checkpoint per base; pendingRecovery state.</li>
+              <li><code>listam-mobile/packages/backend/platform/bare-kit.mjs</code>, <code>platform/node.mjs</code>: recovery policy defaults — mobile UI 'interactive', node hosts 'refuse-destructive' — plus storageNamespace/leaseTtlMs passthrough.</li>
+              <li><code>listam-mobile/packages/domain/list-reducer.mjs</code>, <code>list-reducer.d.ts</code>: <code>createListReduction()</code> incremental id-keyed reduction.</li>
+              <li><code>listam-mobile/packages/protocol/index.mjs</code>, <code>index.d.ts</code>: <code>RPC_RECOVER_STORAGE = 18</code>.</li>
+              <li><code>listam-mobile/app/hooks/_useWorklet.ts</code>: recovery-required prompt (retry / start fresh with second destructive confirmation / cancel) and recovery-complete/failed notifications.</li>
+              <li><code>listam-mobile/packages/i18n/catalogs/en.mjs</code>, <code>catalogs/es.mjs</code>, <code>index.d.ts</code>: recovery copy.</li>
+              <li><code>listam-mobile/backend/lib/recovery.test.mjs</code>, <code>storage-lease.test.mjs</code>, <code>view-checkpoint.test.mjs</code> (new): 22 tests.</li>
+              <li><code>listam-mobile/app/app.ios.bundle.mjs</code>, <code>app/assets/backend.android.bundle.mjs</code>: regenerated Bare backend bundles.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>isCorruptionSignature</code>, <code>describeCorruption</code>, <code>normalizeRecoveryPolicy</code>, <code>planRecoveryAction</code>, and <code>quarantineStorageRoot</code> in <code>recovery.mjs</code>.</li>
+              <li>Created <code>createStorageLease</code> (acquire/renew/release/startHeartbeat/stopHeartbeat/describeOwner/isHeld) in <code>storage-lease.mjs</code>.</li>
+              <li>Created <code>createViewCheckpoint</code> (update/reset) in <code>view-checkpoint.mjs</code> and <code>createListReduction</code> in <code>@listam/domain</code>.</li>
+              <li>Created <code>enterPendingRecovery</code> and <code>performStorageRecovery</code> in <code>network.mjs</code>; updated <code>initAutobase</code> to park on corruption instead of wiping, and to reset the view checkpoint on teardown.</li>
+              <li>Updated <code>rebuildListFromPersistedOps</code> and <code>readPersistedMembershipRecords</code> to share one checkpoint scan; created <code>resetViewCheckpoint</code>; deleted <code>rmrfSafe</code> (the wipe helper) and the raw <code>wx</code> lock code.</li>
+              <li>Updated <code>createBackendPaths</code> (storage namespaces), <code>startBackend</code> (lease acquisition/heartbeat, recovery policy), <code>shutdownBackend</code> (lease release), and <code>handleFrontendRequest</code> (RPC_RECOVER_STORAGE).</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Phase 11 makes storage failures recoverable instead of destructive. A corrupt
+              Autobase root now parks the backend in a pending-recovery state — nothing deleted,
+              key material untouched — and the user chooses retry or an explicitly confirmed
+              fresh start that first quarantines the old root intact (rename plus a manifest with
+              redacted fingerprints only). Node/headless hosts refuse the destructive path
+              entirely. The join-poll rebuild resumes from a materialized-view checkpoint with a
+              one-read tail verification (full replay only on truncation/reorg), the storage root
+              and lease are namespaced per app role, and a crashed instance's stale lease is
+              recovered automatically instead of blocking startup. Verification:
+              <code>npm run ci</code> passed (95 security + 30 shared tests, 22 new); end-to-end
+              node smoke tests covered lease refusal/stale recovery/release, headless reset
+              refusal with storage intact, retry reopening live data, and interactive reset
+              quarantining with a redacted manifest. <code>npm run typecheck</code> remains
+              blocked only by the pre-existing generated <code>itemIconMap.ts</code> errors.
+            </p>
+            <p>Phase commit: <code>listam-mobile</code> <code>7c0fd3a</code> (<code>Phase 11: recovery, snapshots, and storage durability</code>).</p>
           </details>
 
           <details class="phase-record" id="phase-12" data-nav-section>

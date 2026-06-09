@@ -1310,6 +1310,8 @@ Pause gate: commit the pure-package extraction, record the modified files/functi
 
 #### Phase 7 implementation record
 
+Implementation commit: `listam-mobile` `d71ad36`.
+
 Files modified:
 
 - `listam-mobile/package.json`, `package-lock.json`: added local workspace packages `@listam/domain`, `@listam/protocol`, `@listam/grocery`, `@listam/logging`, and `@listam/secrets`; added `test:shared`.
@@ -1352,6 +1354,8 @@ Acceptance: the backend runs under Node with no BareKit globals, and the same `@
 Pause gate: commit the backend/client extraction, record the modified files/functions, and wait before recovery/durability changes.
 
 #### Phase 8 implementation record
+
+Implementation commit: `listam-mobile` `d71ad36`.
 
 Files modified:
 

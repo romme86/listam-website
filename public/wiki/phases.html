@@ -630,7 +630,7 @@
           </details>
 
           <details class="phase-record" id="phase-7" data-nav-section>
-            <summary>Phase 7 - Extract pure shared packages (commits: pending)</summary>
+            <summary>Phase 7 - Extract pure shared packages (commits: listam-mobile d71ad36)</summary>
             <p>
               Commit boundary: extract <code>@listam/domain</code>, <code>@listam/protocol</code>,
               <code>@listam/grocery</code>, <code>@listam/logging</code> (redaction helpers and log line
@@ -640,6 +640,7 @@
             <p><strong>Depends on:</strong> 2, 6. <strong>Unblocks:</strong> 8, 9, 10.</p>
             <p><strong>Acceptance:</strong> mobile builds against published package versions and the shared suites run in Node.</p>
             <p>Pause gate: record the committed files/functions and wait before the backend/client extraction.</p>
+            <p><strong>Implementation commit:</strong> <code>listam-mobile</code> <code>d71ad36</code>.</p>
             <h3>Files modified</h3>
             <ul>
               <li><code>listam-mobile/package.json</code>, <code>package-lock.json</code>: added local workspace packages and <code>test:shared</code>.</li>
@@ -679,7 +680,7 @@
           </details>
 
           <details class="phase-record" id="phase-8" data-nav-section>
-            <summary>Phase 8 - Extract backend/client with platform adapter (commits: pending)</summary>
+            <summary>Phase 8 - Extract backend/client with platform adapter (commits: listam-mobile d71ad36)</summary>
             <p>
               Commit boundary: extract <code>@listam/backend</code> and <code>@listam/client</code> and
               decouple the backend from BareKit globals (<code>BareKit.IPC</code>, <code>Bare.argv</code>,
@@ -689,6 +690,7 @@
             <p><strong>Depends on:</strong> 7. <strong>Unblocks:</strong> 11, 12, 13.</p>
             <p><strong>Acceptance:</strong> the backend runs under Node with no BareKit globals, and the same <code>@listam/client</code> contract suite passes on both the worklet and Node adapters.</p>
             <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
+            <p><strong>Implementation commit:</strong> <code>listam-mobile</code> <code>d71ad36</code>.</p>
             <h3>Files modified</h3>
             <ul>
               <li><code>listam-mobile/package.json</code>, <code>package-lock.json</code>: added local workspace dependencies for <code>@listam/backend</code> and <code>@listam/client</code>.</li>

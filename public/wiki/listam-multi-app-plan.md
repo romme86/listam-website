@@ -1408,6 +1408,28 @@ Depends on: 6, 7. Unblocks: 12, 15.
 
 Acceptance: user-facing mobile UI copy is routed through typed message keys; English plus at least one non-English catalog render; missing keys fail CI; pseudo-locale/long-string checks pass for the main list, invite/join confirmation, settings/preferences, diagnostics, and loyalty-card surfaces. Rollback: language preference falls back to system/default locale without corrupting local preferences.
 
+Phase commit: `listam-mobile` `ba5f150` (`Phase 9: add UI i18n foundation`).
+
+Files modified:
+
+- `listam-mobile/packages/i18n/`: new shared `@listam/i18n` package with English/Spanish catalogs, typed key declarations, fallback locale resolver, grocery-locale resolver, plural/date/number helpers, pseudo/long catalog generators, and package tests.
+- `listam-mobile/app/i18n.tsx`, `app/store/preferencesSlice.ts`, `app/index.tsx`: Redux-backed i18n provider, persisted locale override, locale-choice validation, invite confirmation copy wiring, share/delete/snackbar copy extraction, and app provider installation.
+- `listam-mobile/app/components/{Header,JoinDialog,MembersDialog,JoiningOverlay,AddItemBar,EmptyState,SummaryBar,ListItem,GridCard,VisualGridList,intertial_scroll,LoyaltyCardScanner,LoyaltyCardViewer,Paywall}.tsx`: mobile parity UI copy moved behind typed message keys; the drawer now includes app language choices for system, English, Spanish, pseudo, and long-string checks.
+- `listam-mobile/app/hooks/{_useWorklet,useSubscription}.ts`: diagnostics, backend status, recovery, member-removal, and subscription notifications routed through the current translator.
+- `listam-mobile/packages/grocery/{category-grouping.mjs,index.d.ts,grocery.test.mjs}` and `app/components/categoryGrouping.ts`: category display names now accept the selected grocery locale instead of relying only on dominant item language.
+- `listam-mobile/scripts/check-i18n.mjs`, `package.json`, `package-lock.json`: CI now fails on missing/extra catalog keys and installs the shared workspace package.
+
+Functions created / updated:
+
+- Created `createI18n`, `resolveLocale`, `resolveGroceryLocale`, `getCatalog`, `translate`, `selectPluralMessage`, `formatNumber`, `formatDate`, `pseudoLocalizeText`, `createPseudoCatalog`, `createLongStringCatalog`, and `assertCompleteCatalog` in `@listam/i18n`.
+- Created `I18nProvider` and `useI18n` in the mobile app.
+- Updated preference hydration and `localeChoiceSet` to reject invalid locale values and fall back to `system`.
+- Updated `createJoinConfirmationRequest` and `planIncomingLinkJoin` to accept localized copy while preserving their English defaults for existing tests.
+- Updated list, invite/join, settings/preferences, diagnostics, paywall, and loyalty-card components/hooks to call `i18n.t(...)` for user-facing copy.
+- Updated `groupByCategory` to accept an explicit preferred grocery language.
+
+Implementation summary: Phase 9 adds the shared UI internationalization foundation with English, Spanish, pseudo, and long-string rendering paths. Main list, invite/join confirmation, settings/preferences, diagnostics/status, paywall, and loyalty-card surfaces now resolve copy through typed message keys. Grocery category translations remain in `@listam/grocery` but receive the selected locale from the same resolver. Verification: `npm run ci` passed. `npm run typecheck` remains blocked only by the pre-existing generated `app/components/itemIconMap.ts` duplicate-key errors.
+
 Pause gate: commit the UI internationalization foundation, record the modified files/functions, and wait before redaction/durability or desktop implementation.
 
 </details>

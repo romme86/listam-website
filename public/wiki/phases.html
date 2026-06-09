@@ -729,7 +729,7 @@
           </details>
 
           <details class="phase-record" id="phase-9" data-nav-section>
-            <summary>Phase 9 - UI internationalization foundation (commits: pending)</summary>
+            <summary>Phase 9 - UI internationalization foundation (commits: listam-mobile ba5f150)</summary>
             <p>
               Commit boundary: add shared UI i18n infrastructure (<code>@listam/i18n</code> or the
               equivalent shared module), typed message catalogs, locale detection/override in
@@ -740,13 +740,37 @@
             </p>
             <p><strong>Depends on:</strong> 6, 7. <strong>Unblocks:</strong> 12, 15.</p>
             <p><strong>Acceptance:</strong> user-facing mobile UI copy is routed through typed message keys; English plus at least one non-English catalog render; missing keys fail CI; pseudo-locale/long-string checks pass for the main list, invite/join confirmation, settings/preferences, diagnostics, and loyalty-card surfaces.</p>
+            <p>Phase commit: <code>listam-mobile</code> <code>ba5f150</code> (<code>Phase 9: add UI i18n foundation</code>).</p>
             <p>Pause gate: record the committed files/functions and wait before redaction/durability or desktop implementation.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-mobile/packages/i18n/</code>: new shared <code>@listam/i18n</code> package with English/Spanish catalogs, typed key declarations, fallback locale resolution, grocery-locale resolution, plural/date/number helpers, pseudo/long catalog generators, and package tests.</li>
+              <li><code>listam-mobile/app/i18n.tsx</code>, <code>app/store/preferencesSlice.ts</code>, <code>app/index.tsx</code>: Redux-backed i18n provider, persisted locale override, locale-choice validation, localized invite/share/delete/snackbar copy, and provider installation.</li>
+              <li><code>listam-mobile/app/components/{Header,JoinDialog,MembersDialog,JoiningOverlay,AddItemBar,EmptyState,SummaryBar,ListItem,GridCard,VisualGridList,intertial_scroll,LoyaltyCardScanner,LoyaltyCardViewer,Paywall}.tsx</code>: parity-surface UI copy moved behind typed message keys; the drawer now exposes system, English, Spanish, pseudo, and long language choices.</li>
+              <li><code>listam-mobile/app/hooks/{_useWorklet,useSubscription}.ts</code>: diagnostics, backend status, recovery, member-removal, and subscription notifications route through the active translator.</li>
+              <li><code>listam-mobile/packages/grocery/{category-grouping.mjs,index.d.ts,grocery.test.mjs}</code> and <code>app/components/categoryGrouping.ts</code>: category names accept the selected grocery locale.</li>
+              <li><code>listam-mobile/scripts/check-i18n.mjs</code>, <code>package.json</code>, <code>package-lock.json</code>: CI catalog-key guard and workspace package install metadata.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>createI18n</code>, <code>resolveLocale</code>, <code>resolveGroceryLocale</code>, <code>getCatalog</code>, <code>translate</code>, <code>selectPluralMessage</code>, <code>formatNumber</code>, <code>formatDate</code>, <code>pseudoLocalizeText</code>, <code>createPseudoCatalog</code>, <code>createLongStringCatalog</code>, and <code>assertCompleteCatalog</code> in <code>@listam/i18n</code>.</li>
+              <li>Created mobile <code>I18nProvider</code> and <code>useI18n</code>.</li>
+              <li>Updated preference hydration and <code>localeChoiceSet</code> to reject invalid values and fall back to <code>system</code>.</li>
+              <li>Updated <code>createJoinConfirmationRequest</code> and <code>planIncomingLinkJoin</code> to accept localized copy while preserving English defaults for existing tests.</li>
+              <li>Updated list, invite/join, settings/preferences, diagnostics, paywall, and loyalty-card components/hooks to call <code>i18n.t(...)</code> for user-facing copy.</li>
+              <li>Updated <code>groupByCategory</code> to accept an explicit preferred grocery language.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Phase 9 adds the shared UI internationalization foundation with English, Spanish,
+              pseudo, and long-string rendering paths. Main list, invite/join confirmation,
+              settings/preferences, diagnostics/status, paywall, and loyalty-card surfaces now
+              resolve copy through typed message keys. Grocery category translations remain in
+              <code>@listam/grocery</code> but receive the selected locale from the same resolver.
+              Verification: <code>npm run ci</code> passed.
+              <code>npm run typecheck</code> remains blocked only by the pre-existing generated
+              <code>app/components/itemIconMap.ts</code> duplicate-key errors.
+            </p>
           </details>
 
           <details class="phase-record" id="phase-10" data-nav-section>

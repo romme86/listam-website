@@ -1336,7 +1336,7 @@ Functions created / updated:
 
 Implementation summary:
 
-Pure shared behavior is now packaged under versioned local packages (`0.7.0`) and consumed by mobile, backend tests, and bundling through normal package imports. The old root/backend shared modules are thin compatibility adapters, while platform-specific work stays outside the packages: backend RPC persistence remains in `backend/lib/secrets.mjs`, and React Native image `require()` maps remain in `app/components/itemIconMap.ts`. Grocery generated data now lives in `@listam/grocery`, and the generators write package ESM outputs.
+Pure shared behavior is now packaged under versioned local packages (`0.7.0`) and consumed by mobile, backend tests, and bundling through normal package imports. The app-side grocery/domain/logging modules (`app/components/categoryTranslations.ts`, `app/listProjection.ts`, `backend/lib/list-reducer.mjs`, `backend/lib/logger.mjs`, …) became thin re-export shims, while platform-specific work stays outside the packages: backend RPC secret persistence lives in `@listam/backend/lib/secrets.mjs`, and React Native image `require()` maps remain in `app/components/itemIconMap.ts`. Grocery generated data now lives in `@listam/grocery`, and the generators write package ESM outputs. (Note: the backend-graph modules under `backend/lib/` were *not* thin adapters at `d71ad36` — they were full duplicates of the package copies; this was corrected in the Phase 8 follow-up `8a831a4`, see below.)
 
 Verification: `npm run check:deps`, `npm run check:secrets`, `npm run lint`, and `npm test` passed. `npm run bundle:backend:ios` and `npm run bundle:backend:android` passed and regenerated both backend bundles. Full `npm run typecheck` remains blocked only by the pre-existing generated `itemIconMap.ts` duplicate-key errors.
 
@@ -1380,6 +1380,22 @@ Implementation summary:
 The backend runtime now lives in `@listam/backend` behind an explicit `startBackend(platform)` boundary. BareKit globals are limited to the app-level shim and the `@listam/backend/platform/bare-kit` adapter; the backend package root imports under plain Node with no `Bare` or `BareKit` globals. The Node platform adapter supplies path resolution, filesystem services, teardown registration, and an in-process RPC shim for contract tests. `@listam/client` owns the frontend/backend event decoding contract, and the same suite runs against worklet-shaped byte payloads and Node-shaped payloads.
 
 Verification: `npm run test:shared`, `npm run check:deps`, `npm run check:secrets`, `npm run lint`, and `npm test` passed. `npm run bundle:backend:ios` and `npm run bundle:backend:android` passed and regenerated both backend bundles. A one-off Node `startBackend(createNodePlatform(...))` start/shutdown smoke passed outside the sandbox because Hyperswarm socket binding is blocked inside the sandbox. Full `npm run typecheck` remains blocked only by the pre-existing generated `itemIconMap.ts` duplicate-key errors.
+
+#### Phase 8 follow-up — remove duplicated `backend/lib/` and reconnect the security suite
+
+Follow-up commit: `listam-mobile` `8a831a4` (`Phase 8 follow-up: remove duplicated backend/lib and repoint security tests to @listam/backend`) on branch `phase-8-followup-dedup-backend-lib`.
+
+Why: `d71ad36` *copied* the backend graph into `@listam/backend` instead of moving it — the original `backend/lib/*.mjs` sources were left in place as full duplicates. Two problems followed. (1) The duplicates were orphaned dead code: the production runtime goes shim → `@listam/backend`, nothing imported `backend/lib/`, and `backend/lib/network.mjs` no longer even loaded under Node (it imported `apply`/`open` from the now-shim `backend.mjs`, giving `SyntaxError: ... does not provide an export named 'apply'`). (2) More seriously, the 73-test `test:security` suite (C1/C3 membership authority, key epochs, member-removal re-key, owner recovery, writer removal, join rollback, invite policy) still imported the orphaned `backend/lib/` copies — so green CI no longer proved the *shipping* crypto code (`packages/backend/lib/`) was correct. The copies were byte-identical at `d71ad36` (except `network.mjs`/`key.mjs`, which had already diverged via the platform-fs refactor), so the gap was latent but real: any edit to the shipping copy would leave the suite passing against a stale duplicate.
+
+What changed:
+
+- Deleted the 15 orphaned duplicate sources in `backend/lib/`: `invite-policy.mjs`, `item.mjs`, `join-rollback.mjs`, `key-epochs.mjs`, `key.mjs`, `list-reducer.mjs`, `logger.mjs`, `membership.mjs`, `network.mjs`, `owner-recovery.mjs`, `rekey.mjs`, `secrets.mjs`, `state.mjs`, `util.mjs`, `writer-removal.mjs` (2,743 lines). `backend/lib/` now holds only `*.test.mjs`.
+- Repointed the security tests at the shipping package: `./<module>.mjs` → `@listam/backend/lib/<module>.mjs`, and `./list-reducer.mjs` → `@listam/domain/list-reducer`. The five tests that were already package-based (`invite-confirmation`, `list-projection-parity`, `list-reducer`, `logger`, `secret-storage`) were untouched.
+- Added `"./lib/*.mjs": "./lib/*.mjs"` to `packages/backend/package.json` `exports` so the white-box security tests can import the real internal modules (the prior `exports` map blocked subpath imports).
+
+Verification: `npm run ci` green — `test:security` **73 pass** (now exercising `@listam/backend` directly), `test:shared` 21 pass, `test:grocery` pass, `lint` 0 errors, `check:deps` OK, `check:secrets` OK. Backend bundles were not regenerated because they pack from the shim → `@listam/backend` and never referenced `backend/lib/`. `typecheck` status unchanged (only the pre-existing `itemIconMap.ts` duplicate-key errors).
+
+Open follow-up: the security tests still physically live in `backend/lib/` (app repo) while testing `@listam/backend`; co-locating them inside `packages/backend/` (with a `test:shared` glob update) is deferred so the suite travels with the package when it splits out to `listam-shared`.
 
 </details>
 

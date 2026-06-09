@@ -774,7 +774,7 @@
           </details>
 
           <details class="phase-record" id="phase-10" data-nav-section>
-            <summary>Phase 10 - Loyalty-card secrets and redaction routing (commits: pending)</summary>
+            <summary>Phase 10 - Loyalty-card secrets and redaction routing (listam-mobile commit c63fd9e)</summary>
             <p>
               Commit boundary: move loyalty-card barcode/QR payloads into secure storage via the Phase 2
               boundary, keep only non-secret handles in the Redux slice, route all logging through
@@ -784,11 +784,33 @@
             <p><strong>Acceptance:</strong> Redux state, DevTools-style traces, and exports never contain card payloads or raw secrets; the AsyncStorage-to-secure-storage card migration is idempotent.</p>
             <p>Pause gate: record the committed files/functions and wait before durability changes.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-mobile/packages/secrets/index.mjs</code>, <code>index.d.ts</code>, <code>secrets.test.mjs</code>: loyalty-card payload refs, secure-storage helpers, handle-index serialization, legacy AsyncStorage migration, and idempotence tests.</li>
+              <li><code>listam-mobile/app/secrets.ts</code>, <code>app/secret-storage-core.ts</code>: Expo SecureStore/AsyncStorage adapters and shared boundary re-exports.</li>
+              <li><code>listam-mobile/app/index.tsx</code>, <code>app/store/loyaltyCardsSlice.ts</code>: handle-only hydration, secure payload save/read/delete, and on-demand viewer payload loading.</li>
+              <li><code>listam-mobile/packages/logging/index.mjs</code>, <code>index.d.ts</code>, <code>logger.test.mjs</code>, <code>app/logger.ts</code>, <code>app/hooks/_useWorklet.ts</code>, <code>app/hooks/useSubscription.ts</code>, <code>eslint.config.mjs</code>: redacted app logging and export/diagnostic redaction coverage.</li>
+              <li><code>listam-mobile/packages/i18n/catalogs/en.mjs</code>, <code>catalogs/es.mjs</code>, <code>index.d.ts</code>: localized secure-storage failure messages.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>loyaltyCardPayloadRef</code>, <code>loyaltyCardPayloadStoreKey</code>, <code>normalizeLoyaltyCardPayload</code>, <code>normalizeLoyaltyCardHandle</code>, <code>parseLoyaltyCardPayloadList</code>, <code>parseLoyaltyCardHandleList</code>, <code>serializeLoyaltyCardHandles</code>, <code>prepareLoyaltyCardPayloads</code>, <code>persistLoyaltyCardPayload</code>, <code>readLoyaltyCardPayload</code>, and <code>deleteLoyaltyCardPayload</code> in <code>@listam/secrets</code>.</li>
+              <li>Created mobile wrappers <code>prepareLoyaltyCards</code>, <code>persistLoyaltyCard</code>, <code>readLoyaltyCard</code>, <code>deleteLoyaltyCard</code>, and <code>appLogger</code>.</li>
+              <li>Updated <code>toLoyaltyCardHandle</code>, <code>loyaltyCardsHydrated</code>, <code>loyaltyCardAdded</code>, <code>handleCardScanned</code>, <code>handleSelectCard</code>, and <code>handleDeleteCard</code> so Redux and AsyncStorage handle indexes never carry <code>data</code>.</li>
+              <li>Created <code>redactForExport</code> and <code>redactDiagnosticBundle</code>; updated <code>redactString</code> and <code>redactForLog</code> sensitive-key coverage for loyalty-card barcode/QR payload fields.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Phase 10 moves loyalty-card barcode/QR payloads out of the Redux/AsyncStorage app
+              state path and into confirmed secure-store records keyed by non-secret payload refs.
+              The legacy <code>@lista_loyalty_cards</code> payload array migrates idempotently into
+              secure storage, leaving only handle metadata in AsyncStorage and Redux. Mobile card
+              viewing fetches the payload only when a handle is selected. App diagnostic logging now
+              routes through <code>@listam/logging</code>, and export/diagnostic redaction tests cover
+              loyalty-card payload fields. Verification: <code>npm run ci</code> passed.
+              <code>npm run typecheck</code> remains blocked only by the pre-existing generated
+              <code>app/components/itemIconMap.ts</code> duplicate-key errors.
+            </p>
+            <p>Phase commit: <code>listam-mobile</code> <code>c63fd9e</code> (<code>Phase 10: loyalty-card secrets in secure storage and logging redaction routing</code>).</p>
           </details>
 
           <details class="phase-record" id="phase-11" data-nav-section>

@@ -1435,13 +1435,32 @@ Pause gate: commit the UI internationalization foundation, record the modified f
 </details>
 
 <details>
-<summary>Phase 10 - Loyalty-card secrets and redaction routing (M3, M5)</summary>
+<summary>Phase 10 - Loyalty-card secrets and redaction routing (M3, M5) (listam-mobile commit c63fd9e)</summary>
 
 Commit boundary: move loyalty-card barcode/QR payloads into secure storage via the Phase 2 boundary, keep only non-secret handles in the Redux slice, route all logging through `@listam/logging` redaction, and add export/diagnostic redaction tests.
 
 Depends on: 2, 6, 7. Unblocks: 11.
 
 Acceptance: Redux state, DevTools-style traces, and exports never contain card payloads or raw secrets. Rollback: the AsyncStorage-to-secure-storage card migration is idempotent.
+
+Phase commit: `listam-mobile` `c63fd9e` (`Phase 10: loyalty-card secrets in secure storage and logging redaction routing`).
+
+Files modified:
+
+- `listam-mobile/packages/secrets/index.mjs`, `index.d.ts`, `secrets.test.mjs`: loyalty-card payload refs, secure-storage write/read/delete helpers, handle-index serialization, legacy AsyncStorage migration, and idempotence tests.
+- `listam-mobile/app/secrets.ts`, `app/secret-storage-core.ts`: Expo SecureStore/AsyncStorage adapters for loyalty-card payload storage and shared boundary re-exports.
+- `listam-mobile/app/index.tsx`, `app/store/loyaltyCardsSlice.ts`: loyalty-card hydration now loads handles only; scanned payloads persist to secure storage; viewer payloads are fetched on demand; deletes remove secure payloads and handle metadata.
+- `listam-mobile/packages/logging/index.mjs`, `index.d.ts`, `logger.test.mjs`, `app/logger.ts`, `app/hooks/_useWorklet.ts`, `app/hooks/useSubscription.ts`, `eslint.config.mjs`: app logging routes through `@listam/logging`; export/diagnostic redaction helpers cover loyalty-card payload fields; raw console calls are banned outside the shared logger sink.
+- `listam-mobile/packages/i18n/catalogs/en.mjs`, `catalogs/es.mjs`, `index.d.ts`: added localized save/delete failure messages for secure loyalty-card storage errors.
+
+Functions created / updated:
+
+- Created `loyaltyCardPayloadRef`, `loyaltyCardPayloadStoreKey`, `normalizeLoyaltyCardPayload`, `normalizeLoyaltyCardHandle`, `parseLoyaltyCardPayloadList`, `parseLoyaltyCardHandleList`, `serializeLoyaltyCardHandles`, `prepareLoyaltyCardPayloads`, `persistLoyaltyCardPayload`, `readLoyaltyCardPayload`, and `deleteLoyaltyCardPayload` in `@listam/secrets`.
+- Created mobile wrappers `prepareLoyaltyCards`, `persistLoyaltyCard`, `readLoyaltyCard`, `deleteLoyaltyCard`, and `appLogger`.
+- Updated `toLoyaltyCardHandle`, `loyaltyCardsHydrated`, `loyaltyCardAdded`, `handleCardScanned`, `handleSelectCard`, and `handleDeleteCard` so Redux and AsyncStorage handle indexes never carry `data`.
+- Created `redactForExport` and `redactDiagnosticBundle`; updated `redactString` and `redactForLog` sensitive-key coverage for loyalty-card barcode/QR payload fields.
+
+Implementation summary: Phase 10 moves loyalty-card barcode/QR payloads out of the Redux/AsyncStorage app state path and into confirmed secure-store records keyed by non-secret payload refs. The legacy `@lista_loyalty_cards` payload array migrates idempotently into secure storage, leaving only handle metadata in AsyncStorage and Redux. Mobile card viewing fetches the payload only when a handle is selected. App diagnostic logging now routes through `@listam/logging`, and export/diagnostic redaction tests cover loyalty-card payload fields. Verification: `npm run ci` passed. `npm run typecheck` remains blocked only by the pre-existing generated `app/components/itemIconMap.ts` duplicate-key errors.
 
 Pause gate: commit the loyalty-card/redaction work, record the modified files/functions, and wait before recovery/durability changes.
 

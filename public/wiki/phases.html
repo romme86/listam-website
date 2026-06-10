@@ -1022,7 +1022,7 @@
           </details>
 
           <details class="phase-record" id="phase-15" data-nav-section>
-            <summary>Phase 15 - Cross-app acceptance matrix and release readiness (commits: pending)</summary>
+            <summary>Phase 15 - Cross-app acceptance matrix and release readiness (listam-mobile commit 089228b, listam-headless commit 4ded719)</summary>
             <p>
               Commit boundary: automate the private-bootstrap cross-instance matrix, prove
               mobile/desktop/headless convergence, run the cumulative-migration chain on one base
@@ -1033,11 +1033,34 @@
             <p><strong>Acceptance:</strong> the headless-driven subset of the matrix runs in CI, the cumulative-migration chain passes, and each capability is "done" only when its matrix row passes.</p>
             <p>Pause gate: record the committed files/functions and pause for milestone review before adding new list domains.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-headless/test/helpers/matrix-scenario.mjs</code> + <code>test/matrix.test.mjs</code> (new): the headless-driven matrix (CORE in CI, FULL behind <code>LISTAM_MATRIX_FULL=1</code>); <code>src/service.mjs</code> owner-only <code>remove-member</code> op (C1 re-key trigger).</li>
+              <li><code>listam-mobile/packages/backend/lib/owner-control-client.mjs</code> (new): the worklet owner-control client deferred from Phase 14; <code>backend.mjs</code> RPC_CONTROL_* handlers; <code>packages/protocol</code> RPC_CONTROL_PAIR/COMMAND/LIST; <code>packages/secrets</code> controlDeviceSeed + relaxed parseSecretName.</li>
+              <li><code>listam-mobile/app/components/OwnedDevicesDialog.tsx</code> (new) + Header/_useWorklet/index + <code>control.*</code> i18n: the RN owned-devices surface.</li>
+              <li><code>listam-mobile/backend/lib/migration-chain.test.mjs</code> + <code>owner-control-client.{test,scenario}.mjs</code> (new): the cumulative-migration and mobile-client acceptance suites; bundles regenerated.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>createOwnerControlClient</code> (worklet) and its <code>ensureOwnerControlClient</code> backend wiring; the <code>OwnedDevicesDialog</code> component and its index/Header hooks; the matrix and migration-chain scenarios.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Phase 15 closes the milestone. The headless-driven matrix subset runs in CI on a
+              private testnet with real child-process instances, proving — at the protocol level all
+              surfaces share — invite/join convergence, duplicate-name handling by stable id (M1),
+              and the owner-gated roster (C3); the extended (FULL) tier adds steady-state
+              convergence, member-removal re-key (C1), and 3-way kill/rejoin. The C2 boundary,
+              restart persistence, export/import, invite lifecycle (H3), and owner-control
+              authorization (H1) each have their own automated suites. The cumulative-migration
+              chain proves the hardening migrations stack idempotently on one legacy base
+              (id-backfill → owner adoption → epoch → secret-store), and the mobile owner-control
+              client is proven over real hyperdht. The full per-row matrix status, the migration
+              chain detail, and the consolidated open release risks (sustained-reconnection CI
+              limits, GUI E2E checklist items, shared-package distribution, Pear/Bare packaging, and
+              the deferred-by-design items) are recorded in the plan's Phase 15 entry. Verification:
+              mobile CI green (45 shared + 100 security), headless green (13), desktop green (7).
+            </p>
+            <p>Phase commits: <code>listam-mobile</code> <code>089228b</code>, <code>listam-headless</code> <code>4ded719</code>.</p>
           </details>
 
           <a class="source" href="./plans.html#phases">plans.html#phases</a>

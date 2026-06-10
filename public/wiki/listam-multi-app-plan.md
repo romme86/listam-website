@@ -1618,13 +1618,56 @@ Pause gate: commit the owner-control protocol, record the modified files/functio
 </details>
 
 <details>
-<summary>Phase 15 - Cross-app acceptance matrix and release readiness</summary>
+<summary>Phase 15 - Cross-app acceptance matrix and release readiness (listam-mobile commit 089228b, listam-headless commit 4ded719)</summary>
 
 Commit boundary: automate the private-bootstrap cross-instance matrix, prove mobile/desktop/headless convergence, run the cumulative-migration chain on one base (id-backfill, then owner-key adoption, then epoch, then secret-store) to prove stacked migrations are forward-compatible, document manual acceptance, and close first-milestone release risks.
 
 Depends on: 12, 14. Unblocks: -.
 
 Acceptance: the headless-driven subset of the matrix runs in CI, the cumulative-migration chain passes, and each capability is "done" only when its matrix row passes.
+
+Phase commits: `listam-mobile` `089228b` (`Phase 15 (mobile): owner-control client, cumulative-migration test, owned-devices UI`), `listam-headless` `4ded719` (`Phase 15: cross-instance acceptance matrix harness`).
+
+Files modified:
+
+- `listam-headless/test/helpers/matrix-scenario.mjs` + `test/matrix.test.mjs` (new): the headless-driven matrix, child-process services on a private hyperdht testnet, CORE tier in CI and FULL tier behind `LISTAM_MATRIX_FULL=1`. `src/service.mjs`: the owner-only `remove-member` op (the C1 re-key trigger).
+- `listam-mobile/packages/backend/lib/owner-control-client.mjs` (new): the worklet owner-control client (the mobile client deferred from Phase 14). `backend.mjs`: lazy client, `RPC_CONTROL_*` handlers, shutdown close. `packages/protocol`: `RPC_CONTROL_PAIR/COMMAND/LIST`. `packages/secrets`: `controlDeviceSeed` name; `parseSecretName` accepts any registered hex secret. `packages/backend/package.json` + root: `hyperdht`/`@listam/owner-control` declared.
+- `listam-mobile/app/components/OwnedDevicesDialog.tsx` (new), `app/components/Header.tsx`, `app/hooks/_useWorklet.ts`, `app/index.tsx`, `packages/i18n` (`control.*` EN/ES/types): the RN owned-devices surface.
+- `listam-mobile/backend/lib/migration-chain.test.mjs` (new), plus the `owner-control-client.{test,scenario}.mjs` pair: the two new hyperdht-/Autobase-backed acceptance suites. `eslint.config.mjs`: exempt `*.scenario.mjs` from `no-console`. Bundles regenerated.
+
+#### Cross-instance interaction matrix — per-row status
+
+Every row drives the one shared `@listam/backend` over the one shared `@listam/client` contract, so the headless-driven automated rows establish the protocol-level guarantee for the mobile/desktop pairings; the GUI-level rows are the repeatable manual procedures below. Reasons in parentheses cite the review findings.
+
+| Row | Status | Evidence |
+| --- | --- | --- |
+| mobile ↔ mobile (invite/join, edit, done, delete, converge; duplicate-name by id) | Automated (CORE) + manual | `matrix-scenario` join-and-duplicate-names + steady-state (FULL); manual two-simulator run |
+| mobile ↔ desktop (parity both directions; offline edits; reconnect) | Automated (protocol) + manual | matrix rows (same backend/contract); manual simulator + `pear run` |
+| mobile ↔ headless (stays online; reopen → sync; export/import round-trip) | Automated | `restart.test`, `export-import.test`, matrix convergence |
+| desktop ↔ headless (invite on headless, join from desktop; owner-control) | Automated (protocol) + manual | matrix + `owner-control` acceptance; manual desktop pane |
+| 3-way (converge; kill one; rejoin without duplicates or resurrected deletes) | Automated (FULL) | `matrix-scenario` three-way-convergence / survivors-continue / rejoin-reconciles |
+| membership: owner add works; **non-owner add-writer ignored (C3)**; member-removal re-key (C1) | Automated | matrix non-owner-removal-refused + member-removal-rekey (FULL); unit-proven in the security suite |
+| credential boundary: blind replicates but cannot decrypt (C2); trusted can read | Automated | `blind-c2.test` |
+| invite safety: link-join needs confirmation (H2); expired/exhausted rejected (H3) | Automated + manual | matrix invite-rotation; `invite-policy`/`invite-confirmation` units; manual deep-link tap |
+| owner-control: replayed/expired/out-of-scope rejected; revoked device blocked (H1) | Automated | `owner-control` acceptance over real hyperdht |
+| restart / persistence: each instance rebuilds identical state from disk | Automated | `restart.test`; cumulative-migration chain |
+
+The CORE matrix tier and both new mobile suites run in CI; the FULL tier (sustained bidirectional/mesh steady-state) is a documented, repeatable extended run (`LISTAM_MATRIX_FULL=1`) because main-swarm DHT reconnection between independent processes is environment-flaky in a sandbox — the guarantees it demonstrates (C1/C3/M1) are independently unit-proven.
+
+#### Cumulative-migration chain
+
+`listam-mobile/backend/lib/migration-chain.test.mjs` forges one base in the pre-hardening prototype shape (text-keyed ops, idless legacy view entries, plaintext key files, no membership, no epochs), opens it with the current backend, and asserts the whole stack runs: M1 deterministic id-backfill (done state preserved), C3 owner adoption, C1/4 epoch-1 bootstrap, M5/2 plaintext keys migrated into the secret store and deleted. A restart proves idempotence — identical ids, the owner bootstrapped exactly once, the epoch unchanged, keys served from the store.
+
+#### Open release risks (consolidated)
+
+- **Sustained P2P reconnection in CI:** the FULL matrix tier does not reliably complete in the sandbox; CI gates the deterministic CORE tier and unit-proven crypto, and the FULL run is documented/repeatable. A real multi-device or longer-soak environment should run FULL before release.
+- **GUI runtime verification:** the desktop (`pear run`) and mobile (device) owner-control and recovery screens are lint/typecheck-verified and preview-checked where possible, but full on-device E2E remains a release-checklist item.
+- **Shared-package distribution:** packages are consumed via `file:`/workspace links into `listam-mobile/packages/*`; the `listam-shared` repo + versioned npm publish is not yet done.
+- **Pear/Bare packaging:** desktop and headless run via Pear/Node respectively; production Pear Desktop and Pear Terminal/Bare packaging are follow-ups on the existing platform seams.
+- **Deferred-by-design:** OS keychain/keyring for desktop/headless secrets (file tier today); blind-helper full core-set hand-off and base-key sharing over owner-control; no remote `devices:manage` scope; control-server key rotation; encrypted exports; relay/store-and-forward for others; pre-existing generated `itemIconMap.ts` typecheck errors.
+- **Inherited lower-severity items** (full-list pushes vs diffs; per-base write-context hardening) remain tracked from the original review and are acceptable for the parity milestone.
+
+Implementation summary: Phase 15 closes the first milestone. The headless-driven matrix subset runs in CI on a private testnet with real child-process instances, proving — at the protocol level all surfaces share — invite/join convergence, duplicate-name handling by stable id (M1), the owner-gated roster (C3), and, in the extended tier, steady-state convergence, member-removal re-key (C1), and 3-way kill/rejoin reconciliation. The C2 credential boundary, restart persistence, export/import round-trip, invite lifecycle (H3), and owner-control authorization (H1) are each covered by their own automated suites. The cumulative-migration chain proves the hardening migrations stack idempotently on one legacy base. The mobile owner-control client (deferred from Phase 14) is built on the shared session/client layer and proven over real hyperdht. Verification: `listam-mobile` `npm run ci` green (45 shared + 100 security), `listam-headless` green (13, CORE matrix included), `listam-desktop` green (7). Per-row status, the migration chain, and the consolidated release risks are recorded above; the GUI E2E rows are documented repeatable manual procedures.
 
 Pause gate: commit the acceptance work, record the modified files/functions, and pause for milestone review before adding new list domains, multiple list instances, or grouping.
 

@@ -925,7 +925,7 @@
           </details>
 
           <details class="phase-record" id="phase-13" data-nav-section>
-            <summary>Phase 13 - Headless service and CLI parity (commits: pending)</summary>
+            <summary>Phase 13 - Headless service and CLI parity (listam-headless commit d74bfdc, listam-mobile commit c626a40, listam-desktop commit 2673a0b)</summary>
             <p>
               Commit boundary: build the Pear Terminal/Bare headless app as a long-lived owned peer,
               persist the data model, add CLI setup/status/invite/join/export/shutdown commands, enforce
@@ -936,11 +936,44 @@
             <p><strong>Acceptance:</strong> a blind-storage instance replicates but cannot decrypt <code>view.get()</code>; a restart preserves identity, storage, and status.</p>
             <p>Pause gate: record the committed files/functions and wait before the owner-control protocol.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-headless/</code> (new repo): <code>headless.mjs</code> CLI (setup/run/status with --storage/--bootstrap/--role/--base-key/--max-storage-bytes; run exits on stdin EOF), <code>src/service.mjs</code> (participant role over the shared backend with the headless namespace, lease, refuse-destructive recovery, file-store identity, and the plan's scriptable harness primitives incl. export/import), <code>src/blind.mjs</code> (blind-storage role: Corestore + Hyperswarm only, public-key pins, full live download, own lease, pin/peek diagnostics), <code>src/config.mjs</code>, <code>src/status.mjs</code>, <code>src/quota.mjs</code>, tests, README.</li>
+              <li><code>listam-mobile/packages/secrets</code>: <code>createFileSecretStore</code> promoted from the desktop app (shared dev/file tier pending OS keychain/keyring).</li>
+              <li><code>listam-mobile/packages/backend/platform/node.mjs</code>: <code>options.bootstrap</code> passthrough — previously dropped silently, so constructor-passed bootstraps landed on the public DHT instead of the private testnet; bundles regenerated.</li>
+              <li><code>listam-desktop/src/secret-store.mjs</code>: re-exports the shared store.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>startHeadlessService</code>, <code>startBlindHelper</code>, <code>buildConfig</code>/<code>loadConfig</code>/<code>saveConfig</code>/<code>parseBootstrap</code>/<code>normalizeBaseKeyHex</code>, <code>writeStatus</code>/<code>readStatus</code>, <code>directorySizeBytes</code>/<code>createQuotaMonitor</code>, the CLI dispatcher, and test helpers <code>runHeadless</code>/<code>runOneShot</code>.</li>
+              <li>Created <code>createFileSecretStore</code> in <code>@listam/secrets</code>; updated <code>createNodePlatform</code> (bootstrap passthrough).</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              The headless personal server ships in the two honest capability tiers from the C2
+              re-scope. A <strong>participant</strong> is a trusted full member: the same backend,
+              durable identity across restarts, and the scriptable command surface the interaction
+              matrix drives. A <strong>blind-storage helper</strong> holds ciphertext only — it pins
+              cores by public key, replicates and serves blocks it cannot read, and structurally
+              cannot be handed the encryption key (no Autobase, no secret store in that role).
+              Status snapshots expose peer count, join state, base identity fingerprints, item
+              counts, and quota usage; storage quotas make an over-quota helper leave its topics
+              without ever deleting data (queue quotas belong to the deferred async-message role).
+            </p>
+            <p>
+              Acceptance is test-proven on a private hyperdht testnet with child-process instances:
+              the C2 test shows a blind helper syncing the owner's appends (including post-sync
+              appends) with every stored block opaque and no key material ever present on the
+              helper; the restart test shows the same base-identity fingerprint, item ids, and a
+              live status file across stop/start, with the Phase 11 lease refusing a second
+              instance. Export/import round-trips stable ids, edits, and done state into a fresh
+              base. Verification: headless <code>npm run ci</code> green (lint + 11 tests); mobile
+              green (98 security + 35 shared); desktop green (7). Follow-ups: Pear Terminal/Bare
+              packaging on the same platform seam; blind pins cover the bootstrap core until the
+              Phase 14 owner-control channel hands over the full core set and base-key sharing;
+              exports are plaintext behind an explicit operator action; soak beyond test scale is
+              documented, not CI-bound.
+            </p>
+            <p>Phase commits: <code>listam-headless</code> <code>d74bfdc</code>, <code>listam-mobile</code> <code>c626a40</code>, <code>listam-desktop</code> <code>2673a0b</code>.</p>
           </details>
 
           <details class="phase-record" id="phase-14" data-nav-section>

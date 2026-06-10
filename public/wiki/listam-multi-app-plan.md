@@ -1550,13 +1550,33 @@ Pause gate: commit the desktop parity work, record the modified files/functions,
 </details>
 
 <details>
-<summary>Phase 13 - Headless service and CLI parity (C2)</summary>
+<summary>Phase 13 - Headless service and CLI parity (C2) (listam-headless commit d74bfdc, listam-mobile commit c626a40, listam-desktop commit 2673a0b)</summary>
 
 Commit boundary: build the Pear Terminal/Bare headless app as a long-lived owned peer, persist the data model, add CLI setup/status/invite/join/export/shutdown commands, enforce blind-helper credential boundaries (a blind helper never receives the encryption key), and add resource quotas on queues and storage. The owner-control protocol is Phase 14.
 
 Depends on: 8, 11. Unblocks: 14, 15.
 
 Acceptance: a blind-storage instance replicates but cannot decrypt `view.get()`; a restart preserves identity, storage, and status.
+
+Phase commits: `listam-headless` `d74bfdc` (`Phase 13: headless service and CLI parity`, root commit of the new repo), `listam-mobile` `c626a40` (`Phase 13 (shared packages): file secret store in @listam/secrets and node bootstrap passthrough`), `listam-desktop` `2673a0b` (`Use the shared @listam/secrets file secret store`).
+
+Files modified:
+
+- `listam-headless/` (new repo): `headless.mjs` (CLI entry: `setup`/`run`/`status` with `--storage`/`--bootstrap`/`--role`/`--base-key`/`--max-storage-bytes`; `run` exits on stdin EOF so harness runs never orphan), `src/service.mjs` (participant role: the shared `@listam/backend` on the `headless` storage namespace/lease with the refuse-destructive recovery policy, identity persisted via the shared file secret store, scriptable JSON-line stdin primitives including the plan's harness aliases `print-invite`/`dump-list`/`add-item`/`edit-item`/`mark-done`/`delete-item` plus `export`/`import`), `src/blind.mjs` (blind-storage role: Corestore + Hyperswarm only — pins cores by public key, full live download, swarm replication, own storage lease, `pin`/`peek` diagnostics; no Autobase, no code path that accepts the encryption key), `src/config.mjs`, `src/status.mjs` (periodic snapshot file with fingerprints only), `src/quota.mjs` (directory-size quota monitor; a blind helper over quota leaves its swarm topics and never deletes data), tests, eslint config, README.
+- `listam-mobile/packages/secrets`: `createFileSecretStore` promoted from the desktop app so desktop and headless share one implementation (owner-only 0600 JSON file; documented dev/file tier pending OS keychain/keyring work).
+- `listam-mobile/packages/backend/platform/node.mjs`: `createNodePlatform` now passes `options.bootstrap` through to `swarmBootstrap` — it was silently dropped, so a service passing bootstrap at construction joined the public DHT while its private-testnet peers waited (Phase 12's desktop driver assigned the property post-construction, masking this). Bundles regenerated.
+- `listam-desktop/src/secret-store.mjs`: re-exports the shared store.
+
+Functions created / updated:
+
+- Created `startHeadlessService` (+ its op handlers and snapshot), `startBlindHelper` (+ `pin`/`peek`), `buildConfig`/`loadConfig`/`saveConfig`/`parseBootstrap`/`normalizeBaseKeyHex`, `writeStatus`/`readStatus`, `directorySizeBytes`/`createQuotaMonitor`, the CLI arg parser/dispatcher, and the test helpers `runHeadless`/`runOneShot`.
+- Created `createFileSecretStore` in `@listam/secrets`; updated `createNodePlatform` (bootstrap passthrough).
+
+Implementation summary: Phase 13 ships the headless personal server in the two honest capability tiers from the C2 re-scope. A **participant** is a trusted full member: the same backend, durable identity, and the full scriptable command surface for the interaction-matrix harness. A **blind-storage helper** holds ciphertext only — it is configured with core public keys, replicates and serves blocks it cannot read, and structurally cannot be handed the encryption key (there is no Autobase and no secret store in that role). Status snapshots expose peer count, sync/join state, base identity as a fingerprint, item counts, and quota usage; the `status` subcommand reads them with staleness detection. Storage quotas bound the helper's own footprint (queue quotas belong to the deferred async-message helper role).
+
+Both acceptance signals are covered by tests on a private hyperdht testnet with child-process instances: the C2 test proves a blind helper syncs the owner's appends (including new appends after the initial sync), that every locally stored block contains no plaintext and parses as nothing, and that no key material ever exists on the helper; the restart test proves the same base-identity fingerprint, the same item ids, and a live status file across a full stop/start, with the Phase 11 lease refusing a second instance on the same root. Export/import round-trips stable ids, edits, and done state into a fresh base (updates upsert by id through the shared reduction). Verification: `listam-headless` `npm run ci` green (lint + 11 tests); `listam-mobile` green (98 security + 35 shared); `listam-desktop` green (7 tests).
+
+Deviations and follow-up risks: the service runs Node-first (matching the plan's own harness commands); Pear Terminal/Bare packaging is a packaging follow-up on the same platform seam. The blind helper pins the base (bootstrap) core — the full writer/view core set hand-off belongs to the Phase 14 owner-control channel, as does revealing the base key to configure a helper without reading the owner's secrets file. Exports are plaintext JSON behind an explicit operator action (encrypted exports are future work). First-run `setup` takes flags rather than an interactive role questionnaire. Long-duration soak beyond the test-suite scale is documented but not CI-bound. Headless secrets use the shared file store pending OS keyring/TPM integration.
 
 Pause gate: commit the headless service work, record the modified files/functions, and wait before the owner-control protocol.
 

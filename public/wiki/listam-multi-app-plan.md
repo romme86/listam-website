@@ -1583,13 +1583,35 @@ Pause gate: commit the headless service work, record the modified files/function
 </details>
 
 <details>
-<summary>Phase 14 - Owner-control protocol (H1)</summary>
+<summary>Phase 14 - Owner-control protocol (H1) (listam-mobile commit b9917ac, listam-headless commit ccdc099, listam-desktop commit 4fbe47b)</summary>
 
 Commit boundary: establish per-device key pairs at pairing; require every command to carry a nonce/timestamp for replay protection and a signature; model capabilities as separate grants (`status:read`, `diagnostics:read`, `topics:configure`, `invite:create`, `export:create`, `import:apply`, `service:shutdown`); add device revocation and key rotation; build the desktop and mobile owner-control clients.
 
 Depends on: 13. Unblocks: 15.
 
 Acceptance: headless refuses unsigned, replayed, expired, or out-of-scope commands, and a diagnostics-only client cannot shutdown, import, export, or configure topics.
+
+Phase commits: `listam-mobile` `b9917ac` (`Phase 14 (shared packages): @listam/owner-control protocol`), `listam-headless` `ccdc099` (`Phase 14: P2P owner-control server (H1)`), `listam-desktop` `4fbe47b` (`Phase 14: desktop owner-control client and owned-devices pane`).
+
+Files modified:
+
+- `listam-mobile/packages/owner-control/` (new shared package): signed command envelopes (command id, device id, capability scope, timestamp, per-device monotonic seq, payload hash, ed25519 signature over a canonical sorted-keys encoding), the seven capability grants exactly as planned with a per-command scope map (plus the implicit `device:rotate` self-right), the device registry (revocation, self-service rotation signed by the key being replaced — the old key dies and the new one inherits grants and the seq high-water mark — JSON persistence), single-use TTL-bound pairing codes (z32: server public key + one-time secret, capabilities bound server-side, constant-time secret comparison), and the transport-agnostic `createOwnerControlSession` client glue. 10 unit tests.
+- `listam-mobile/packages/i18n`: desktop owned-devices pane keys (EN+ES+types).
+- `listam-headless/src/control.mjs` (new): the hyperdht control server — persistent control keypair in the device-local file key store (service material, independent of list encryption keys, so the blind helper serves it without crossing C2), JSON-line framing over the encrypted stream, full envelope authorization before any execution, persisted device registry (`headless-devices.json`), and an audit ring with fingerprinted ids.
+- `listam-headless/headless.mjs`: role-scoped executors (participant: status/diagnostics/invite/data-only export/import/shutdown; blind: status/diagnostics/topics-pin/shutdown), graceful shutdown on the authorized remote command, and the operator-only management ops `control-info`/`control-pair`/`control-devices`/`control-revoke`/`control-audit` on the stdin surface; the ready line announces the control address.
+- `listam-headless/test/owner-control.test.mjs` + `test/helpers/owner-control-scenario.mjs` (new): the H1 acceptance matrix over real hyperdht on a private testnet, run as a plain child process so hyperdht's post-teardown reset noise can be filtered narrowly without masking assertion failures (the node:test wrapper asserts exit 0 plus nine scenario checkpoints).
+- `listam-desktop/src/owner-control.mjs` (new) + `src/ui.mjs` + `src/main.mjs`: the Pear-only client (device key in the shared file secret store, hyperdht dialing, pairing, signed requests, persisted paired-server list) and the OWNED DEVICES section in the Peers pane (pairing form, capability summary, signed status query; the browser preview states the section is unavailable without the Pear runtime).
+- `listam-desktop/test/sync.test.mjs` + `listam-headless/test/helpers/cli.mjs`: request/exit races pre-attach rejection handlers so late child exits can never surface as unhandled rejections.
+
+Functions created / updated:
+
+- Created (package): `createDeviceKeyPair`, `deviceIdFromPublicKey`, `canonicalJson`, `payloadHashHex`, `createCommandEnvelope`, `verifyCommandEnvelope`, `createDeviceRegistry`, `authorizeCommand`, `createPairingOffer`/`parsePairingCode`/`createPairingRequest`/`verifyPairingRequest`, `createRotationPayload`/`applyRotation`, `normalizeCapabilities`, `createOwnerControlSession`.
+- Created (headless): `startOwnerControl` with its pairing/envelope handlers, audit ring, and registry persistence; the CLI executor and `handleOperatorOp` dispatch.
+- Created (desktop): `createOwnerControlManager` and `renderOwnedDevices`; updated `mountApp` and the Pear boot path.
+
+Implementation summary: Phase 14 replaces the unscoped-bearer-token risk H1 names with an authenticated-capability protocol. Trust bootstraps through operator-minted, single-use, ten-minute pairing codes whose capabilities are fixed server-side; thereafter every command is a signed envelope verified against the registered device key with double replay protection (freshness window plus persisted per-device monotonic sequence that survives restarts and rotation). Authorization happens before any execution, every decision is audited, and device management (minting codes, listing, revoking) deliberately stays on the Phase 13 operator surface rather than becoming a remote grant. The acceptance matrix is test-proven over real encrypted hyperdht connections on a private testnet: pairing (including single-use enforcement against a second redeemer), signed status/diagnostics success, the diagnostics-only client refused `shutdown`/`import`/`export`/`topics` with `out-of-scope`, unsigned/garbage/byte-identical-replay/expired/unknown-device envelopes refused with precise reasons, invite and export working under their grants, key rotation killing the old key while the new inherits, operator revocation cutting a device off, and an authorized remote shutdown stopping the service cleanly. Verification: `listam-headless` `npm run ci` green (12 tests), `listam-mobile` green (45 shared + 98 security), `listam-desktop` green (7 tests); the owned-devices pane verified in the browser preview (unavailable-state) — live pane behavior requires `pear run`.
+
+Deviations and follow-up risks: the mobile owner-control UI is deferred to Phase 15 — it consumes the same shared session/client layer, but needs RN screens plus worklet plumbing; the shared package is the mobile client foundation. Device management has no remote scope (`devices:manage`) by design this phase — operator-only. The control server's own keypair does not rotate yet (device keys do). Unredeemed pairing offers deliberately do not survive a service restart. The desktop client dials the public DHT; private-bootstrap configuration for the desktop client is a harness nicety left to Phase 15.
 
 Pause gate: commit the owner-control protocol, record the modified files/functions, and wait before full cross-app acceptance.
 

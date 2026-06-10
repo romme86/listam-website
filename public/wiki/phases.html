@@ -977,7 +977,7 @@
           </details>
 
           <details class="phase-record" id="phase-14" data-nav-section>
-            <summary>Phase 14 - Owner-control protocol (commits: pending)</summary>
+            <summary>Phase 14 - Owner-control protocol (listam-mobile commit b9917ac, listam-headless commit ccdc099, listam-desktop commit 4fbe47b)</summary>
             <p>
               Commit boundary: establish per-device key pairs at pairing, require every command to carry
               a nonce/timestamp and signature, model capabilities as separate grants (status:read,
@@ -989,11 +989,36 @@
             <p><strong>Acceptance:</strong> headless refuses unsigned, replayed, expired, or out-of-scope commands, and a diagnostics-only client cannot shutdown, import, export, or configure topics.</p>
             <p>Pause gate: record the committed files/functions and wait before full cross-app acceptance.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-mobile/packages/owner-control/</code> (new shared package): signed envelopes (command id, device id, scope, timestamp, per-device monotonic seq, payload hash, ed25519 signature over a canonical encoding), the seven planned capability grants with a per-command scope map, device registry (revocation, self-rotation with grant/seq inheritance, JSON persistence), single-use TTL pairing codes with server-bound capabilities, and the transport-agnostic client session; 10 unit tests. Plus desktop owned-devices i18n keys.</li>
+              <li><code>listam-headless/src/control.mjs</code> + <code>headless.mjs</code>: hyperdht control server on a persistent device-local keypair, full authorization before execution, role-scoped executors, persisted device registry, audit ring, and operator-only management ops (control-pair/devices/revoke/audit/info).</li>
+              <li><code>listam-headless/test/owner-control.test.mjs</code> + scenario helper: the H1 acceptance matrix over real hyperdht on a private testnet (run as a plain child so hyperdht teardown noise is filtered narrowly; nine checkpoints asserted).</li>
+              <li><code>listam-desktop/src/owner-control.mjs</code> + UI: Pear-only client (device key in the shared file store, pairing, signed status queries) and the OWNED DEVICES section in the Peers pane with an honest unavailable state in the browser preview.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created the protocol surface (<code>createCommandEnvelope</code>/<code>verifyCommandEnvelope</code>/<code>authorizeCommand</code>, <code>createDeviceRegistry</code>, pairing offer/request/verify, rotation helpers, <code>createOwnerControlSession</code>), the headless <code>startOwnerControl</code> server with its executors and operator ops, and the desktop <code>createOwnerControlManager</code> + <code>renderOwnedDevices</code>.</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Phase 14 replaces the unscoped-bearer-token risk H1 names with an authenticated-capability
+              protocol: trust bootstraps through operator-minted single-use pairing codes whose
+              capabilities are fixed server-side, and every subsequent command is a signed envelope
+              verified against the registered device key with double replay protection (freshness window
+              plus a persisted per-device monotonic sequence that survives restarts and rotation).
+              Authorization precedes execution, every decision is audited, and device management stays
+              on the Phase 13 operator surface rather than becoming a remote grant. The acceptance
+              matrix is test-proven over real encrypted hyperdht connections: pairing with single-use
+              enforcement, signed command success, the diagnostics-only client refused
+              shutdown/import/export/topics as out-of-scope, unsigned/replayed/expired/unknown-device
+              envelopes refused with precise reasons, rotation and operator revocation, and an
+              authorized remote shutdown stopping the service cleanly. Verification: headless CI green
+              (12 tests), mobile green (45 shared + 98 security), desktop green (7). Follow-ups: the
+              mobile owner-control UI lands with Phase 15 on the same shared client layer; no remote
+              devices:manage scope by design; the control server's own keypair does not rotate yet;
+              unredeemed pairing offers do not survive restart.
+            </p>
+            <p>Phase commits: <code>listam-mobile</code> <code>b9917ac</code>, <code>listam-headless</code> <code>ccdc099</code>, <code>listam-desktop</code> <code>4fbe47b</code>.</p>
           </details>
 
           <details class="phase-record" id="phase-15" data-nav-section>

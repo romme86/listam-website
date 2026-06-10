@@ -869,7 +869,7 @@
           </details>
 
           <details class="phase-record" id="phase-12" data-nav-section>
-            <summary>Phase 12 - Desktop parity surface (commits: pending)</summary>
+            <summary>Phase 12 - Desktop parity surface (listam-desktop commit 1bbdd52, listam-mobile commit 67429e7)</summary>
             <p>
               Commit boundary: build the Pear Desktop app around the shared packages, match current
               mobile parity, implement desktop IPC/client contracts, consume the Phase 9 UI catalogs,
@@ -880,11 +880,48 @@
             <p><strong>Acceptance:</strong> desktop reaches mobile parity, syncs with mobile through invite, uses the shared UI i18n catalogs, and matches the desktop design-guide examples in English and pseudo-localized/long-string modes.</p>
             <p>Pause gate: record the committed files/functions and wait before headless implementation.</p>
             <h3>Files modified</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li><code>listam-desktop/</code> (new repo, root commit): Pear desktop <code>package.json</code> with <code>file:</code> shared-package deps, <code>index.html</code>, <code>app.css</code> (kinetic-minimalist tokens, no CDN fetches), <code>src/</code> (main, backend-boot, secret-store, store, ui, i18n, icons, mock-backend), eslint config, README, tests, and the committed <code>design-guide/</code>.</li>
+              <li><code>listam-mobile/packages/client</code>: <code>createBackendChannel()</code> — the desktop in-process IPC contract decoding events with the same <code>decodeBackendRequest</code> as the worklet adapter, with async reply support for the secret-persistence ack; contract tests extended.</li>
+              <li><code>listam-mobile/packages/backend</code>: new <code>platform/pear.mjs</code>; <code>platform.bootstrap</code> feeds every Hyperswarm for private-testnet harness runs; invite-epoch codec in <code>key-epochs.mjs</code>; join-flow and apply() fixes described below; bundles regenerated.</li>
+              <li><code>listam-mobile/packages/i18n</code>: desktop chrome keys (nav, peers, diagnostics, shortcuts) in EN+ES with typed declarations.</li>
+            </ul>
             <h3>Functions created / updated / deleted</h3>
-            <p>Pending phase commit.</p>
+            <ul>
+              <li>Created <code>createBackendChannel</code>, <code>createPearPlatform</code>, <code>encodeInviteEpochData</code>/<code>decodeInviteEpochData</code>, <code>resetApplyMembershipCheckpoint</code>, and the desktop app modules (<code>createDesktopStore</code>, <code>mountApp</code>, <code>createFileSecretStore</code>, <code>bootDesktopBackend</code>, <code>createMockBackend</code>, locale/icon helpers).</li>
+              <li>Updated <code>createInvite</code> (embeds the current epoch key as signed invite data; retires invites minted for a rotated epoch), the host pairing confirm (sends <code>additional</code>), <code>joinViaInvite</code> (decodes the epoch from <code>paired.data</code>), <code>removeMemberAndRotateEpoch</code> (rotates the outstanding invite), and <code>apply</code> (membership state derived from the view via a truncation-aware checkpoint).</li>
+            </ul>
             <h3>Implementation summary</h3>
-            <p>Pending phase commit.</p>
+            <p>
+              Listam Desktop runs the same embedded <code>@listam/backend</code> as mobile (own
+              'desktop' storage root, lease, interactive recovery) behind the new in-process client
+              channel, reduces state through the shared id-keyed reduction, consumes the Phase 9
+              catalogs (system/EN/ES plus pseudo and long-string modes), groups by
+              <code>@listam/grocery</code> categories, gates paste-joins behind the H2 explicit
+              confirmation, surfaces the Phase 11 recovery prompt, and is keyboard-first — all on
+              the kinetic-minimalist system, compared against the design-guide examples in the
+              browser preview in English, pseudo-locale, and grid modes.
+            </p>
+            <p>
+              Building the plan's two-instance harness (child-process backends on a private
+              hyperdht testnet) exposed two real cross-device join bugs in the shipping backend,
+              both fixed and regression-tested here: the epoch key passed as extra
+              BlindPairing confirm fields was silently dropped (every real guest join failed) and
+              now travels as the invite's signed additional data; and apply() kept membership
+              state in memory across linearizer reorgs, rejecting re-run history as replays so
+              joined members never became writable — it now re-derives state from the view. The
+              cross-instance test then passed end to end: real invite pairing, pre-join history
+              decryption, writability via the owner-signed membership flow, host→guest sync, and
+              roster convergence. Verification: desktop <code>npm run ci</code> green (lint + 7
+              tests incl. the testnet suite); mobile <code>npm run ci</code> green (98 security +
+              35 shared tests). Follow-ups: device-level mobile↔desktop row stays in Phase 15;
+              full bidirectional steady-state assertions behind <code>LISTAM_SYNC_FULL=1</code>
+              (main-swarm reconnection between two local processes is environment-flaky); desktop
+              secrets in an owner-only file store pending OS-keychain work; <code>pear run</code>
+              GUI verification pending; shared packages still consumed from
+              <code>listam-mobile/packages/*</code> pending the listam-shared extraction.
+            </p>
+            <p>Phase commits: <code>listam-desktop</code> <code>1bbdd52</code> (<code>Phase 12: Pear Desktop parity surface</code>) and <code>listam-mobile</code> <code>67429e7</code> (<code>Phase 12 (shared packages): desktop client channel, Pear platform, and two cross-device join fixes</code>).</p>
           </details>
 
           <details class="phase-record" id="phase-13" data-nav-section>

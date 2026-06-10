@@ -1511,13 +1511,39 @@ Pause gate: commit the durability work, record the modified files/functions, and
 </details>
 
 <details>
-<summary>Phase 12 - Desktop parity surface</summary>
+<summary>Phase 12 - Desktop parity surface (listam-desktop commit 1bbdd52, listam-mobile commit 67429e7)</summary>
 
 Commit boundary: build the Pear Desktop app around the shared packages, match current mobile parity, implement desktop IPC/client contracts, consume the Phase 9 UI catalogs, and compare UI against `listam-desktop/design-guide/`. The desktop owner-control client is deferred to Phase 14.
 
 Depends on: 8, 9, 11. Unblocks: 15.
 
 Acceptance: desktop reaches mobile parity, syncs with mobile through invite, uses the shared UI i18n catalogs, and matches the desktop design-guide examples in English and pseudo-localized/long-string modes.
+
+Phase commits: `listam-desktop` `1bbdd52` (`Phase 12: Pear Desktop parity surface`, root commit of the new repo) and `listam-mobile` `67429e7` (`Phase 12 (shared packages): desktop client channel, Pear platform, and two cross-device join fixes`).
+
+Files modified:
+
+- `listam-desktop/` (new repo): `package.json` (Pear desktop config, `file:` deps on the shared packages, npm overrides pinning all `@listam/*` to the mobile workspace), `index.html` + import map, `app.css` (kinetic-minimalist tokens transcribed from `design-guide/`, no CDN/network fetches), `src/main.mjs` (Pear vs mock boot), `src/backend-boot.mjs` (in-process `@listam/backend` under Pear with the desktop storage namespace and interactive recovery policy), `src/secret-store.mjs` (owner-only JSON file store answering `RPC_PERSIST_SECRET` acks via `@listam/secrets`), `src/store.mjs` (client-event reducer over `@listam/domain`'s id-keyed reduction, redacted diagnostics ring), `src/ui.mjs` (lists/peers/diagnostics panes, share/join/members/recovery/shortcuts dialogs, keyboard-first actions), `src/i18n.mjs`, `src/icons.mjs`, `src/mock-backend.mjs` (fixture backend for the design preview), `eslint.config.mjs`, `README.md`, tests under `test/`, and the committed `design-guide/`.
+- `listam-mobile/packages/client/index.mjs`, `index.d.ts`, `client-contract.test.mjs`: `createBackendChannel()` — the desktop in-process IPC contract (same RPC commands, same `decodeBackendRequest` events as the worklet adapter, async `event.reply()` for the secret-persistence ack), with contract tests.
+- `listam-mobile/packages/backend/platform/pear.mjs` (new), `package.json`: Pear Desktop platform factory and exports entry.
+- `listam-mobile/packages/backend/backend.mjs`, `lib/network.mjs`: `platform.bootstrap` → `swarmBootstrap` feeds every Hyperswarm (main and pairing temp swarm) so cross-instance tests run on a private hyperdht testnet; plus the two join fixes below.
+- `listam-mobile/packages/backend/lib/key-epochs.mjs`, `backend/lib/invite-epoch.test.mjs` (new): `encodeInviteEpochData`/`decodeInviteEpochData` and regression tests.
+- `listam-mobile/packages/i18n/catalogs/en.mjs`, `catalogs/es.mjs`, `index.d.ts`: desktop chrome keys (nav, peers, diagnostics, shortcuts).
+- `listam-mobile/app/app.ios.bundle.mjs`, `app/assets/backend.android.bundle.mjs`: regenerated.
+
+Functions created / updated:
+
+- Created `createBackendChannel` (`@listam/client`), `createPearPlatform` (`@listam/backend/platform/pear`), `encodeInviteEpochData`/`decodeInviteEpochData` (`key-epochs.mjs`), `resetApplyMembershipCheckpoint` (`backend.mjs`).
+- Desktop app: `createDesktopStore`/`selectSummary`/`selectDoneItems`, `mountApp` with its pane/dialog renderers and keyboard map, `createFileSecretStore`/`prepareDesktopSecrets`/`persistDesktopSecret`, `bootDesktopBackend`, `createMockBackend`, `buildI18n`/`loadLocaleChoice`/`persistLocaleChoice`/`localeChoiceLabel`, `categoryGlyph`.
+- Updated `createInvite` (embeds the current epoch key as signed invite data and retires invites minted for a rotated epoch), the blind-pairing `onadd` host confirm (sends `additional` instead of dropped extra fields), `joinViaInvite` (decodes the epoch from `paired.data`), `removeMemberAndRotateEpoch` (rotates the outstanding invite after a rekey), and `apply` (derives membership state from the view through a truncation-aware checkpoint).
+
+Implementation summary: Phase 12 builds Listam Desktop as a Pear Desktop app over the shared packages: the same `@listam/backend` mobile embeds (own `desktop` storage root, lease, interactive recovery), the new `@listam/client` in-process channel as the IPC contract, state reduced through the shared id-keyed reduction, the Phase 9 catalogs for all copy (system/EN/ES plus pseudo `en-XA` and long-string `en-XL` selectable in the sidebar), grocery grouping from `@listam/grocery`, manual paste-join behind the H2 explicit confirmation, the Phase 11 recovery prompt, and keyboard-first actions — all on the kinetic-minimalist system with the design guide committed into the repo as the binding reference. The UI was compared against the `grocery_list_rounded` and `peers_devices_rounded` examples in the browser preview (mock backend) in English, pseudo-locale, and grid modes.
+
+Building the plan's two-instance harness (child-process backends on a private hyperdht testnet) exposed **two real cross-device join bugs in the shipping backend**, both fixed and regression-tested in this phase: (1) BlindPairing's confirm payload only encodes `{key, encryptionKey, additional}`, so the epoch key the host passed as extra confirm fields was silently dropped and every real guest join failed (`Pairing returned no epoch key`) — the epoch key now travels as the invite's signed additional data, invites remember their mint epoch, and a rekey rotates the outstanding invite; (2) `apply()` accumulated membership state in memory across linearizer reorgs, so when the indexer set changed the re-run history was rejected as replays and `addWriter` never executed on the reorged timeline, leaving joined members permanently non-writable — membership state is now derived from the view through a truncation-aware Phase 11 checkpoint. The cross-instance test then passed end to end: real invite pairing, pre-join history decryption under the granted epoch, writability via the owner-signed membership flow, host→guest item sync, and roster convergence on both sides.
+
+Verification: `listam-desktop` `npm run ci` green (lint plus 7 tests including the two-instance testnet suite); `listam-mobile` `npm run ci` green (98 security + 35 shared tests, including the new invite-epoch and channel-contract tests); bundles regenerated.
+
+Deviations and follow-up risks: desktop↔mobile sync is proven at the protocol level (both surfaces drive the identical backend over the identical client contract); the device-level mobile/desktop row stays in the Phase 15 matrix. Full bidirectional steady-state assertions in the sync test sit behind `LISTAM_SYNC_FULL=1` because main-swarm reconnection between two processes on one machine is environment-flaky (the deterministic pairing path is asserted unconditionally). Desktop secrets use an owner-only file store, not the OS keychain yet. `pear run` on a GUI session (including import-map vs `require` resolution under Pear's loader) remains to be exercised. Shared packages are consumed via `file:` links into `listam-mobile/packages/*` — the `listam-shared` extraction is still pending. The mobile icon intelligence stays app-local; desktop ships category-level glyphs.
 
 Pause gate: commit the desktop parity work, record the modified files/functions, and wait before headless implementation.
 

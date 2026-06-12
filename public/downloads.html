@@ -94,43 +94,32 @@
       <div class="zen-rule flex-grow"></div>
     </div>
     <div class="border border-line rounded-2xl bg-card overflow-hidden">
-      <div class="p-8 flex flex-col md:flex-row md:items-center gap-6">
-        <div class="flex-1">
-          <h3 class="text-xl font-bold mb-1">Listam for macOS</h3>
-          <p class="text-sm text-ink-mute">
-            Version <!-- dmg-version -->0.12.0<!-- /dmg-version --> ·
-            <!-- dmg-size -->23 MB<!-- /dmg-size --> ·
-            Apple Silicon (M1 or newer)
-          </p>
-        </div>
-        <a class="lift inline-flex items-center justify-center gap-2 py-3 px-8 bg-inverse text-inverse-ink rounded-lg font-bold hover:opacity-90 transition-opacity whitespace-nowrap" href="/downloads/Listam-0.12.0.dmg" download>
-          <span class="material-icons-round text-lg" aria-hidden="true">download</span>
-          Download .dmg
-        </a>
+      <div class="p-8 pb-6">
+        <h3 class="text-xl font-bold mb-1">Listam for macOS</h3>
+        <p class="text-sm text-ink-mute">
+          Version 0.12.0 · Apple Silicon (M1 or newer) · runs on the Pear runtime
+        </p>
       </div>
       <div class="px-8 pb-8">
         <ol class="space-y-4 text-ink-mute text-sm leading-relaxed list-none">
           <li class="flex gap-4">
             <span class="font-mono text-ink-faint flex-shrink-0">01</span>
-            <span>Install the <a class="draw-link pb-0.5 text-ink font-medium" href="https://pears.com" rel="noopener noreferrer" target="_blank">Pear runtime</a> if you don't have it yet — Listam runs on it and fetches the app peer-to-peer.</span>
+            <span>Install the <a class="draw-link pb-0.5 text-ink font-medium" href="https://pears.com" rel="noopener noreferrer" target="_blank">Pear runtime</a> — Listam runs on it and arrives peer-to-peer, no installer download needed.</span>
           </li>
           <li class="flex gap-4">
             <span class="font-mono text-ink-faint flex-shrink-0">02</span>
-            <span>Open the downloaded <span class="font-mono text-ink">.dmg</span> and drag <span class="font-mono text-ink">Listam</span> into <span class="font-mono text-ink">Applications</span>.</span>
+            <span>In Terminal, run the line below. Pear fetches Listam over the swarm and asks you to trust it once.</span>
           </li>
+        </ol>
+        <pre class="mt-4 bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto"><code>pear run pear://h1jwexik1m9c75rqng8hico4oxqgmm8xskws684skmjepksq5r3o</code></pre>
+        <ol class="mt-4 space-y-4 text-ink-mute text-sm leading-relaxed list-none">
           <li class="flex gap-4">
             <span class="font-mono text-ink-faint flex-shrink-0">03</span>
-            <span>First launch: right-click the app and choose <span class="font-mono text-ink">Open</span>. The beta build is not yet notarized by Apple, so macOS asks once. If it stays quarantined, run <span class="font-mono text-ink">xattr -dr com.apple.quarantine /Applications/Listam.app</span> in Terminal.</span>
-          </li>
-          <li class="flex gap-4">
-            <span class="font-mono text-ink-faint flex-shrink-0">04</span>
-            <span>That's it. The app fetches itself over the swarm and updates arrive peer-to-peer — no installer reruns.</span>
+            <span>That's it. Launch it the same way any time — updates arrive peer-to-peer, automatically.</span>
           </li>
         </ol>
         <div class="mt-6 p-4 rounded-lg bg-surface-1 border border-line text-xs text-ink-mute leading-relaxed">
-          <span class="font-bold text-ink">If the window closes right after launch:</span> the Pear runtime hasn't trusted the app key yet. Run
-          <span class="font-mono text-ink break-all">pear run pear://h1jwexik1m9c75rqng8hico4oxqgmm8xskws684skmjepksq5r3o</span>
-          once in Terminal, approve it, and launch Listam again.
+          <span class="font-bold text-ink">A drag-install .dmg is in the works.</span> The beta currently ships through the Pear runtime only.
         </div>
       </div>
     </div>
@@ -214,8 +203,7 @@ listam-headless uninstall --storage ~/listam-data</code></pre>
       <p class="text-sm text-ink-mute leading-relaxed mb-4">
         Verify what you downloaded before you run it — <a class="draw-link pb-0.5 text-ink font-medium" href="/downloads/SHA256SUMS.txt">SHA256SUMS.txt</a>:
       </p>
-      <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-xs overflow-x-auto mb-4"><code>Listam-0.12.0.dmg            <!-- dmg-sha -->0b0e4140e25a7a11cf10c7dd317610adf7ff4e4904a7bd0e7c4dc9c32ac1cafb<!-- /dmg-sha -->
-listam-headless-0.13.0.tgz   <!-- tgz-sha -->8aaa1a1305115fb630deb4e99cbd5ff698275cd1ca70ef16df82546456a23534<!-- /tgz-sha --></code></pre>
+      <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-xs overflow-x-auto mb-4"><code>listam-headless-0.13.0.tgz   <!-- tgz-sha -->8aaa1a1305115fb630deb4e99cbd5ff698275cd1ca70ef16df82546456a23534<!-- /tgz-sha --></code></pre>
       <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto"><code>shasum -a 256 -c SHA256SUMS.txt</code></pre>
     </div>
   </section>

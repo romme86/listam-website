@@ -1,0 +1,190 @@
+/* Listam site theme — tokens shared with the desktop app (listam-desktop/app.css).
+   The signal accent (--signal) is theme-constant; everything else is ink on paper. */
+:root {
+  --surface-0: #fbf9f9;
+  --surface-1: #f5f3f3;
+  --surface-2: #efeded;
+  --surface-3: #e3e2e2;
+  --card: #ffffff;
+
+  --ink: #1b1c1c;
+  --ink-mute: #5d5f5f;
+  --ink-faint: #7e7576;
+  --line: #cfc4c5;
+
+  --inverse-surface: #303031;
+  --inverse-ink: #f2f0f0;
+
+  --signal: #c3f400;
+  --on-signal: #161e00;
+
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 700ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.dark {
+  --surface-0: #101212;
+  --surface-1: #161919;
+  --surface-2: #1d2121;
+  --surface-3: #252a2a;
+  --card: #181b1b;
+
+  --ink: #f1efef;
+  --ink-mute: #b0abab;
+  --ink-faint: #8a8485;
+  --line: #34393a;
+
+  --inverse-surface: #e7e4e4;
+  --inverse-ink: #1b1c1c;
+}
+
+body {
+  transition: background-color 300ms var(--ease), color 300ms var(--ease);
+}
+
+/* ---- chrome ---- */
+
+.site-header {
+  background: color-mix(in srgb, var(--surface-0) 86%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+/* ---- hexagram (Tong Ren) ---- */
+
+.hexagram-line {
+  height: 12px;
+  width: 100%;
+  border-radius: 9999px;
+  background-color: currentColor;
+  margin-bottom: 8px;
+}
+.hexagram-broken {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.hexagram-broken span {
+  height: 12px;
+  width: 42%;
+  border-radius: 9999px;
+  background-color: currentColor;
+}
+.hexagram-mark .hexagram-line,
+.hexagram-mark .hexagram-broken {
+  height: 3px;
+  margin-bottom: 2.5px;
+}
+.hexagram-mark .hexagram-broken span {
+  height: 3px;
+}
+
+/* brush-in: lines draw from the center on load, bottom line first
+   (strokes settle upward, like laying the hexagram down) */
+.hexagram-draw .hexagram-line,
+.hexagram-draw .hexagram-broken {
+  transform: scaleX(0);
+  opacity: 0;
+  animation: hx-draw var(--t-slow) var(--ease) forwards;
+}
+.hexagram-draw > :nth-child(6) { animation-delay: 60ms; }
+.hexagram-draw > :nth-child(5) { animation-delay: 180ms; }
+.hexagram-draw > :nth-child(4) { animation-delay: 300ms; }
+.hexagram-draw > :nth-child(3) { animation-delay: 420ms; }
+.hexagram-draw > :nth-child(2) { animation-delay: 540ms; }
+.hexagram-draw > :nth-child(1) { animation-delay: 660ms; }
+@keyframes hx-draw {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* ---- zen motion ---- */
+
+/* ink-settle: sections surface as you reach them */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  filter: blur(5px);
+  transition:
+    opacity var(--t-slow) var(--ease),
+    transform var(--t-slow) var(--ease),
+    filter var(--t-slow) var(--ease);
+}
+.reveal.is-inview {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.reveal-d1 { transition-delay: 90ms; }
+.reveal-d2 { transition-delay: 180ms; }
+.reveal-d3 { transition-delay: 270ms; }
+
+/* a rule line that draws itself across when it enters the view */
+.zen-rule {
+  height: 1px;
+  background-color: var(--line);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1100ms var(--ease) 150ms;
+}
+.zen-rule.is-inview { transform: scaleX(1); }
+
+/* signal underline that draws left-to-right on hover */
+.draw-link {
+  background-image: linear-gradient(to right, var(--signal), var(--signal));
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--t-base) var(--ease);
+}
+.draw-link:hover,
+.draw-link:focus-visible {
+  background-size: 100% 2px;
+}
+
+/* card lift with the border easing line -> signal */
+.lift {
+  transition:
+    transform var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
+}
+.lift:hover { transform: translateY(-3px); border-color: var(--signal); }
+
+/* breathing: the hero phones float on slow counter-phased cycles */
+.breathe { animation: breathe 7s ease-in-out infinite; }
+.breathe-late { animation: breathe 7s ease-in-out 1.6s infinite; }
+@keyframes breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.breathe-tilt { animation: breathe-tilt 7s ease-in-out 1.6s infinite; }
+@keyframes breathe-tilt {
+  0%, 100% { transform: rotate(4deg) translateY(0); }
+  50%      { transform: rotate(4deg) translateY(-10px); }
+}
+
+/* screenshots settle in once loaded */
+.img-settle { animation: img-settle 900ms var(--ease) both; }
+@keyframes img-settle {
+  from { opacity: 0; filter: blur(6px); }
+  to   { opacity: 1; filter: none; }
+}
+
+/* ---- stillness for those who ask for it ---- */
+@media (prefers-reduced-motion: reduce) {
+  .hexagram-draw .hexagram-line,
+  .hexagram-draw .hexagram-broken,
+  .breathe, .breathe-late, .breathe-tilt, .img-settle {
+    animation: none !important;
+  }
+  .breathe-tilt { transform: rotate(4deg); }
+  .reveal, .zen-rule, .draw-link, .lift {
+    transition: none !important;
+  }
+  .reveal { opacity: 1; transform: none; filter: none; }
+  .zen-rule { transform: none; }
+  body { transition: none; }
+}

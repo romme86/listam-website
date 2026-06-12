@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Listam - Downloads</title>
+  <meta name="description" content="Download Listam for every device you own: the mobile app, the macOS desktop app, and the always-on headless peer for your own hardware."/>
+  <link rel="icon" href="/assets/icon.png" type="image/png"/>
+  <meta property="og:title" content="Listam - Downloads"/>
+  <meta property="og:description" content="The mobile app, the macOS desktop app, and the always-on headless peer for your own hardware."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://listam.ch/downloads"/>
+  <meta property="og:image" content="https://listam.ch/assets/screenshots/og.png"/>
+  <meta property="og:image:width" content="1024"/>
+  <meta property="og:image:height" content="500"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="/assets/site.js"></script>
+  <link rel="stylesheet" href="/assets/site.css"/>
+</head>
+<body class="bg-surface-0 text-ink font-sans antialiased min-h-screen flex flex-col items-center">
+<header class="site-header sticky top-0 z-50 w-full">
+  <nav class="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+    <a class="hexagram-mark w-7 text-ink opacity-90 hover:opacity-100 transition-opacity" href="/" aria-label="Listam home">
+      <div class="hexagram-line"></div>
+      <div class="hexagram-line"></div>
+      <div class="hexagram-line"></div>
+      <div class="hexagram-line"></div>
+      <div class="hexagram-broken"><span></span><span></span></div>
+      <div class="hexagram-line"></div>
+    </a>
+    <div class="flex items-center gap-5 text-sm">
+      <a class="draw-link pb-0.5" href="/">Home</a>
+      <a class="draw-link pb-0.5" href="/downloads">Downloads</a>
+      <a class="draw-link pb-0.5" href="/wiki/">Wiki</a>
+      <a class="draw-link pb-0.5 hidden sm:inline" href="/privacy">Privacy</a>
+      <button class="p-1.5 rounded-full hover:bg-surface-2 transition-colors" onclick="listamToggleTheme()" aria-label="Toggle dark mode">
+        <span class="material-icons-round text-lg block dark:hidden" aria-hidden="true">dark_mode</span>
+        <span class="material-icons-round text-lg hidden dark:block" aria-hidden="true">light_mode</span>
+      </button>
+    </div>
+  </nav>
+</header>
+<main class="w-full max-w-4xl px-6 py-12 md:py-24 flex flex-col items-center">
+  <div class="hexagram-draw mb-12 w-24 md:w-32 text-ink opacity-90" aria-hidden="true">
+    <div class="hexagram-line"></div>
+    <div class="hexagram-line"></div>
+    <div class="hexagram-line"></div>
+    <div class="hexagram-line"></div>
+    <div class="hexagram-broken"><span></span><span></span></div>
+    <div class="hexagram-line"></div>
+  </div>
+  <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4 text-center">Downloads</h1>
+  <p class="text-xl md:text-2xl text-ink-mute mb-20 font-light text-center max-w-lg">
+    Listam on every device you own. Your lists stay yours on all of them.
+  </p>
+
+  <!-- Mobile -->
+  <section class="reveal w-full mb-20" id="mobile">
+    <div class="flex items-center gap-4 mb-8">
+      <span class="material-icons-round text-3xl text-ink-faint" aria-hidden="true">smartphone</span>
+      <h2 class="text-3xl font-bold tracking-tight">Mobile</h2>
+      <div class="zen-rule flex-grow"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="lift border border-line rounded-2xl p-8 bg-card">
+        <h3 class="text-xl font-bold mb-2">Android</h3>
+        <p class="text-sm text-ink-mute mb-6">On the Play Store, with automatic updates. 1 month free trial, then 1 CHF/year.</p>
+        <a class="block text-center w-full py-3 px-6 bg-inverse text-inverse-ink rounded-lg font-bold hover:opacity-80 transition-opacity" href="https://play.google.com/store/apps/details?id=ch.saynode.listam&amp;pcampaignid=web_share" rel="noopener noreferrer" target="_blank">
+          Get it on Play Store
+        </a>
+      </div>
+      <div class="border border-line rounded-2xl p-8 bg-card opacity-70">
+        <h3 class="text-xl font-bold mb-2">iOS</h3>
+        <p class="text-sm text-ink-mute mb-6">The App Store release is on its way.</p>
+        <div class="block text-center w-full py-3 px-6 bg-surface-2 text-ink-faint rounded-lg font-bold cursor-default">
+          Coming soon
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Desktop -->
+  <section class="reveal w-full mb-20" id="desktop">
+    <div class="flex items-center gap-4 mb-8">
+      <span class="material-icons-round text-3xl text-ink-faint" aria-hidden="true">desktop_windows</span>
+      <h2 class="text-3xl font-bold tracking-tight">Desktop</h2>
+      <span class="text-xs font-mono px-2 py-0.5 rounded bg-signal text-on-signal">BETA</span>
+      <div class="zen-rule flex-grow"></div>
+    </div>
+    <div class="border border-line rounded-2xl bg-card overflow-hidden">
+      <div class="p-8 flex flex-col md:flex-row md:items-center gap-6">
+        <div class="flex-1">
+          <h3 class="text-xl font-bold mb-1">Listam for macOS</h3>
+          <p class="text-sm text-ink-mute">
+            Version <!-- dmg-version -->0.12.0<!-- /dmg-version --> ·
+            <!-- dmg-size -->23 MB<!-- /dmg-size --> ·
+            Apple Silicon (M1 or newer)
+          </p>
+        </div>
+        <a class="lift inline-flex items-center justify-center gap-2 py-3 px-8 bg-inverse text-inverse-ink rounded-lg font-bold hover:opacity-90 transition-opacity whitespace-nowrap" href="/downloads/Listam-0.12.0.dmg" download>
+          <span class="material-icons-round text-lg" aria-hidden="true">download</span>
+          Download .dmg
+        </a>
+      </div>
+      <div class="px-8 pb-8">
+        <ol class="space-y-4 text-ink-mute text-sm leading-relaxed list-none">
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">01</span>
+            <span>Install the <a class="draw-link pb-0.5 text-ink font-medium" href="https://pears.com" rel="noopener noreferrer" target="_blank">Pear runtime</a> if you don't have it yet — Listam runs on it and fetches the app peer-to-peer.</span>
+          </li>
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">02</span>
+            <span>Open the downloaded <span class="font-mono text-ink">.dmg</span> and drag <span class="font-mono text-ink">Listam</span> into <span class="font-mono text-ink">Applications</span>.</span>
+          </li>
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">03</span>
+            <span>First launch: right-click the app and choose <span class="font-mono text-ink">Open</span>. The beta build is not yet notarized by Apple, so macOS asks once. If it stays quarantined, run <span class="font-mono text-ink">xattr -dr com.apple.quarantine /Applications/Listam.app</span> in Terminal.</span>
+          </li>
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">04</span>
+            <span>That's it. The app fetches itself over the swarm and updates arrive peer-to-peer — no installer reruns.</span>
+          </li>
+        </ol>
+        <div class="mt-6 p-4 rounded-lg bg-surface-1 border border-line text-xs text-ink-mute leading-relaxed">
+          <span class="font-bold text-ink">If the window closes right after launch:</span> the Pear runtime hasn't trusted the app key yet. Run
+          <span class="font-mono text-ink break-all">pear run pear://h1jwexik1m9c75rqng8hico4oxqgmm8xskws684skmjepksq5r3o</span>
+          once in Terminal, approve it, and launch Listam again.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Headless -->
+  <section class="reveal w-full mb-20" id="headless">
+    <div class="flex items-center gap-4 mb-8">
+      <span class="material-icons-round text-3xl text-ink-faint" aria-hidden="true">terminal</span>
+      <h2 class="text-3xl font-bold tracking-tight">Headless</h2>
+      <span class="text-xs font-mono px-2 py-0.5 rounded bg-signal text-on-signal">BETA</span>
+      <div class="zen-rule flex-grow"></div>
+    </div>
+    <p class="text-ink-mute leading-relaxed mb-8 max-w-2xl">
+      The always-on Listam peer for hardware you own — a Raspberry Pi, a mini PC, a NAS.
+      It is not a cloud service: it keeps your lists available and durable on your own
+      device, even when your phone is off. Requires <span class="font-mono text-ink">Node.js 22+</span>
+      and Linux for the always-on service (Raspberry Pi OS, Debian, Ubuntu).
+    </p>
+    <div class="space-y-6">
+      <div class="border border-line rounded-2xl bg-card p-8">
+        <div class="flex items-center gap-3 mb-4">
+          <h3 class="text-xl font-bold">From npm</h3>
+          <span class="text-xs font-mono text-ink-faint">RECOMMENDED</span>
+        </div>
+        <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>npm install -g listam-headless
+listam-headless install --storage ~/listam-data --invite &lt;code&gt;</code></pre>
+        <p class="text-sm text-ink-mute leading-relaxed">
+          <span class="font-mono text-ink">install</span> sets the peer up, registers a systemd user
+          service that survives reboots, starts it, and joins your list. The invite code comes from
+          the share flow in the Listam app on your phone or desktop. Use a global install rather than
+          <span class="font-mono text-ink">npx</span> — the service points at the package on disk.
+        </p>
+      </div>
+      <div class="border border-line rounded-2xl bg-card p-8">
+        <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+          <h3 class="text-xl font-bold flex-1">From this site</h3>
+          <a class="lift inline-flex items-center justify-center gap-2 py-2 px-5 bg-inverse text-inverse-ink rounded-lg font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap" href="/downloads/listam-headless-0.13.0.tgz" download>
+            <span class="material-icons-round text-base" aria-hidden="true">download</span>
+            listam-headless <!-- tgz-version -->0.13.0<!-- /tgz-version --> · <!-- tgz-size -->19 KB<!-- /tgz-size -->
+          </a>
+        </div>
+        <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>tar xzf listam-headless-0.13.0.tgz &amp;&amp; cd package
+npm install --omit=dev
+node headless.mjs install --storage ~/listam-data --invite &lt;code&gt;</code></pre>
+        <p class="text-sm text-ink-mute leading-relaxed">
+          Same peer, no registry account needed. The tarball pulls its dependencies from npm on install.
+        </p>
+      </div>
+      <div class="border border-line rounded-2xl bg-card p-8" id="source">
+        <h3 class="text-xl font-bold mb-4">From source</h3>
+        <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>git clone https://github.com/romme86/listam-headless.git
+git clone https://github.com/romme86/listam-packages.git
+cd listam-headless &amp;&amp; npm install</code></pre>
+        <p class="text-sm text-ink-mute leading-relaxed">
+          The checkout expects the shared <span class="font-mono text-ink">@listam/*</span> packages
+          cloned next to it. Build it, read it, change it — it's yours.
+        </p>
+      </div>
+      <div class="border border-line rounded-2xl bg-surface-1 p-8">
+        <h3 class="text-lg font-bold mb-4">Living with it</h3>
+        <pre class="bg-card border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>listam-headless status --storage ~/listam-data   # live snapshot
+journalctl --user -u listam-headless -n 20       # service log
+listam-headless uninstall --storage ~/listam-data</code></pre>
+        <p class="text-sm text-ink-mute leading-relaxed">
+          The service restarts itself after crashes and reboots. Your data stays under
+          <span class="font-mono text-ink">~/listam-data</span>, also after an uninstall.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Checksums -->
+  <section class="reveal w-full mb-20" id="checksums">
+    <div class="flex items-center gap-4 mb-8">
+      <span class="material-icons-round text-3xl text-ink-faint" aria-hidden="true">verified</span>
+      <h2 class="text-3xl font-bold tracking-tight">Checksums</h2>
+      <div class="zen-rule flex-grow"></div>
+    </div>
+    <div class="border border-line rounded-2xl bg-card p-8">
+      <p class="text-sm text-ink-mute leading-relaxed mb-4">
+        Verify what you downloaded before you run it — <a class="draw-link pb-0.5 text-ink font-medium" href="/downloads/SHA256SUMS.txt">SHA256SUMS.txt</a>:
+      </p>
+      <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-xs overflow-x-auto mb-4"><code>Listam-0.12.0.dmg            <!-- dmg-sha -->0b0e4140e25a7a11cf10c7dd317610adf7ff4e4904a7bd0e7c4dc9c32ac1cafb<!-- /dmg-sha -->
+listam-headless-0.13.0.tgz   <!-- tgz-sha -->8aaa1a1305115fb630deb4e99cbd5ff698275cd1ca70ef16df82546456a23534<!-- /tgz-sha --></code></pre>
+      <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto"><code>shasum -a 256 -c SHA256SUMS.txt</code></pre>
+    </div>
+  </section>
+
+  <!-- Docs -->
+  <section class="reveal w-full">
+    <div class="border border-line rounded-2xl bg-surface-1 p-8 text-center">
+      <p class="text-ink-mute leading-relaxed">
+        Want the deep technical story? The AI Wiki covers the
+        <a class="draw-link pb-0.5 text-ink font-medium" href="/wiki/desktop.html">desktop app</a> and the
+        <a class="draw-link pb-0.5 text-ink font-medium" href="/wiki/headless.html">headless peer</a> in detail.
+      </p>
+    </div>
+  </section>
+
+  <footer class="mt-24 w-full text-center text-sm text-ink-faint">
+    <div class="zen-rule w-full mb-10"></div>
+    <div class="flex flex-wrap items-center justify-center gap-6 mb-4">
+      <a class="draw-link pb-0.5 hover:text-ink transition-colors" href="/privacy">Privacy</a>
+      <a class="draw-link pb-0.5 hover:text-ink transition-colors" href="/downloads">Downloads</a>
+      <a class="draw-link pb-0.5 hover:text-ink transition-colors" href="/wiki/">AI Wiki</a>
+      <a class="draw-link pb-0.5 hover:text-ink transition-colors" href="https://github.com/romme86" rel="noopener noreferrer" target="_blank">GitHub</a>
+      <a class="draw-link pb-0.5 hover:text-ink transition-colors" href="https://saynode.ch" rel="noopener noreferrer" target="_blank">Contact</a>
+    </div>
+    <p>© 2026 Saynode Operations AG</p>
+  </footer>
+</main>
+</body>
+</html>

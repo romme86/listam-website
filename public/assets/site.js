@@ -47,13 +47,29 @@ function listamToggleTheme() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  var revealed = document.querySelectorAll(".reveal, .zen-rule");
-  if (!("IntersectionObserver" in window)) {
-    revealed.forEach(function (el) { el.classList.add("is-inview"); });
-    return;
-  }
+  var els = Array.prototype.slice.call(document.querySelectorAll(".reveal, .zen-rule"));
+  var showAll = function () {
+    els.forEach(function (el) { el.classList.add("reveal-instant", "is-inview"); });
+  };
+  if (!("IntersectionObserver" in window)) { showAll(); return; }
+
+  // Whatever is already on screen settles instantly — anchored links and
+  // restored scroll positions must not greet the reader with blank space.
+  var vh = window.innerHeight;
+  var below = els.filter(function (el) {
+    var r = el.getBoundingClientRect();
+    var onScreen = r.top < vh && r.bottom > 0;
+    if (onScreen) el.classList.add("reveal-instant", "is-inview");
+    return !onScreen;
+  });
+  if (below.length === 0) return;
+
+  // The spec guarantees an initial delivery for every observed element;
+  // if none arrives, the observer is broken or throttled — fail open.
+  var delivered = false;
   var observer = new IntersectionObserver(
     function (entries) {
+      delivered = true;
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add("is-inview");
@@ -63,5 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
   );
-  revealed.forEach(function (el) { observer.observe(el); });
+  below.forEach(function (el) { observer.observe(el); });
+  setTimeout(function () { if (!delivered) showAll(); }, 2500);
 });

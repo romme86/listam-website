@@ -6,7 +6,7 @@
     <title>Listam CodeWiki — Headless</title>
     <meta
       name="description"
-      content="Headless-specific documentation for the planned Listam always-on personal server."
+      content="Headless-specific documentation for the Listam always-on personal server."
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -54,10 +54,15 @@
           <details class="nav-section">
             <summary class="nav-group">Desktop</summary>
             <div class="nav-links">
-              <a href="desktop.html#desktop" title="Planned, not implemented yet">
-                <span class="status-icon planned" aria-hidden="true"></span>
-                <span>Desktop Overview</span>
-              </a>
+              <a href="desktop.html#structure">Project Structure</a>
+              <a href="desktop.html#runtime">Runtime Flows</a>
+              <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#backend">Worker Backend</a>
+              <a href="desktop.html#devices">Peers &amp; Devices</a>
+              <a href="desktop.html#storage">Storage</a>
+              <a href="desktop.html#installer">Installer &amp; Releases</a>
+              <a href="desktop.html#libraries">Libraries</a>
+              <a href="desktop.html#file-index">File Index</a>
               <a href="desktop.html#testing">Testing</a>
             </div>
           </details>
@@ -65,10 +70,15 @@
           <details class="nav-section" open>
             <summary class="nav-group">Headless</summary>
             <div class="nav-links">
-              <a href="headless.html#headless" title="Planned, not implemented yet">
-                <span class="status-icon planned" aria-hidden="true"></span>
-                <span>Headless Overview</span>
-              </a>
+              <a href="headless.html#structure">Project Structure</a>
+              <a href="headless.html#roles">Roles</a>
+              <a href="headless.html#runtime">Runtime Flows</a>
+              <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#owner-control">Owner Control</a>
+              <a href="headless.html#storage">Storage</a>
+              <a href="headless.html#installer">Service Installer</a>
+              <a href="headless.html#libraries">Libraries</a>
+              <a href="headless.html#file-index">File Index</a>
               <a href="headless.html#testing">Testing</a>
             </div>
           </details>
@@ -77,8 +87,7 @@
             <summary class="nav-group">Plans</summary>
             <div class="nav-links">
               <details class="nav-subsection">
-                <summary class="nav-subgroup" title="Planned, not implemented yet">
-                  <span class="status-icon planned" aria-hidden="true"></span>
+                <summary class="nav-subgroup">
                   <span>Multi-App Plan</span>
                 </summary>
                 <div class="nav-sublinks">
@@ -110,81 +119,525 @@
               </details>
             </div>
           </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">QA</summary>
+            <div class="nav-links">
+              <a href="qa.html#qa-overview">Release QA Overview</a>
+              <a href="qa.html#qa-smoke">Smoke Matrix</a>
+              <a href="qa.html#qa-mobile">Mobile Checklist</a>
+              <a href="qa.html#qa-desktop">Desktop Checklist</a>
+              <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
+              <a href="qa.html#qa-release">Release Gate</a>
+            </div>
+          </details>
         </nav>
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-05-29</strong>
-          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+          <strong>2026-06-12</strong>
+          <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
 
       <main class="content">
         <header class="topbar">
           <div>
-            <span class="eyebrow">Headless · Pear Terminal / Bare · planned</span>
+            <span class="eyebrow">Headless · Node 22 service · v0.13.0</span>
             <h1>Headless App</h1>
           </div>
           <label class="search">
             <span>Search</span>
-            <input id="site-search" type="search" placeholder="Try: owner-control, relay, CLI..." />
+            <input id="site-search" type="search" placeholder="Try: blind-storage, control-pair, systemd..." />
           </label>
         </header>
 
-        <section id="headless" class="page page-searchable">
+        <section id="structure" class="page page-searchable">
           <div class="section-heading">
-            <span class="eyebrow">Pear Terminal / Bare · planned</span>
-            <h2>Headless Overview</h2>
+            <span class="eyebrow">Folder intent</span>
+            <h2>Project Structure</h2>
             <p class="section-lede">
-              Not implemented yet. Planned as an always-on personal server that runs on a device the
-              user owns (Raspberry Pi, mini PC, NAS) and acts as a durable personal peer — not a
-              central cloud service.
+              <code>listam-headless</code> (v0.13.0) is the always-on owned peer: a long-lived
+              Node&nbsp;22 service for a device the user controls (Raspberry Pi, mini PC, NAS, a Mac
+              that stays on) — a durable personal peer, not a cloud service. It runs the same
+              <code>@listam/backend</code> engine as mobile and desktop and is driven entirely by
+              JSON lines on stdin/stdout.
+            </p>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Role</th>
+                <th>Why it exists</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>headless.mjs</code></td>
+                <td>Entry point / CLI</td>
+                <td>Commands <code>setup</code>, <code>run</code>, <code>status</code>, <code>install</code>, <code>uninstall</code>; owns the stdin op loop and signal handling. Also the <code>listam-headless</code> bin.</td>
+              </tr>
+              <tr>
+                <td><code>src/config.mjs</code></td>
+                <td>Config builder/loader</td>
+                <td>Validates role, base key, bootstrap list, and storage quota; persists <code>headless-config.json</code>.</td>
+              </tr>
+              <tr>
+                <td><code>src/service.mjs</code></td>
+                <td>Participant service</td>
+                <td>Boots the full backend and dispatches the participant op set with wedge-avoiding timeouts.</td>
+              </tr>
+              <tr>
+                <td><code>src/blind.mjs</code></td>
+                <td>Blind-storage helper</td>
+                <td>Corestore + Hyperswarm only: pins cores by public key and replicates ciphertext without ever holding the encryption key.</td>
+              </tr>
+              <tr>
+                <td><code>src/control.mjs</code></td>
+                <td>Owner-control server</td>
+                <td>HyperDHT server for pairing, signed command envelopes, device registry, and the audit ring.</td>
+              </tr>
+              <tr>
+                <td><code>src/install.mjs</code></td>
+                <td>Service installer</td>
+                <td>Renders <code>run.sh</code> and a systemd user unit, enables linger, falls back to cron, and wires the FIFO control surface.</td>
+              </tr>
+              <tr>
+                <td><code>src/status.mjs</code> / <code>src/quota.mjs</code></td>
+                <td>Monitoring</td>
+                <td>Writes a redacted <code>headless-status.json</code> snapshot every ~5&nbsp;s; scans storage against the configured quota.</td>
+              </tr>
+              <tr>
+                <td><code>test/</code></td>
+                <td>Acceptance matrix</td>
+                <td>Multi-process scenarios on a private DHT testnet: matrix, wedge regression, blind C2 boundary, owner control, restarts, export/import.</td>
+              </tr>
+              <tr>
+                <td><code>scripts/build-dist.mjs</code></td>
+                <td>Distribution</td>
+                <td>Rewrites <code>file:</code> monorepo deps to registry ranges and builds the dist tarball.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="roles" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Trust model</span>
+            <h2>Roles</h2>
+            <p class="section-lede">
+              The role is chosen at <code>setup</code> time (<code>--role</code>) and stored in the
+              config. It decides which code path <code>run</code> boots and which capabilities the
+              node can ever exercise.
             </p>
           </div>
 
           <div class="grid two">
-            <article class="card accent-amber">
-              <h3>Role</h3>
-              <p>
-                Run as a long-lived owned peer that persists the same Autobase/Corestore data model,
-                helps devices reconnect, and later coordinates with relay/storage dongles.
-              </p>
-            </article>
             <article class="card accent-green">
-              <h3>First milestone</h3>
+              <h3>participant</h3>
               <p>
-                Create/join invites; expose peer count, sync state, base identity, and storage status;
-                CLI for setup, status, invite, join, export, and shutdown; and a P2P owner-control
-                command/event channel for trusted clients.
+                A full trusted peer. Runs <code>@listam/backend</code> with the encrypted Autobase,
+                holds the list encryption key in its secret store, and supports the whole op set:
+                invite, join, item mutations, export/import, roster queries, and owner-gated member
+                removal. Its identity (base key, joined-ness, items) survives restarts.
               </p>
+              <span class="source">src/service.mjs</span>
             </article>
-            <article class="card">
-              <h3>Capabilities (opt-in at setup)</h3>
+            <article class="card accent-amber">
+              <h3>blind-storage</h3>
               <p>
-                Bootstrap helper, replication helper, storage helper, async message helper,
-                notification/reconnect helper, and diagnostics helper — each chosen during first-run
-                setup so the device only enables the roles the owner wants. Under the current
-                substrate, content-access roles must be treated as trusted full-participant roles;
-                blind storage/relay helpers should receive no list encryption key.
+                An untrusted storage helper. Configured with core <em>public keys</em> only, it
+                pins and replicates blocks as opaque ciphertext through Corestore + Hyperswarm —
+                there is no Autobase, no view, and no code path that accepts an encryption key. Its
+                status reports <code>encryptionKey: "never-held"</code>, and remote owner-control
+                restricts it to pin-style commands.
               </p>
-            </article>
-            <article class="card accent-red">
-              <h3>Security gates</h3>
-              <p>
-                Require pairing/auth for control operations and never expose raw control endpoints
-                publicly by default. The owner-control admin channel needs signed per-device
-                capabilities, replay protection, owner-authorized membership, and key-rotation design
-                before implementation (see review findings C1–C3, H1).
-              </p>
+              <span class="source">src/blind.mjs</span>
             </article>
           </div>
 
           <div class="callout">
-            <strong>Status:</strong>
-            The <code>listam-headless</code> repository is currently empty. See the
-            <a href="plans.html#multi-app-plan">Multi-App Plan</a> for owner-control, the co-invite
-            flow, and the <a href="plans.html#review-findings">review findings</a> (C1–C3, H1) that
-            must be resolved first.
+            <strong>C2 boundary, enforced by test:</strong>
+            <code>test/blind-c2.test.mjs</code> replicates a real base into a blind node and then
+            asserts that no plaintext item text appears in any stored block, that blocks don't parse
+            as readable operations, and that no <code>headless-secrets.json</code> was ever created
+            on the blind instance.
+          </div>
+        </section>
+
+        <section id="runtime" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Behavior</span>
+            <h2>Runtime Flows</h2>
+          </div>
+
+          <div class="flow">
+            <div>
+              <span>1</span>
+              <h3>Boot</h3>
+              <p>
+                <code>node headless.mjs run --storage …</code> loads
+                <code>headless-config.json</code> (a CLI <code>--bootstrap</code> can override the
+                stored DHT bootstrap for test harnesses) and branches on the role: participant
+                service or blind helper.
+              </p>
+              <span class="source">headless.mjs</span>
+            </div>
+            <div>
+              <span>2</span>
+              <h3>Storage lease</h3>
+              <p>
+                Both roles take a storage lease with a 30&nbsp;s heartbeat TTL and a
+                refuse-destructive policy: a second instance on the same directory fails fast with
+                "lease held", and after a <code>kill -9</code> the next start waits out the TTL
+                instead of corrupting state.
+              </p>
+              <span class="source">src/service.mjs</span>
+            </div>
+            <div>
+              <span>3</span>
+              <h3>Ready and steady state</h3>
+              <p>
+                Once up, the process prints
+                <code>{"event":"ready","role":…,"controlPublicKey":…}</code>, starts the
+                owner-control server, refreshes <code>headless-status.json</code> every ~5&nbsp;s,
+                and checks the storage quota every 30&nbsp;s while Hyperswarm replicates in the
+                background.
+              </p>
+              <span class="source">src/status.mjs</span>
+            </div>
+            <div>
+              <span>4</span>
+              <h3>Shutdown</h3>
+              <p>
+                SIGINT, SIGTERM, stdin EOF, or a <code>shutdown</code> op all exit cleanly in a few
+                seconds, releasing the lease. <code>headless status</code> exits 0 while the
+                snapshot is fresh and 1 once it goes stale (&gt;60&nbsp;s).
+              </p>
+              <span class="source">headless.mjs</span>
+            </div>
+          </div>
+
+          <div class="sequence">
+            <h3>First-run and join sequence</h3>
+            <ol>
+              <li><code>setup --storage &lt;dir&gt; --role participant</code> writes the config (re-running refuses without <code>--force</code>); secrets land in <code>headless-secrets.json</code> with mode 0600.</li>
+              <li><code>run</code> boots the backend and prints the <code>ready</code> event with the node's control public key.</li>
+              <li>Either mint an invite for GUI peers (<code>{"op":"invite"}</code> → z32 key) or join an existing base: <code>{"op":"join","invite":…}</code> with a 180&nbsp;s budget for the BlindPairing handshake.</li>
+              <li>The joined base is persisted, so a restart comes back with <code>joined: true</code> and the same identity (covered by <code>test/join-restart.test.mjs</code>).</li>
+              <li>The owner pairs trusted clients (desktop/mobile) via <code>control-pair</code> for remote administration.</li>
+            </ol>
+          </div>
+
+          <div class="detail-list">
+            <h3>Interesting implementation details</h3>
+            <div>
+              <strong>Wedge avoidance by op timeouts.</strong>
+              <p>
+                Every stdin op races a timeout — 20&nbsp;s normally, 180&nbsp;s for join. If the
+                backend stalls because peers vanished mid-append (the upstream Autobase wedge), the
+                op answers <code>ok: false</code> promptly instead of hanging the service; the
+                regression is pinned by <code>test/wedge.test.mjs</code>.
+              </p>
+            </div>
+            <div>
+              <strong>Blind replication without decryption.</strong>
+              <p>
+                <code>pin</code> derives the swarm discovery key from the core's public key, calls
+                <code>core.download({ start: 0, end: -1 })</code>, and stores whatever arrives.
+                Encrypted blocks never pass through Autobase, so there is nothing to decrypt with.
+              </p>
+            </div>
+            <div>
+              <strong>Redacted status surface.</strong>
+              <p>
+                The status file and logs only ever contain BLAKE2b fingerprints of keys, never raw
+                key material; stdout is reserved for protocol JSON and all diagnostics go to stderr
+                through the <code>@listam/logging</code> redactor (a no-raw-console lint rule
+                enforces this).
+              </p>
+            </div>
+            <div>
+              <strong>Export/import round-trips by stable id.</strong>
+              <p>
+                Exports carry version, timestamp, base fingerprint, and items; import upserts by the
+                item's stable id, so done flags and edits survive and re-importing the same file
+                creates no duplicates.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="ops" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Operator surface</span>
+            <h2>Control Interface (stdin JSON)</h2>
+            <p class="section-lede">
+              One JSON object per line on stdin, one reply per request on stdout, correlated by
+              <code>id</code>. Unknown ops or missing fields answer <code>ok: false</code> without
+              killing the service. The same surface is reachable through the installer's
+              <code>control.fifo</code> when running under systemd.
+            </p>
+          </div>
+
+          <pre><code>→ {"id":1,"op":"add","text":"milk"}
+← {"id":1,"ok":true}
+→ {"id":2,"op":"dump"}
+← {"id":2,"ok":true,"items":[…],"peerCount":1,"joined":true,…}</code></pre>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Op</th>
+                <th>Role</th>
+                <th>What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>status</code> / <code>dump</code></td>
+                <td>both</td>
+                <td>Snapshot: role, base fingerprint, joined, peer count, item count, quota — plus full items/roster on <code>dump</code>.</td>
+              </tr>
+              <tr>
+                <td><code>invite</code> / <code>join</code></td>
+                <td>participant</td>
+                <td>Mint a z32 BlindPairing invite, or consume one to join a base (180&nbsp;s budget; the joined base persists).</td>
+              </tr>
+              <tr>
+                <td><code>add</code> / <code>edit</code> / <code>done</code> / <code>delete</code></td>
+                <td>participant</td>
+                <td>Item mutations by <code>itemId</code>. Unwritable bases refuse fast ("mutation refused") rather than queueing silently.</td>
+              </tr>
+              <tr>
+                <td><code>export</code> / <code>import</code> / <code>sync</code></td>
+                <td>participant</td>
+                <td>JSON export (optionally to a 0600 file), id-stable import, explicit sync request.</td>
+              </tr>
+              <tr>
+                <td><code>members</code> / <code>remove-member</code></td>
+                <td>participant</td>
+                <td>Owner-signed roster (C3) and member removal, which triggers the C1 re-key epoch.</td>
+              </tr>
+              <tr>
+                <td><code>pin</code> / <code>peek</code></td>
+                <td>blind-storage</td>
+                <td>Add a core public key to the replication set; return a raw block as hex — always ciphertext.</td>
+              </tr>
+              <tr>
+                <td><code>control-info</code> / <code>control-pair</code> / <code>control-devices</code> / <code>control-revoke</code> / <code>control-audit</code></td>
+                <td>both (local operator only)</td>
+                <td>Owner-control administration: inspect the control key, mint pairing codes, list/revoke devices, read the audit trail.</td>
+              </tr>
+              <tr>
+                <td><code>shutdown</code></td>
+                <td>both</td>
+                <td>Graceful exit; stdin EOF and signals behave the same.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="owner-control" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Remote administration</span>
+            <h2>Owner Control</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-blue">
+              <h3>Pairing</h3>
+              <p>
+                <code>control-pair</code> mints a short-lived one-time code (≤15&nbsp;min expiry).
+                A client (the desktop app's Peers pane, for example) dials the node's persistent
+                control key over an encrypted HyperDHT session, proves possession of the code, and
+                lands in <code>headless-devices.json</code> with the capabilities the code granted.
+              </p>
+              <span class="source">src/control.mjs</span>
+            </article>
+            <article class="card accent-red">
+              <h3>Envelope authentication</h3>
+              <p>
+                Every remote command is a signed envelope checked by
+                <code>@listam/owner-control</code>: the device must be registered and not revoked,
+                the Ed25519 signature must verify, the timestamp must be fresh, the per-device
+                sequence number must strictly increase (replay protection), and the capability grant
+                must cover the command (H1).
+              </p>
+              <span class="source">src/control.mjs</span>
+            </article>
+            <article class="card">
+              <h3>Remote command set</h3>
+              <p>
+                <code>status</code> and <code>diagnostics</code> work against both roles;
+                <code>invite</code>, <code>export</code>, and <code>import</code> only against a
+                participant; pin-style <code>topics</code> only against blind storage;
+                <code>shutdown</code> and device key <code>rotate</code> (H3) round it out. Denials
+                are capability errors, not silence.
+              </p>
+              <span class="source">headless.mjs</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>Audit and revocation</h3>
+              <p>
+                Pairings, commands, rejections, rotations, and revocations land in a 100-event audit
+                ring readable via <code>control-audit</code> and mirrored to the redacted stderr log.
+                <code>control-revoke</code> is operator-shell only — a paired device cannot revoke
+                its peers remotely.
+              </p>
+              <span class="source">src/control.mjs</span>
+            </article>
+          </div>
+        </section>
+
+        <section id="storage" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Persistence</span>
+            <h2>Storage Layout</h2>
+            <p class="section-lede">
+              Everything lives under the <code>--storage</code> directory; nothing is written
+              elsewhere. Secret-bearing files are created with mode 0600.
+            </p>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Role</th>
+                <th>Contents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>headless-config.json</code></td>
+                <td>both</td>
+                <td>Role, bootstrap list, storage quota (default 1&nbsp;GiB), blind pins, optional leaf-bridge port.</td>
+              </tr>
+              <tr>
+                <td><code>headless-secrets.json</code></td>
+                <td>participant only</td>
+                <td>Autobase/encryption key material via the <code>@listam/secrets</code> file store — this file never exists on a blind node.</td>
+              </tr>
+              <tr>
+                <td><code>headless-control-keys.json</code> / <code>headless-devices.json</code></td>
+                <td>both</td>
+                <td>Owner-control server seed and the paired-device registry (capabilities, sequence counters).</td>
+              </tr>
+              <tr>
+                <td><code>headless-status.json</code></td>
+                <td>both</td>
+                <td>Live snapshot rewritten every ~5&nbsp;s; key material appears only as fingerprints. Read by <code>headless status</code> and remote diagnostics.</td>
+              </tr>
+              <tr>
+                <td><code>headless/</code> namespace / <code>blind-store/</code></td>
+                <td>participant / blind</td>
+                <td>The Corestore data: encrypted Autobase cores for participants, pinned ciphertext cores for blind nodes.</td>
+              </tr>
+              <tr>
+                <td><code>run.sh</code>, <code>control.fifo</code>, <code>service.log</code></td>
+                <td>installed service</td>
+                <td>Generated runner, the named pipe that feeds stdin under systemd, and the cron-fallback log.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="installer" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Always-on deployment</span>
+            <h2>Service Installer</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>One-command install</h3>
+              <p>
+                <code>node headless.mjs install --storage ~/listam</code> (Linux: Raspberry Pi, the
+                Geekom VMs) renders <code>run.sh</code> — which runs setup if no config exists and
+                keeps <code>control.fifo</code> open as stdin — plus a systemd <em>user</em> unit
+                with <code>Restart=always</code> and a 10&nbsp;s backoff sized to outlast the
+                30&nbsp;s storage-lease TTL. The service is active immediately after install.
+              </p>
+              <span class="source">src/install.mjs</span>
+            </article>
+            <article class="card accent-blue">
+              <h3>Surviving reboots and logouts</h3>
+              <p>
+                The installer enables <code>loginctl</code> linger so the user manager outlives the
+                SSH session, and handles <code>XDG_RUNTIME_DIR</code> quirks on Tailscale SSH. Where
+                no user bus or linger exists, it falls back to crontab: an <code>@reboot</code> entry
+                plus a 5-minute staleness guard, each line tagged for idempotent re-install and clean
+                uninstall.
+              </p>
+              <span class="source">src/install.mjs</span>
+            </article>
+            <article class="card">
+              <h3>Join during install</h3>
+              <p>
+                <code>install --invite &lt;z32&gt;</code> waits for the service to report ready,
+                writes the join op into the FIFO, and polls status until <code>joined: true</code>
+                (200&nbsp;s budget on top of the 180&nbsp;s join timeout) — a Pi can be enrolled into
+                a household base in a single command.
+              </p>
+              <span class="source">src/install.mjs</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>Operating it</h3>
+              <p>
+                Echo ops into <code>control.fifo</code> and read replies in the journal;
+                <code>headless status --storage …</code> is the scriptable health check (exit 0
+                fresh, 1 stale). <code>uninstall</code> removes the unit and cron entries but always
+                preserves the storage directory. Target runtime is Node&nbsp;22+ (on the Pi:
+                <code>~/node22</code>).
+              </p>
+              <span class="source">headless.mjs</span>
+            </article>
+          </div>
+        </section>
+
+        <section id="libraries" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Dependency roles</span>
+            <h2>Libraries</h2>
+          </div>
+
+          <div class="library-grid">
+            <div><strong>@listam/backend</strong><span>The shared replication/mutation engine, booted through the Node platform adapter (namespace <code>headless</code>).</span></div>
+            <div><strong>@listam/client + @listam/protocol</strong><span>Command dispatch and the numeric RPC ABI shared with mobile and desktop.</span></div>
+            <div><strong>@listam/domain</strong><span>Id-keyed list reduction — the same convergence rules on every surface.</span></div>
+            <div><strong>@listam/owner-control</strong><span>Pairing-code parsing, envelope signing/verification, capability grants, rotation.</span></div>
+            <div><strong>@listam/secrets</strong><span>File secret store backing the participant's persistent identity.</span></div>
+            <div><strong>@listam/logging</strong><span>Redacting stderr logger; stdout stays protocol-clean.</span></div>
+            <div><strong>Corestore / Hyperswarm</strong><span>Block storage and peer replication — the entire substrate a blind node needs.</span></div>
+            <div><strong>HyperDHT</strong><span>Transport for the owner-control channel and the private testnets in CI.</span></div>
+            <div><strong>hypercore-crypto + b4a</strong><span>Key derivation, discovery keys, signatures, and buffer plumbing.</span></div>
+          </div>
+          <span class="source">package.json</span>
+        </section>
+
+        <section id="file-index" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Source map</span>
+            <h2>File Index</h2>
+          </div>
+
+          <div class="file-index">
+            <a><strong>headless.mjs</strong><span>CLI commands, stdin JSON loop, ready event, signal handling, remote-command routing.</span></a>
+            <a><strong>src/config.mjs</strong><span>Role and option validation; reads/writes <code>headless-config.json</code>.</span></a>
+            <a><strong>src/service.mjs</strong><span>Participant service: backend boot, op dispatch with timeouts, export/import, roster.</span></a>
+            <a><strong>src/blind.mjs</strong><span>Blind-storage helper: pinning, ciphertext replication, never-held key boundary.</span></a>
+            <a><strong>src/control.mjs</strong><span>Owner-control DHT server: pairing, envelope auth, device registry, audit ring.</span></a>
+            <a><strong>src/install.mjs</strong><span>systemd/cron installer, linger, FIFO control surface, join-during-install.</span></a>
+            <a><strong>src/status.mjs</strong><span>Redacted live snapshot writer behind <code>headless status</code>.</span></a>
+            <a><strong>src/quota.mjs</strong><span>Periodic storage scan with quota callbacks (blind nodes leave topics, never delete).</span></a>
+            <a><strong>test/matrix.test.mjs</strong><span>Cross-instance acceptance matrix, CORE and FULL tiers.</span></a>
+            <a><strong>test/blind-c2.test.mjs</strong><span>Proof that blind storage never sees plaintext or key material.</span></a>
+            <a><strong>test/helpers/cli.mjs</strong><span>Child-process harness: spawn, drive stdin ops, await predicates, stop.</span></a>
+            <a><strong>scripts/build-dist.mjs</strong><span>Builds the publishable tarball from the monorepo checkout.</span></a>
           </div>
         </section>
 
@@ -193,9 +646,9 @@
             <span class="eyebrow">Verification</span>
             <h2>Testing</h2>
             <p class="section-lede">
-              How an implementation agent tests the headless server and proves it interacts with mobile
-              and desktop. See also the <a href="plans.html#implementation-plans">implementation plans</a>
-              and the security findings.
+              The suite is the project's acceptance harness: real child processes on a private
+              <code>hyperdht</code> testnet (3 bootstrap nodes), no in-process mocks. Manual passes
+              follow the <a href="qa.html#qa-headless">Headless Checklist</a>.
             </p>
           </div>
 
@@ -203,44 +656,49 @@
             <article class="card accent-green">
               <h3>Unit</h3>
               <p>
-                Backend service logic behind the Node runtime port (no BareKit globals); the
-                <code>apply</code> reducer; owner-signed membership verification (C3); corruption
-                quarantine/recovery (M4); redaction (M5).
-              </p>
-            </article>
-            <article class="card accent-red">
-              <h3>Integration</h3>
-              <p>
-                CLI (setup/status/invite/join/export/shutdown); owner-control auth — signed accepted,
-                unsigned/expired/replayed/out-of-scope rejected, capability scope, device revoke (H1);
-                a blind helper never receives the encryption key (C2); queue/storage quotas.
-              </p>
-            </article>
-            <article class="card">
-              <h3>Soak</h3>
-              <p>
-                A long-lived peer stays up for hours with bounded storage/queue; restart preserves
-                identity, storage, and status.
+                <code>config.test.mjs</code> (parsing and defaults), <code>install.test.mjs</code>
+                (rendered unit/run.sh/cron content), <code>quota.test.mjs</code> (scan and callback
+                behavior).
               </p>
             </article>
             <article class="card accent-blue">
+              <h3>Acceptance matrix</h3>
+              <p>
+                <code>matrix.test.mjs</code> runs the CORE tier by default (~4&nbsp;min: join and
+                convergence, duplicate names kept distinct by id (M1), single-use invite rotation
+                (H3), owner gate and signed roster (C3)). <code>LISTAM_MATRIX_FULL=1</code> adds the
+                ~30&nbsp;min FULL tier: steady-state mesh convergence, member removal with the C1
+                re-key epoch, 3-way kill/rejoin, and rejoin reconciliation.
+              </p>
+            </article>
+            <article class="card accent-red">
+              <h3>Security regressions</h3>
+              <p>
+                <code>blind-c2.test.mjs</code> (ciphertext boundary), <code>owner-control.test.mjs</code>
+                (pairing, expired codes, replayed/unsigned envelopes rejected, capability scope,
+                revocation, rotation), <code>wedge.test.mjs</code> (mutations fail fast under peer
+                loss), <code>restart.test.mjs</code> / <code>join-restart.test.mjs</code> (identity
+                and joined base persist).
+              </p>
+            </article>
+            <article class="card">
               <h3>How to run</h3>
               <p>
-                <code>node headless.mjs --storage &lt;dir&gt; --bootstrap &lt;addr&gt;</code> from the
-                <code>listam-headless</code> repo; script invite/join against a second headless or a
-                desktop instance; runs headlessly in CI.
+                <code>npm test</code> for the suite, <code>npm run ci</code> for lint + tests (the
+                release gate). Scenario files in <code>test/helpers/</code> run as child processes so
+                every instance is a real OS process with its own storage root.
               </p>
             </article>
           </div>
 
           <div class="callout">
             <strong>Interaction:</strong>
-            Headless is the always-on peer central to the
-            <a href="plans.html#implementation-plans">cross-instance matrix</a>: mobile ↔ headless
-            (stays online while mobile closed, accepts generated/edited/deleted content, reopen → sync),
-            desktop ↔ headless content-operation sync, the 3-way convergence test, and the security rows
-            — non-owner add-writer ignored (C3), blind-storage cannot
-            decrypt (C2), owner-control replay rejected (H1).
+            headless is the always-on hub of the <a href="qa.html#qa-cross-device">cross-device
+            scenarios</a>: it stays online while phones close and reopen, accepts desktop and mobile
+            joins, mirrors to ESP32 leaf peers via the optional leaf bridge
+            (<code>LISTAM_LEAF_BRIDGE_PORT</code>), and is the target the desktop app administers
+            over owner control. The <code>tools/cross-device</code> harness drives the Pi and the
+            Geekom VMs for the real-network rows.
           </div>
         </section>
       </main>

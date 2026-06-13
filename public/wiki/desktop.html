@@ -6,7 +6,7 @@
     <title>Listam CodeWiki — Desktop</title>
     <meta
       name="description"
-      content="Desktop-specific documentation for the planned Listam Pear Desktop app."
+      content="Desktop-specific documentation for the Listam Pear desktop app."
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -54,10 +54,15 @@
           <details class="nav-section" open>
             <summary class="nav-group">Desktop</summary>
             <div class="nav-links">
-              <a href="desktop.html#desktop" title="Planned, not implemented yet">
-                <span class="status-icon planned" aria-hidden="true"></span>
-                <span>Desktop Overview</span>
-              </a>
+              <a href="desktop.html#structure">Project Structure</a>
+              <a href="desktop.html#runtime">Runtime Flows</a>
+              <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#backend">Worker Backend</a>
+              <a href="desktop.html#devices">Peers &amp; Devices</a>
+              <a href="desktop.html#storage">Storage</a>
+              <a href="desktop.html#installer">Installer &amp; Releases</a>
+              <a href="desktop.html#libraries">Libraries</a>
+              <a href="desktop.html#file-index">File Index</a>
               <a href="desktop.html#testing">Testing</a>
             </div>
           </details>
@@ -65,10 +70,15 @@
           <details class="nav-section">
             <summary class="nav-group">Headless</summary>
             <div class="nav-links">
-              <a href="headless.html#headless" title="Planned, not implemented yet">
-                <span class="status-icon planned" aria-hidden="true"></span>
-                <span>Headless Overview</span>
-              </a>
+              <a href="headless.html#structure">Project Structure</a>
+              <a href="headless.html#roles">Roles</a>
+              <a href="headless.html#runtime">Runtime Flows</a>
+              <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#owner-control">Owner Control</a>
+              <a href="headless.html#storage">Storage</a>
+              <a href="headless.html#installer">Service Installer</a>
+              <a href="headless.html#libraries">Libraries</a>
+              <a href="headless.html#file-index">File Index</a>
               <a href="headless.html#testing">Testing</a>
             </div>
           </details>
@@ -77,8 +87,7 @@
             <summary class="nav-group">Plans</summary>
             <div class="nav-links">
               <details class="nav-subsection">
-                <summary class="nav-subgroup" title="Planned, not implemented yet">
-                  <span class="status-icon planned" aria-hidden="true"></span>
+                <summary class="nav-subgroup">
                   <span>Multi-App Plan</span>
                 </summary>
                 <div class="nav-sublinks">
@@ -110,77 +119,530 @@
               </details>
             </div>
           </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">QA</summary>
+            <div class="nav-links">
+              <a href="qa.html#qa-overview">Release QA Overview</a>
+              <a href="qa.html#qa-smoke">Smoke Matrix</a>
+              <a href="qa.html#qa-mobile">Mobile Checklist</a>
+              <a href="qa.html#qa-desktop">Desktop Checklist</a>
+              <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
+              <a href="qa.html#qa-release">Release Gate</a>
+            </div>
+          </details>
         </nav>
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-05-29</strong>
-          <p>Multi-app wiki: mobile plus the planned desktop and headless surfaces.</p>
+          <strong>2026-06-12</strong>
+          <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
 
       <main class="content">
         <header class="topbar">
           <div>
-            <span class="eyebrow">Desktop · Pear Desktop · planned</span>
+            <span class="eyebrow">Desktop · Pear / Bare · v0.12.0</span>
             <h1>Desktop App</h1>
           </div>
           <label class="search">
             <span>Search</span>
-            <input id="site-search" type="search" placeholder="Try: Pear, IPC, keyboard..." />
+            <input id="site-search" type="search" placeholder="Try: worker, leaf bridge, appling..." />
           </label>
         </header>
 
-        <section id="desktop" class="page page-searchable">
+        <section id="structure" class="page page-searchable">
           <div class="section-heading">
-            <span class="eyebrow">Pear Desktop · planned</span>
-            <h2>Desktop Overview</h2>
+            <span class="eyebrow">Folder intent</span>
+            <h2>Project Structure</h2>
             <p class="section-lede">
-              Not implemented yet. Planned as an enhanced large-screen version of the mobile
-              experience that shares the same backend, domain logic, and shared packages.
+              <code>listam-desktop</code> (v0.12.0) is a Pear desktop app. The renderer is vanilla
+              DOM + CSS; the real backend is the shared <code>@listam/backend</code> engine — the
+              same one the mobile worklet and the headless service run — booted in a Pear worker
+              because <code>bare-*</code> modules cannot load in the renderer.
             </p>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Role</th>
+                <th>Why it exists</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>index.html</code></td>
+                <td>Pear entry point</td>
+                <td>Minimal shell with an importmap for the shared <code>@listam/*</code> packages; loads <code>src/main.mjs</code>.</td>
+              </tr>
+              <tr>
+                <td><code>src/main.mjs</code></td>
+                <td>Renderer composition root</td>
+                <td>Detects the Pear runtime, boots the worker backend (or the mock), wires store, i18n, theme, and mounts the UI.</td>
+              </tr>
+              <tr>
+                <td><code>src/backend-boot.mjs</code> / <code>src/backend-worker.mjs</code></td>
+                <td>Worker bridge</td>
+                <td>Renderer and worker halves of the IPC pipe: newline-delimited JSON frames carry commands, events, and bridge control.</td>
+              </tr>
+              <tr>
+                <td><code>src/store.mjs</code> / <code>src/ui.mjs</code></td>
+                <td>State + DOM renderer</td>
+                <td>Redux-style store reduced with the shared <code>@listam/domain</code> id-keyed reducer; <code>ui.mjs</code> renders sidebar, panes, dialogs, and animations.</td>
+              </tr>
+              <tr>
+                <td><code>src/leaf-bridge-manager.mjs</code> / <code>src/leaf-bridge-config.mjs</code></td>
+                <td>Leaf-peer hub</td>
+                <td>Worker-side TCP listener lifecycle for hardware leaf peers (ESP32 mirrors), plus port validation.</td>
+              </tr>
+              <tr>
+                <td><code>src/owner-control.mjs</code></td>
+                <td>Headless device client</td>
+                <td>Pairs with headless servers over HyperDHT and sends signed, capability-scoped commands.</td>
+              </tr>
+              <tr>
+                <td><code>src/secret-store.mjs</code>, <code>src/prefs.mjs</code>, <code>src/i18n.mjs</code></td>
+                <td>Persistence helpers</td>
+                <td>File-backed secret store for backend keys; localStorage for theme/view/hints preferences and locale choice.</td>
+              </tr>
+              <tr>
+                <td><code>src/mock-backend.mjs</code></td>
+                <td>Design preview</td>
+                <td>Fixture backend for <code>?mock=1</code> browser preview — UI work without the Pear runtime or real peers.</td>
+              </tr>
+              <tr>
+                <td><code>design-guide/</code></td>
+                <td>Design system docs</td>
+                <td>Kinetic Minimalist v2 proposal, tokens, and component specs that <code>app.css</code> implements.</td>
+              </tr>
+              <tr>
+                <td><code>installer/</code></td>
+                <td>macOS distribution</td>
+                <td>Appling shell, DMG build script, seeding LaunchAgent — excluded from Pear staging.</td>
+              </tr>
+              <tr>
+                <td><code>test/</code></td>
+                <td>Test suite</td>
+                <td>node:test units, a two-process sync acceptance test on a private DHT, and the pear-smoke E2E harness.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="runtime" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Behavior</span>
+            <h2>Runtime Flows</h2>
+          </div>
+
+          <div class="flow">
+            <div>
+              <span>1</span>
+              <h3>Renderer boot</h3>
+              <p>
+                Pear loads <code>index.html</code> → <code>src/main.mjs</code>. If
+                <code>globalThis.Pear</code> exists, the renderer spawns the backend worker with
+                <code>Pear.worker.run('./src/backend-worker.mjs')</code>; otherwise it falls back to
+                the mock backend for browser previews.
+              </p>
+              <span class="source">src/main.mjs</span>
+            </div>
+            <div>
+              <span>2</span>
+              <h3>Worker boot</h3>
+              <p>
+                The worker opens the file secret store, prepares the boot key payload, creates the
+                Pear platform adapter (storage namespace <code>desktop</code>), starts
+                <code>@listam/backend</code>, optionally starts the leaf bridge, then sends a
+                <code>ready</code> frame. The renderer aborts with an error after 45&nbsp;s of silence.
+              </p>
+              <span class="source">src/backend-worker.mjs</span>
+            </div>
+            <div>
+              <span>3</span>
+              <h3>List mutation</h3>
+              <p>
+                UI actions send numeric <code>@listam/protocol</code> commands
+                (<code>RPC_ADD</code>, <code>RPC_UPDATE</code>, <code>RPC_DELETE</code>) over the
+                pipe. Backend events come back pre-decoded by <code>@listam/client</code>, are
+                reduced into the store by id, and <code>renderAll()</code> repaints the DOM.
+              </p>
+              <span class="source">src/store.mjs</span>
+            </div>
+            <div>
+              <span>4</span>
+              <h3>Replication</h3>
+              <p>
+                The worker's Autobase replicates over Hyperswarm exactly as on mobile and headless.
+                Peer-count events drive the status strip: hollow ring at 0 peers, breathing dot when
+                ≥1 peer is connected.
+              </p>
+              <span class="source">src/ui.mjs</span>
+            </div>
+          </div>
+
+          <div class="sequence">
+            <h3>Invite join sequence</h3>
+            <ol>
+              <li>Share opens the invite dialog: the worker mints a z32 BlindPairing invite (<code>RPC_CREATE_INVITE</code>) with copy-to-clipboard; the code rotates on the next Share.</li>
+              <li>Join accepts a pasted invite; a confirmation dialog warns that the local list will be replaced before anything is torn down.</li>
+              <li>On confirm, the renderer sends <code>RPC_JOIN_KEY</code> and shows a join overlay that tracks the backend's join phases.</li>
+              <li>The backend pairs, receives base credentials, replicates, and waits until the base is writable.</li>
+              <li>Lists merge, the roster updates, and a bad or dead invite surfaces a join-error notice with the app back in a usable ready state.</li>
+            </ol>
+            <span class="source">src/ui.mjs</span>
+          </div>
+        </section>
+
+        <section id="frontend" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Renderer layer</span>
+            <h2>Renderer UI</h2>
           </div>
 
           <div class="grid two">
             <article class="card accent-blue">
-              <h3>Runtime target</h3>
+              <h3>Shell and sidebar IA</h3>
               <p>
-                Build as a Pear Desktop application first, with Electron only as a fallback if Pear
-                blocks a concrete requirement. The desktop app uses Pear Desktop IPC for its embedded
-                backend path through the shared <code>@listam/client</code> adapter.
+                A frameless 1280×860 window with draggable titlebar. The left rail navigates list
+                types — Groceries is live; Overview, Todo, and Travel are disabled "soon"
+                placeholders — and a bottom strip holds the peer-status dot plus system panes:
+                Peers, Diagnostics (activity log), and Settings.
               </p>
+              <span class="source">src/ui.mjs</span>
             </article>
             <article class="card accent-green">
-              <h3>First milestone</h3>
+              <h3>Lists pane</h3>
               <p>
-                Current Listam parity: invite create/join, peer and sync status, list and grid views,
-                grocery grouping and icon intelligence, shared Redux/domain logic, and shared
-                backend/client packages.
+                Add-bar with chain-adding and draft preservation across background re-renders,
+                duplicate rejection (case-insensitive, whitespace-normalized) with a shake
+                animation, inline edit on double-click, list and grid views, category grouping with
+                per-category colored Tabler icons, and a Clear Done sweep with staggered exits.
               </p>
+              <span class="source">src/ui.mjs</span>
+              <span class="source">src/icons.mjs</span>
             </article>
             <article class="card">
-              <h3>Large-screen improvements</h3>
+              <h3>Keyboard-first actions</h3>
               <p>
-                Denser list and grid layouts, keyboard-first actions, a larger multi-pane structure,
-                clearer sync and peer diagnostics, and tray/status affordances where Pear Desktop
-                supports them.
+                <code>N</code>/<code>/</code> summon the add-bar, <code>G</code> toggles grid,
+                <code>T</code> cycles theme, <code>H</code> toggles the hint bar, <code>?</code>
+                opens the shortcuts dialog, arrows move row focus, <code>Space</code>/<code>Enter</code>
+                toggle done, <code>Delete</code> removes. Shortcuts go inert while typing or while a
+                dialog is open, and OS reduce-motion swaps animations for instant updates.
               </p>
+              <span class="source">src/ui.mjs</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>Design system and i18n</h3>
+              <p>
+                <code>app.css</code> implements the Kinetic Minimalist v2 tokens (light/dark/system
+                with live OS re-resolution). Locale comes from the shared <code>@listam/i18n</code>
+                catalogs — English, Español, plus <code>en-XA</code> pseudo-accents and
+                <code>en-XL</code> long-strings for layout QA. Dialogs (share, join, confirm,
+                settings, member-remove, recovery) close on <code>Esc</code>/backdrop; notices stack
+                to 4 and auto-dismiss.
+              </p>
+              <span class="source">app.css</span>
+              <span class="source">design-guide/</span>
+            </article>
+          </div>
+        </section>
+
+        <section id="backend" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Pear worker layer</span>
+            <h2>Worker Backend</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-red">
+              <h3>Why a worker</h3>
+              <p>
+                Pear's DOM loader rejects <code>bare-*</code> modules, so Corestore, Autobase,
+                Hyperswarm, and bare-tcp cannot run in the renderer (loading them there was the root
+                cause of silently dead adds during the port). The whole bare module graph lives in
+                one Pear worker; the renderer stays vanilla JS + Web APIs.
+              </p>
+              <span class="source">src/backend-worker.mjs</span>
+            </article>
+            <article class="card accent-blue">
+              <h3>NDJSON pipe protocol</h3>
+              <p>
+                Renderer and worker exchange newline-delimited JSON frames over the worker pipe:
+                <code>req</code>/<code>res</code> for commands, <code>event</code>/<code>reply</code>
+                for backend pushes, <code>bridge</code>/<code>bridge-status</code> for leaf-bridge
+                control, and <code>ready</code>/<code>boot-error</code> for lifecycle. Pending
+                requests are matched by id.
+              </p>
+              <span class="source">src/backend-boot.mjs</span>
+            </article>
+            <article class="card accent-green">
+              <h3>Shared engine</h3>
+              <p>
+                The worker boots the same <code>@listam/backend</code> the mobile worklet and the
+                headless service use, through a Pear platform adapter (bare-fs paths, storage
+                namespace <code>desktop</code>, RPC handler, boot secrets). Events arrive already
+                decoded by <code>@listam/client</code>, so the renderer never parses backend
+                payloads itself.
+              </p>
+              <span class="source">src/backend-worker.mjs</span>
             </article>
             <article class="card">
-              <h3>Device operations</h3>
+              <h3>Secrets round-trip</h3>
               <p>
-                Easier review of invites, peers, and owned headless-device connections, including the
-                headless P2P owner-control adapter when the desktop app observes a user's always-on
-                personal server.
+                The backend persists base and encryption keys by sending
+                <code>RPC_PERSIST_SECRET</code> back to the secret store, a file-tier
+                <code>@listam/secrets</code> adapter. A corrupt secrets file degrades to a fresh
+                base instead of crashing the app.
               </p>
+              <span class="source">src/secret-store.mjs</span>
+            </article>
+          </div>
+
+          <div class="detail-list">
+            <h3>Interesting implementation details</h3>
+            <div>
+              <strong>Local mutation attribution.</strong>
+              <p>
+                The backend echoes your own edits back as events. The renderer keeps a short-lived
+                map of recently typed texts/ids so locally added items animate as "enter" while
+                genuinely remote arrivals pulse as "remote" — peers' edits are visible, yours are
+                instant.
+              </p>
+            </div>
+            <div>
+              <strong>Bridge generation tokens.</strong>
+              <p>
+                Toggling the leaf bridge off and on quickly could let a stale socket-close overwrite
+                the new bridge's status. Each start increments a generation counter and stale
+                callbacks are dropped.
+              </p>
+            </div>
+            <div>
+              <strong>Boot timeout instead of a hang.</strong>
+              <p>
+                If the worker never reports <code>ready</code> within 45 seconds, the renderer
+                rejects the boot promise and shows an error state rather than an apparently frozen
+                window.
+              </p>
+            </div>
+            <div>
+              <strong>Live system-theme resolution.</strong>
+              <p>
+                With theme "system", a <code>prefers-color-scheme</code> media listener re-resolves
+                light/dark the moment the OS scheme flips — no restart, no stale theme.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="devices" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Connectivity surfaces</span>
+            <h2>Peers &amp; Devices</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-blue">
+              <h3>Peers pane</h3>
+              <p>
+                Live peer count and connection dot, the current invite code (or a "no active
+                invite" empty state), and the member roster as monospace writer keys with
+                Owner / You / Member badges.
+              </p>
+              <span class="source">src/ui.mjs</span>
+            </article>
+            <article class="card accent-red">
+              <h3>Member removal</h3>
+              <p>
+                Remove appears only when this device can administer the base and never for self or
+                owner. A confirmation dialog gates it; on confirm the roster updates and the removed
+                peer loses write access (the C1 re-key epoch on the backend side).
+              </p>
+              <span class="source">src/ui.mjs</span>
+            </article>
+            <article class="card accent-green">
+              <h3>Leaf bridge (hardware peers)</h3>
+              <p>
+                A worker-side TCP listener (default port 9993, via <code>bare-tcp</code>) that
+                ESP32 leaf peers dial to mirror cores, gated by a 64-hex control key shown with a
+                Copy button. Status reads off / waiting / connected(N); the toggle and port persist
+                and the bridge auto-starts on relaunch. In browser/mock mode the section shows its
+                "requires Pear runtime" state.
+              </p>
+              <span class="source">src/leaf-bridge-manager.mjs</span>
+              <span class="source">src/leaf-bridge-config.mjs</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>Owner control (headless devices)</h3>
+              <p>
+                Paste a pairing code minted on a headless node (<code>control-pair</code>) plus a
+                name → the device pairs over an encrypted HyperDHT session and appears with its
+                capabilities. Query fetches the node's status snapshot through signed,
+                capability-scoped command envelopes; a stopped node times out with a notice instead
+                of hanging the UI.
+              </p>
+              <span class="source">src/owner-control.mjs</span>
             </article>
           </div>
 
           <div class="callout">
-            <strong>Status:</strong>
-            The <code>listam-desktop</code> repository is currently empty. See the
-            <a href="plans.html#multi-app-plan">Multi-App Plan</a> for the full design and the
-            <a href="plans.html#review-findings">review findings</a> that gate it.
+            <strong>Trust boundary:</strong>
+            the leaf control key and owner-control device seed are credentials. They live in the
+            app's storage directory as files today (keychain migration is tracked follow-up work),
+            and the diagnostics log deliberately redacts keys and item payloads.
+          </div>
+        </section>
+
+        <section id="storage" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Persistence</span>
+            <h2>Storage and Local State</h2>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Storage</th>
+                <th>Owner</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>List log and materialized view</td>
+                <td><code>{Pear storage}/desktop/</code></td>
+                <td>Worker backend</td>
+                <td>Corestore + encrypted Autobase under the app's private Pear storage directory.</td>
+              </tr>
+              <tr>
+                <td>Base / encryption keys</td>
+                <td><code>listam-desktop-secrets.json</code></td>
+                <td>Worker backend</td>
+                <td>File-tier <code>@listam/secrets</code> store, loaded into the boot payload at startup.</td>
+              </tr>
+              <tr>
+                <td>Owner-control identity</td>
+                <td><code>owner-control-keys.json</code></td>
+                <td>Renderer (Pear only)</td>
+                <td>Device key seed plus the paired-servers list (name, capabilities, public key).</td>
+              </tr>
+              <tr>
+                <td>UI preferences</td>
+                <td>localStorage <code>listam.desktop.uiPreferences</code></td>
+                <td>Renderer</td>
+                <td>Theme, grid view, category toggles, hint bar, leaf-bridge toggle and port. Local to this machine — never replicated.</td>
+              </tr>
+              <tr>
+                <td>Locale choice</td>
+                <td>localStorage <code>listam.desktop.localeChoice</code></td>
+                <td>Renderer</td>
+                <td><code>system</code>, <code>en</code>, <code>es</code>, or the QA pseudo-locales.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="installer" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Distribution</span>
+            <h2>Installer &amp; Releases</h2>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>P2P distribution model</h3>
+              <p>
+                The app itself ships over Pear: <code>pear stage</code> uploads the checkout to a
+                channel drive, <code>pear release</code> moves the release pointer consumers follow.
+                The production app key is
+                <code>pear://h1jwexik1m9c75rqng8hico4oxqgmm8xskws684skmjepksq5r3o</code>.
+                The stage ignore list replaces Pear's defaults, so it must re-state <code>.git</code>
+                alongside tests, design docs, and installer sources.
+              </p>
+              <span class="source">installer/build-macos.sh</span>
+            </article>
+            <article class="card accent-blue">
+              <h3>macOS appling DMG</h3>
+              <p>
+                <code>installer/build-macos.sh [--release] [--native]</code> stages, generates
+                <code>listam.icns</code> from the canonical icon, builds a <code>Listam.app</code>
+                shell that execs <code>pear run --appling</code> against the app key, and packs a
+                drag-to-/Applications DMG. The native cmake-pear appling owns the Dock tile and
+                splash; both are ad-hoc signed (right-click → Open past Gatekeeper).
+              </p>
+              <span class="source">installer/build-macos.sh</span>
+              <span class="source">installer/appling/</span>
+            </article>
+            <article class="card">
+              <h3>Seeding</h3>
+              <p>
+                Installs fetch the payload from whoever seeds the drive.
+                <code>installer/seed-agent.sh install</code> registers the
+                <code>ch.saynode.listam.seed</code> LaunchAgent, which runs
+                <code>pear seed production</code> from this checkout at login and logs to
+                <code>~/Library/Logs/listam-seed.log</code>.
+              </p>
+              <span class="source">installer/seed-agent.sh</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>First run on a fresh machine</h3>
+              <p>
+                Without Pear installed, the appling offers the pears.com download; with Pear, an
+                untrusted key needs a one-time approval. Bundle id
+                <code>ch.saynode.listam.desktop</code>, minimum macOS 11. Windows/Linux packaging is
+                scaffolded but not wired to CI yet.
+              </p>
+              <span class="source">installer/README.md</span>
+            </article>
+          </div>
+        </section>
+
+        <section id="libraries" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Dependency roles</span>
+            <h2>Libraries</h2>
+          </div>
+
+          <div class="library-grid">
+            <div><strong>@listam/backend</strong><span>The shared P2P engine — the same package the mobile worklet and headless service boot.</span></div>
+            <div><strong>@listam/protocol + @listam/client</strong><span>Numeric command ABI and the event decoder that keeps bare imports out of the renderer.</span></div>
+            <div><strong>@listam/domain</strong><span>Id-keyed list reducer shared across all apps — duplicate names stay distinct items.</span></div>
+            <div><strong>@listam/grocery + @listam/i18n</strong><span>Category taxonomy with localized names; shared locale catalogs including QA pseudo-locales.</span></div>
+            <div><strong>@listam/owner-control</strong><span>Pairing codes, signed command envelopes, and capability checks for headless devices.</span></div>
+            <div><strong>@listam/secrets + @listam/logging</strong><span>File secret store and redacting logger.</span></div>
+            <div><strong>Corestore / Autobase</strong><span>Local Hypercore storage and the encrypted multi-writer log, in the worker.</span></div>
+            <div><strong>Hyperswarm / BlindPairing</strong><span>Peer discovery, replication, and the invite handshake.</span></div>
+            <div><strong>bare-rpc / bare-tcp / hyperdht</strong><span>Worker RPC framing, the leaf-bridge TCP listener, and the owner-control transport.</span></div>
+          </div>
+          <span class="source">package.json</span>
+        </section>
+
+        <section id="file-index" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Source map</span>
+            <h2>File Index</h2>
+          </div>
+
+          <div class="file-index">
+            <a><strong>src/main.mjs</strong><span>Renderer entry: Pear detection, backend vs mock boot, store/i18n/theme wiring, UI mount.</span></a>
+            <a><strong>src/backend-boot.mjs</strong><span>Renderer side of the worker pipe: NDJSON framing, request/response matching, boot timeout.</span></a>
+            <a><strong>src/backend-worker.mjs</strong><span>Pear worker entry: secret store, platform adapter, backend start, bridge control, ready/boot-error frames.</span></a>
+            <a><strong>src/store.mjs</strong><span>State container: items, invite, peers, roster, join phase, recovery, diagnostics, preferences.</span></a>
+            <a><strong>src/ui.mjs</strong><span>Entire DOM tree: sidebar, lists/peers/diagnostics panes, dialogs, notices, keyboard shortcuts, animations.</span></a>
+            <a><strong>src/leaf-bridge-manager.mjs</strong><span>Worker-side leaf TCP listener lifecycle with generation-token race protection.</span></a>
+            <a><strong>src/owner-control.mjs</strong><span>HyperDHT client for pairing with and querying headless servers.</span></a>
+            <a><strong>src/secret-store.mjs</strong><span>File secret store adapter answering the backend's persist-secret RPC.</span></a>
+            <a><strong>src/prefs.mjs</strong><span>localStorage preferences and live system-theme resolution.</span></a>
+            <a><strong>src/mock-backend.mjs</strong><span>Fixture backend behind <code>?mock=1</code> for design preview without Pear.</span></a>
+            <a><strong>installer/build-macos.sh</strong><span>Stage → release → icns → appling shell → DMG pipeline.</span></a>
+            <a><strong>test/sync.test.mjs</strong><span>Two child-process backends on a private DHT converging through a real invite join.</span></a>
           </div>
         </section>
 
@@ -189,8 +651,8 @@
             <span class="eyebrow">Verification</span>
             <h2>Testing</h2>
             <p class="section-lede">
-              How an implementation agent tests the desktop app and proves it interacts with mobile and
-              headless. See also the <a href="plans.html#implementation-plans">implementation plans</a>.
+              Automated suites run with the plain node:test runner; manual passes follow the
+              <a href="qa.html#qa-desktop">Desktop Checklist</a> on the QA page.
             </p>
           </div>
 
@@ -198,40 +660,47 @@
             <article class="card accent-green">
               <h3>Unit</h3>
               <p>
-                The shared <code>@listam/domain</code>, <code>@listam/protocol</code>, and
-                <code>@listam/grocery</code> suites run in Node — identical to mobile.
+                <code>test/store.test.mjs</code> (id-keyed reduction and event handling),
+                <code>test/secret-store.test.mjs</code> (boot payload, key round-trip, corrupt-file
+                degradation), <code>test/leaf-bridge.test.mjs</code> (start/stop lifecycle,
+                generation-token races, port validation).
               </p>
             </article>
             <article class="card accent-blue">
-              <h3>Integration</h3>
+              <h3>Cross-instance acceptance</h3>
               <p>
-                The Pear Desktop IPC adapter passes the same <code>@listam/client</code> contract tests
-                as the worklet adapter; keyboard actions and multi-pane behavior; the diagnostics panel
-                reads backend events.
+                <code>test/sync.test.mjs</code> spawns two real backend child processes on a private
+                <code>hyperdht</code> testnet, mints an invite on one, joins from the other, mutates
+                on both sides, and asserts id-keyed convergence within a 120&nbsp;s budget.
               </p>
+              <span class="source">test/helpers/backend-driver.mjs</span>
             </article>
             <article class="card">
-              <h3>Manual / E2E</h3>
+              <h3>E2E / manual</h3>
               <p>
-                Parity checklist on macOS/Windows/Linux; tray/status where Pear supports it; compare the
-                UI against <code>listam-desktop/design-guide/</code>.
+                The <code>test/pear-smoke</code> harness drives the app under the Pear runtime;
+                <code>?mock=1</code> serves the UI with fixtures for design passes; release builds
+                run the full <a href="qa.html#qa-desktop">manual checklist</a> from the installed
+                appling.
               </p>
             </article>
             <article class="card">
               <h3>How to run</h3>
               <p>
-                Launch the Pear dev app; run the shared package suites with the Node runner; drive a
-                second instance (or a headless peer) for sync.
+                <code>npm run dev</code> launches via <code>pear run --dev .</code>;
+                <code>npm test</code> runs the suites; <code>npm run ci</code> is lint + tests and
+                is the release gate together with the cross-device harness.
               </p>
             </article>
           </div>
 
           <div class="callout">
             <strong>Interaction:</strong>
-            Desktop rows of the <a href="plans.html#implementation-plans">cross-instance matrix</a>:
-            mobile ↔ desktop generated/edited/completed/deleted content parity both directions,
-            desktop usable while mobile is offline, and desktop ↔ headless (join an invite created on
-            headless, drive owner-control from desktop, and sync content operations both ways).
+            desktop rows of the cross-device matrix live in
+            <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>: mobile ↔ desktop content
+            parity in both directions, desktop ↔ headless join and owner-control driving, and the
+            ESP32 leaf mirroring through the bridge (<code>tools/cross-device/esp32-leaf.mjs</code>
+            stands in for the board).
           </div>
         </section>
       </main>

@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki — QA</title>
+    <meta
+      name="description"
+      content="Manual release QA checklists for the Listam mobile, desktop, and headless apps."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#structure">Project Structure</a>
+              <a href="desktop.html#runtime">Runtime Flows</a>
+              <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#backend">Worker Backend</a>
+              <a href="desktop.html#devices">Peers &amp; Devices</a>
+              <a href="desktop.html#storage">Storage</a>
+              <a href="desktop.html#installer">Installer &amp; Releases</a>
+              <a href="desktop.html#libraries">Libraries</a>
+              <a href="desktop.html#file-index">File Index</a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#structure">Project Structure</a>
+              <a href="headless.html#roles">Roles</a>
+              <a href="headless.html#runtime">Runtime Flows</a>
+              <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#owner-control">Owner Control</a>
+              <a href="headless.html#storage">Storage</a>
+              <a href="headless.html#installer">Service Installer</a>
+              <a href="headless.html#libraries">Libraries</a>
+              <a href="headless.html#file-index">File Index</a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                </div>
+              </details>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">QA</summary>
+            <div class="nav-links">
+              <a href="qa.html#qa-overview">Release QA Overview</a>
+              <a href="qa.html#qa-smoke">Smoke Matrix</a>
+              <a href="qa.html#qa-mobile">Mobile Checklist</a>
+              <a href="qa.html#qa-desktop">Desktop Checklist</a>
+              <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
+              <a href="qa.html#qa-release">Release Gate</a>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Updated</span>
+          <strong>2026-06-12</strong>
+          <p>Manual release QA: checklists for the mobile, desktop, and headless apps plus cross-device scenarios.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">QA · manual release testing</span>
+            <h1>Release QA Checklists</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: invite, leaf bridge, paywall..." />
+          </label>
+        </header>
+
+        <section id="qa-overview" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">How to use this page</span>
+              <h2>Release QA Overview</h2>
+            </div>
+            <button id="qa-reset" class="button" type="button">Reset all checkboxes</button>
+          </div>
+
+          <p class="section-lede">
+            These are the manual tests to run before each release. Tick boxes as you go — state is
+            saved in this browser (localStorage) so a pass can span hours or days. Hit
+            "Reset all checkboxes" to start the next release pass.
+          </p>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>What to run when</h3>
+              <ul>
+                <li><strong>Every release:</strong> the <a href="#qa-smoke">Smoke Matrix</a> on release artifacts (installed app / TestFlight build, not dev builds), plus the <a href="#qa-release">Release Gate</a>.</li>
+                <li><strong>App changed:</strong> the full checklist for each app whose code changed this release.</li>
+                <li><strong>Backend / shared packages changed:</strong> the <a href="#qa-cross-device">Cross-Device Scenarios</a> as well — sync regressions only show up between peers.</li>
+                <li><strong>Hardware / leaf firmware changed:</strong> add the ESP32 leaf rows.</li>
+              </ul>
+            </article>
+            <article class="card accent-blue">
+              <h3>Run the robots first</h3>
+              <p>Manual QA assumes the automated suites are already green. Before starting:</p>
+              <ul>
+                <li><code>listam-mobile</code>: <code>npm run ci</code> (lint, deps, secrets, i18n, security + grocery tests)</li>
+                <li><code>listam-desktop</code>: <code>npm run ci</code></li>
+                <li><code>listam-headless</code>: <code>npm run ci</code> (includes the private-testnet matrix)</li>
+                <li>Cross-device: <code>node tools/cross-device/matrix.mjs</code> and <code>node tools/cross-device/wedge-repro.mjs</code></li>
+              </ul>
+            </article>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Test bed</th>
+                <th>Role</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mac (dev machine)</td>
+                <td>Desktop app, headless instances, harness driver</td>
+                <td>Personal Listam instance lives here — use scratch storage dirs for headless tests, never <code>pkill</code> broadly.</td>
+              </tr>
+              <tr>
+                <td>iPhone + Android phone</td>
+                <td>Mobile passes (run the mobile checklist once per OS)</td>
+                <td><code>npm run ios</code> / <code>npm run android</code> rebuild the Bare backend bundle before installing.</td>
+              </tr>
+              <tr>
+                <td>cassandrina-app / cassandrina-node (Geekom Proxmox VMs)</td>
+                <td>Linux headless peers, installer tests</td>
+                <td>Guest-only for P2P rows — ufw drops inbound holepunch. SSH over Tailscale.</td>
+              </tr>
+              <tr>
+                <td>Raspberry Pi</td>
+                <td>Always-on headless peer, systemd installer target</td>
+                <td>aarch64; Node 22 under <code>~/node22</code>.</td>
+              </tr>
+              <tr>
+                <td>ESP32-S3 board</td>
+                <td>Leaf mirror peer</td>
+                <td>Firmware in <code>hardware/leaf-peer</code>; control key flashed via <code>cfg.toml</code> must match the hub.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <strong>Reporting:</strong> when a check fails, file it before moving on — note app +
+            version, the checklist item, and the diagnostics pane / <code>[AUDIT]</code> log output.
+            A failed smoke item blocks the release; failures in extended sections are judgment calls.
+          </div>
+        </section>
+
+        <section id="qa-smoke" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Every release · ~30 minutes · release artifacts only</span>
+              <h2>Smoke Matrix</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-smoke">0 / 0</span>
+          </div>
+          <p class="section-lede">
+            The minimum cross-platform pass. Tags: <span class="qa-tag mobile">M</span> mobile,
+            <span class="qa-tag desktop">D</span> desktop, <span class="qa-tag headless">H</span> headless.
+          </p>
+
+          <ul class="qa-list" data-qa="smoke">
+            <li><label><input type="checkbox" /><span><span class="qa-tag desktop">D</span> Installed <code>Listam.app</code> launches; list renders; status reaches "Ready to share" with no error notices.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag mobile">M</span> Cold start on device: status goes "Starting…" → "Ready"; list renders; no storage-mode warning snackbar on a normal device.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag headless">H</span> <code>node headless.mjs run</code> emits the <code>ready</code> JSON line; <code>node headless.mjs status</code> exits 0 with a fresh snapshot.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag desktop">D</span> Add, edit, complete, delete an item; quit and relaunch — state fully restored.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag mobile">M</span> Add, edit, complete, delete an item; force-kill and relaunch — state fully restored.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag desktop">D</span><span class="qa-tag mobile">M</span> Desktop creates an invite → mobile joins by pasting it → joining overlay completes → both show the identical list.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag mobile">M</span><span class="qa-tag desktop">D</span> Reverse direction: mobile shares an invite → desktop joins → lists converge.</span></label></li>
+            <li><label><input type="checkbox" /><span>With both peers online: adds, done-toggles, and deletes propagate both ways within seconds.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag headless">H</span> Headless joins via invite; an <code>add</code> op appears on the GUI peers; a GUI edit shows up in <code>dump</code>.</span></label></li>
+            <li><label><input type="checkbox" /><span>One peer edits offline (airplane mode / network off), reconnects → all peers converge with no losses or duplicates.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag mobile">M</span> Deep link <code>https://listam.ch/join?invite=…</code> opens the app, shows the confirmation dialog, and joins.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag mobile">M</span> Loyalty card: scan a card, save it, reopen from the header — barcode renders crisply.</span></label></li>
+            <li><label><input type="checkbox" /><span><span class="qa-tag desktop">D</span> Settings: theme cycle (T) and a language switch apply instantly and survive a restart.</span></label></li>
+            <li><label><input type="checkbox" /><span>Peer-count badges and live dots match the number of actually connected peers on every device.</span></label></li>
+          </ul>
+        </section>
+
+        <section id="qa-mobile" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Mobile · iOS &amp; Android · run once per OS</span>
+              <h2>Mobile Checklist</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-mobile">0 / 0</span>
+          </div>
+          <div class="callout">
+            <strong>Prep:</strong> build with <code>npm run ios</code> / <code>npm run android</code>
+            (these rebuild the Bare backend bundle first — required whenever backend or RPC code
+            changed). For first-run items, delete and reinstall the app. Run this checklist on
+            <em>both</em> platforms; IAP items need a sandbox / test account.
+          </div>
+
+          <div class="qa-group">
+            <h3>1 · Install &amp; first run</h3>
+            <ul class="qa-list" data-qa="m-firstrun">
+              <li><label><input type="checkbox" /><span>Fresh install boots to the default Shopping list with the empty state (basket icon + three hint rows: tap to complete, long-press to edit, swipe to delete).</span></label></li>
+              <li><label><input type="checkbox" /><span>Header status shows "Starting…" with a pulsing dot, then settles on "Ready" once the backend worklet is up.</span></label></li>
+              <li><label><input type="checkbox" /><span>No storage-mode warning snackbar on a normal device (a "legacy" / "session storage" warning at startup means secure storage is broken — fail this item).</span></label></li>
+              <li><label><input type="checkbox" /><span>No paywall on first launch — the 30-day trial starts silently.</span></label></li>
+              <li><label><input type="checkbox" /><span>Delete + reinstall produces a fresh identity: previous list gone, new empty base, trial behavior per IAP/restore rules.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>2 · Items — list view</h3>
+            <ul class="qa-list" data-qa="m-list">
+              <li><label><input type="checkbox" /><span>Add an item → appears instantly (optimistic), no flicker when the backend echo arrives.</span></label></li>
+              <li><label><input type="checkbox" /><span>Add with leading/trailing spaces → saved trimmed.</span></label></li>
+              <li><label><input type="checkbox" /><span>Add an exact duplicate → rejected with the duplicate snackbar; list unchanged.</span></label></li>
+              <li><label><input type="checkbox" /><span>Empty / whitespace-only input → nothing added.</span></label></li>
+              <li><label><input type="checkbox" /><span>Tap an item → done with strikethrough + haptic; item moves to the end of the list.</span></label></li>
+              <li><label><input type="checkbox" /><span>Tap a done item → un-done; moves back into the active section.</span></label></li>
+              <li><label><input type="checkbox" /><span>Long-press → inline edit; saving changes the text everywhere (including on peers).</span></label></li>
+              <li><label><input type="checkbox" /><span>Edit an item to the text of another existing item → rejected with the duplicate-edit snackbar.</span></label></li>
+              <li><label><input type="checkbox" /><span>Swipe right past ~⅓ screen width → haptic at the threshold; releasing deletes (with confirmation).</span></label></li>
+              <li><label><input type="checkbox" /><span>Swipe released before the threshold → row snaps back, nothing deleted.</span></label></li>
+              <li><label><input type="checkbox" /><span>"Clear completed" appears in the summary bar only when done items exist; tapping removes exactly the done items.</span></label></li>
+              <li><label><input type="checkbox" /><span>Menu → Delete All → confirmation alert; Confirm wipes the list, Cancel leaves it intact.</span></label></li>
+              <li><label><input type="checkbox" /><span>A very long item name wraps/truncates without breaking the row layout.</span></label></li>
+              <li><label><input type="checkbox" /><span>With ~50 items the list scrolls smoothly and toggles stay responsive.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>3 · Items — grid view</h3>
+            <ul class="qa-list" data-qa="m-grid">
+              <li><label><input type="checkbox" /><span>Menu → Grid View → items render as icon cards; toggle back to list view works.</span></label></li>
+              <li><label><input type="checkbox" /><span>Tap a card → toggles done with the bubble scale/fade animation + haptic.</span></label></li>
+              <li><label><input type="checkbox" /><span>Long-press a card → delete confirmation → removes the item.</span></label></li>
+              <li><label><input type="checkbox" /><span>Grid icon size Small / Medium / Normal / Large changes card density immediately.</span></label></li>
+              <li><label><input type="checkbox" /><span>Item icons match content (e.g. "apples" → fruit icon); Illustrated ↔ Minimal icon variant switches the style of all cards.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>4 · Categories</h3>
+            <ul class="qa-list" data-qa="m-categories">
+              <li><label><input type="checkbox" /><span>"Show Categories" on → items group into the grocery categories; common items land correctly (milk → Dairy, apples → Fruits, shampoo → Personal Care).</span></label></li>
+              <li><label><input type="checkbox" /><span>"Show Category Headers" toggles header rows in both list and grid views.</span></label></li>
+              <li><label><input type="checkbox" /><span>Category names follow the app language setting.</span></label></li>
+              <li><label><input type="checkbox" /><span>Nonsense items fall into "Others" rather than disappearing.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>5 · Appearance &amp; accessibility</h3>
+            <ul class="qa-list" data-qa="m-appearance">
+              <li><label><input type="checkbox" /><span>List text size Small / Medium / Normal / Large applies immediately and persists.</span></label></li>
+              <li><label><input type="checkbox" /><span>System dark mode → app follows; both themes legible (check menu, dialogs, snackbars, paywall).</span></label></li>
+              <li><label><input type="checkbox" /><span>System Reduce Motion on → pulse/slide/layout animations are disabled; everything still works.</span></label></li>
+              <li><label><input type="checkbox" /><span>All display preferences survive an app restart.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>6 · Sharing (host side)</h3>
+            <ul class="qa-list" data-qa="m-share">
+              <li><label><input type="checkbox" /><span>Share button opens the native share sheet containing the invite key and the <code>https://listam.ch/join?invite=…</code> link.</span></label></li>
+              <li><label><input type="checkbox" /><span>Share before the backend is ready → "not ready" snackbar instead of the sheet.</span></label></li>
+              <li><label><input type="checkbox" /><span>On a guest (joined) device → owner-only message; sharing blocked.</span></label></li>
+              <li><label><input type="checkbox" /><span>Sharing repeatedly keeps working (invite reuse/rotation is transparent).</span></label></li>
+              <li><label><input type="checkbox" /><span>When a peer connects: share icon shows the red badge with the peer count, status row reads "Synced with N peers".</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>7 · Joining (guest side)</h3>
+            <ul class="qa-list" data-qa="m-join">
+              <li><label><input type="checkbox" /><span>Join dialog: paste a raw invite key → confirmation dialog appears before anything happens.</span></label></li>
+              <li><label><input type="checkbox" /><span>Pasting the full <code>listam.ch</code> URL into the dialog parses correctly.</span></label></li>
+              <li><label><input type="checkbox" /><span>Garbage text → "Invalid invite" snackbar, no state change.</span></label></li>
+              <li><label><input type="checkbox" /><span>Joining overlay advances through the phase dots: pairing → permission → syncing, with rotating status messages.</span></label></li>
+              <li><label><input type="checkbox" /><span>Cancel during joining aborts; the previous list is intact and usable.</span></label></li>
+              <li><label><input type="checkbox" /><span>Successful join replaces the local list with the host's list; the old personal list is no longer reachable on this device.</span></label></li>
+              <li><label><input type="checkbox" /><span>Starting a second join while one is running → "Already joining" snackbar.</span></label></li>
+              <li><label><input type="checkbox" /><span>Deep link, cold start: open a join URL with the app killed → app launches straight into the confirmation dialog.</span></label></li>
+              <li><label><input type="checkbox" /><span>Deep link, warm: tapping a join link while the app is open shows the confirmation dialog (it must never auto-join).</span></label></li>
+              <li><label><input type="checkbox" /><span>An invite from an untrusted source (not <code>listam.ch</code> / <code>listam:</code>) shows the trust warning in the confirmation dialog.</span></label></li>
+              <li><label><input type="checkbox" /><span>Host offline during join → join times out (~2 min) with an error; the app remains usable afterwards.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>8 · Members &amp; recovery</h3>
+            <ul class="qa-list" data-qa="m-members">
+              <li><label><input type="checkbox" /><span>Members dialog shows the roster: shortened writer keys, Owner / You / Member roles, epoch number.</span></label></li>
+              <li><label><input type="checkbox" /><span>On the owner device: Remove is offered for other members (never for self/owner); confirming removes them.</span></label></li>
+              <li><label><input type="checkbox" /><span>The removed device actually loses write access (verify on that device — its edits no longer propagate).</span></label></li>
+              <li><label><input type="checkbox" /><span>"Reveal Backup Code" (owner) shows the one-time recovery code; confirming "I've saved the code" hides it.</span></label></li>
+              <li><label><input type="checkbox" /><span>"Recover Ownership" on a non-owner member with the code → device gains the owner role; roster updates everywhere.</span></label></li>
+              <li><label><input type="checkbox" /><span>A wrong recovery code → error, no role change.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>9 · Owned devices (headless control)</h3>
+            <ul class="qa-list" data-qa="m-devices">
+              <li><label><input type="checkbox" /><span>Pair: mint a code on the headless node (<code>control-pair</code>), enter code + name → device appears with its capabilities.</span></label></li>
+              <li><label><input type="checkbox" /><span>"Check status" → the node's status JSON is displayed.</span></label></li>
+              <li><label><input type="checkbox" /><span>An expired (&gt;15 min) or already-used pairing code → clear error.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>10 · Loyalty cards</h3>
+            <ul class="qa-list" data-qa="m-loyalty">
+              <li><label><input type="checkbox" /><span>First scanner open → camera permission prompt. Deny → permission screen with a working link to system Settings. Grant → live camera preview.</span></label></li>
+              <li><label><input type="checkbox" /><span>Scan an EAN-13 card → recognized; enter a store name; Save → "Card saved" snackbar.</span></label></li>
+              <li><label><input type="checkbox" /><span>Scan a QR-based card → saved and re-rendered as a QR code.</span></label></li>
+              <li><label><input type="checkbox" /><span>Header card icon: tap opens the primary card full screen; the barcode is crisp and scans at a real checkout scanner if available.</span></label></li>
+              <li><label><input type="checkbox" /><span>Long-press the header card icon → opens the scanner directly.</span></label></li>
+              <li><label><input type="checkbox" /><span>Delete a card from the viewer → confirmation → removed from the list.</span></label></li>
+              <li><label><input type="checkbox" /><span>Cards survive an app restart (secure storage round-trip).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>11 · Trial &amp; paywall</h3>
+            <ul class="qa-list" data-qa="m-paywall">
+              <li><label><input type="checkbox" /><span>Trial active: no paywall; with ≤7 days remaining the "X days left" label shows in the header.</span></label></li>
+              <li><label><input type="checkbox" /><span>Trial expired and not subscribed → paywall blocks the app: title, monthly price (CHF 1.00 / $0.99), feature list, Subscribe + Restore buttons.</span></label></li>
+              <li><label><input type="checkbox" /><span>Subscribe with a sandbox/test account → purchase completes, paywall dismissed.</span></label></li>
+              <li><label><input type="checkbox" /><span>Restore Purchase after a reinstall → subscription recognized without paying again.</span></label></li>
+              <li><label><input type="checkbox" /><span>Store unreachable → paywall shows the error copy; no crash, trial logic still applies.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>12 · Language</h3>
+            <ul class="qa-list" data-qa="m-language">
+              <li><label><input type="checkbox" /><span>Locale System / English / French / German / Italian / Spanish → UI strings switch immediately and persist across restart.</span></label></li>
+              <li><label><input type="checkbox" /><span>Spot-check one non-English locale across menu, dialogs, snackbars, and paywall — no missing-key strings, no overflowing labels.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>13 · Lifecycle &amp; sync resilience</h3>
+            <ul class="qa-list" data-qa="m-lifecycle">
+              <li><label><input type="checkbox" /><span>Force-kill + relaunch → items, preferences, loyalty cards, and membership all restored.</span></label></li>
+              <li><label><input type="checkbox" /><span>Background the app 10+ minutes, foreground → list resyncs without duplicates; peer edits made meanwhile arrive.</span></label></li>
+              <li><label><input type="checkbox" /><span>Airplane mode: add/edit items offline → all kept; disable airplane mode → changes propagate to peers and theirs arrive.</span></label></li>
+              <li><label><input type="checkbox" /><span>Two peers edit the same item while disconnected → after reconnect every device shows the same single winner (no ghosts, no dupes).</span></label></li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="qa-desktop" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Desktop · Pear · macOS</span>
+              <h2>Desktop Checklist</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-desktop">0 / 0</span>
+          </div>
+          <div class="callout">
+            <strong>Prep:</strong> dev pass with <code>npm run dev</code> in <code>listam-desktop</code>;
+            the release pass must use the installed <code>/Applications/Listam.app</code> appling.
+            For UI-only sanity without the Pear runtime, serve the app and open with
+            <code>?mock=1</code> (fixtures, no real peers — leaf bridge and owner control show their
+            "requires Pear" states there).
+          </div>
+
+          <div class="qa-group">
+            <h3>1 · Launch &amp; shell</h3>
+            <ul class="qa-list" data-qa="d-shell">
+              <li><label><input type="checkbox" /><span>Frameless window opens with working traffic lights (close / minimize / maximize) and a draggable titlebar.</span></label></li>
+              <li><label><input type="checkbox" /><span>Sidebar: Groceries is active; Overview, Todo, Travel are disabled "soon" placeholders and not clickable.</span></label></li>
+              <li><label><input type="checkbox" /><span>Status strip: hollow ring at 0 peers, breathing acid dot when ≥1 peer; clicking it navigates to the Peers pane.</span></label></li>
+              <li><label><input type="checkbox" /><span>Peers / Activity / Settings nav buttons switch panes with the entrance animation; peer-count badge pops when the count changes.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>2 · Keyboard</h3>
+            <ul class="qa-list" data-qa="d-keyboard">
+              <li><label><input type="checkbox" /><span><code>N</code> or <code>/</code> summons the add-bar focused; <code>Esc</code> dismisses it.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>G</code> toggles grid ↔ list; <code>T</code> cycles theme system → light → dark; <code>H</code> hides/shows the hint bar (persisted).</span></label></li>
+              <li><label><input type="checkbox" /><span><code>?</code> opens the Keyboard Shortcuts dialog and its contents match reality.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>↑</code>/<code>↓</code> move row focus and wrap at the ends; <code>Space</code>/<code>Enter</code> toggles done; <code>Delete</code> removes the focused item.</span></label></li>
+              <li><label><input type="checkbox" /><span>Shortcuts are inert while typing in any input and while a dialog is open.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>3 · Add &amp; edit</h3>
+            <ul class="qa-list" data-qa="d-add">
+              <li><label><input type="checkbox" /><span><code>Enter</code> in the add-bar adds the item, clears the input, and keeps focus for chain-adding.</span></label></li>
+              <li><label><input type="checkbox" /><span>Blur with an empty input dismisses the bar; with draft text it stays.</span></label></li>
+              <li><label><input type="checkbox" /><span>Draft text survives background re-renders (type half an item, have a peer add something — the draft is untouched).</span></label></li>
+              <li><label><input type="checkbox" /><span>Duplicate add (case-insensitive, whitespace-normalized) → shake animation + "Duplicate item" notice; not added.</span></label></li>
+              <li><label><input type="checkbox" /><span>Double-click a row → inline edit; <code>Enter</code> saves, <code>Esc</code> cancels, blur saves; renaming to an existing item is rejected.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>4 · Rows, grid &amp; animations</h3>
+            <ul class="qa-list" data-qa="d-rows">
+              <li><label><input type="checkbox" /><span>Click toggles done: strikethrough + completion flash; un-toggling unflashes.</span></label></li>
+              <li><label><input type="checkbox" /><span>Hover reveals the ✕ delete button; clicking animates the row exit before removal.</span></label></li>
+              <li><label><input type="checkbox" /><span>Items added by a remote peer pulse on arrival; locally added items don't.</span></label></li>
+              <li><label><input type="checkbox" /><span>Grid view: cards with larger icons, identical toggle/delete interactions, hover state.</span></label></li>
+              <li><label><input type="checkbox" /><span>Clear Done with several completed items → staggered exit animations; the button disappears after.</span></label></li>
+              <li><label><input type="checkbox" /><span>OS "reduce motion" on → all animations replaced by instant updates.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>5 · Summary bar &amp; categories</h3>
+            <ul class="qa-list" data-qa="d-summary">
+              <li><label><input type="checkbox" /><span>Status text transitions: "Starting…" → "Ready to share" → "Synced with N peer(s)".</span></label></li>
+              <li><label><input type="checkbox" /><span>"X items left" is accurate; "All done!" when everything is completed.</span></label></li>
+              <li><label><input type="checkbox" /><span>Category grouping and headers honor the preference toggles; category icons are colored per category.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>6 · Share &amp; join</h3>
+            <ul class="qa-list" data-qa="d-share">
+              <li><label><input type="checkbox" /><span>Share opens the invite dialog with a z32 code; Copy puts it on the clipboard + "Copied" notice; the code rotates on the next Share.</span></label></li>
+              <li><label><input type="checkbox" /><span>Join dialog with empty input → "paste an invite code" error notice.</span></label></li>
+              <li><label><input type="checkbox" /><span>Valid invite → confirmation dialog (warns the local list is replaced) → join overlay with phases → lists merge and the roster updates.</span></label></li>
+              <li><label><input type="checkbox" /><span>Bad or dead invite → join-error notice; the app returns to a usable ready state.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>7 · Peers pane</h3>
+            <ul class="qa-list" data-qa="d-peers">
+              <li><label><input type="checkbox" /><span>Peer count and live dot match reality as peers come and go.</span></label></li>
+              <li><label><input type="checkbox" /><span>Create-invite section shows the current code (copy works) or the "no active invite" empty state.</span></label></li>
+              <li><label><input type="checkbox" /><span>Members list: monospace writer keys with Owner / You / Member badges.</span></label></li>
+              <li><label><input type="checkbox" /><span>Remove is shown only when you can administer and never for self/owner; "Remove member?" confirmation → roster updates and the removed peer loses write access (verify on that peer).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>8 · Leaf bridge</h3>
+            <ul class="qa-list" data-qa="d-leaf">
+              <li><label><input type="checkbox" /><span>In browser/mock mode the pane shows the "requires Pear runtime" unavailable state.</span></label></li>
+              <li><label><input type="checkbox" /><span>Enable → status "Waiting on port 9993"; the 64-hex control key appears with a working Copy button.</span></label></li>
+              <li><label><input type="checkbox" /><span>Port input is disabled while the bridge runs; an invalid port shows an error and the bridge doesn't start.</span></label></li>
+              <li><label><input type="checkbox" /><span>Relaunch with the toggle left on → bridge auto-starts at boot.</span></label></li>
+              <li><label><input type="checkbox" /><span>Connect a leaf (ESP32 board or the <code>tools/cross-device/esp32-leaf.mjs</code> harness) → status shows "1 connection"; disconnecting drops the count.</span></label></li>
+              <li><label><input type="checkbox" /><span>Disable stops the listener; status returns to "Off".</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>9 · Owner control (headless devices)</h3>
+            <ul class="qa-list" data-qa="d-control">
+              <li><label><input type="checkbox" /><span>Pair: mint a code on the node (<code>control-pair</code>), paste it with a name → device row appears with name, capabilities, and key chip.</span></label></li>
+              <li><label><input type="checkbox" /><span>Query → the "last status" line fills with the node snapshot.</span></label></li>
+              <li><label><input type="checkbox" /><span>Query while the node is stopped → ~30 s timeout surfaces a notice; the UI never hangs.</span></label></li>
+              <li><label><input type="checkbox" /><span>Invalid or expired pairing code → clear pair-error notice.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>10 · Settings</h3>
+            <ul class="qa-list" data-qa="d-settings">
+              <li><label><input type="checkbox" /><span>Theme System / Light / Dark applies instantly; with System selected, changing the OS theme live re-themes the app.</span></label></li>
+              <li><label><input type="checkbox" /><span>Language System / English / Español / Pseudo (en-XA) / Long strings (en-XL) → all visible text updates; scan the major panes in the pseudo locales for clipping or overflow.</span></label></li>
+              <li><label><input type="checkbox" /><span>Show-keyboard-hints toggle matches the bottom hint bar and persists.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>11 · Diagnostics</h3>
+            <ul class="qa-list" data-qa="d-diagnostics">
+              <li><label><input type="checkbox" /><span>Summary shows backend ready state, peer count, join phase, and locale correctly.</span></label></li>
+              <li><label><input type="checkbox" /><span>Event log records sync/add/update/delete/invite/peer-count/join events newest-first, capped at 50, with no raw keys or item payloads leaked.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>12 · Dialogs &amp; notices</h3>
+            <ul class="qa-list" data-qa="d-dialogs">
+              <li><label><input type="checkbox" /><span><code>Esc</code> and backdrop click close every dialog type (share, join, confirm, settings, member-remove, shortcuts).</span></label></li>
+              <li><label><input type="checkbox" /><span>Notices stack to at most 4 and auto-dismiss after ~4 s.</span></label></li>
+              <li><label><input type="checkbox" /><span>Storage recovery flow (when triggered): Retry / Reset first stage, then a second confirmation warning that all local data is erased; Cancel is safe at both stages.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>13 · Persistence &amp; instances</h3>
+            <ul class="qa-list" data-qa="d-persistence">
+              <li><label><input type="checkbox" /><span>Quit + relaunch → items, invite state, theme, view mode, and all preferences restored.</span></label></li>
+              <li><label><input type="checkbox" /><span>Preferences are local to this machine — they do not replicate to peers.</span></label></li>
+              <li><label><input type="checkbox" /><span>Exploratory: launch a second instance of the app → no data corruption; note the observed behavior (locking is not formally specified yet).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>14 · Installer &amp; distribution (release builds)</h3>
+            <ul class="qa-list" data-qa="d-installer">
+              <li><label><input type="checkbox" /><span><code>installer/build-macos.sh --release</code> produces the DMG; drag-install to /Applications works.</span></label></li>
+              <li><label><input type="checkbox" /><span>Quarantined download: right-click → Open launches despite ad-hoc signing.</span></label></li>
+              <li><label><input type="checkbox" /><span>On a machine without Pear: launching shows the dialog offering the pears.com download.</span></label></li>
+              <li><label><input type="checkbox" /><span>With the seed agent running (<code>installer/seed-agent.sh</code> LaunchAgent), a fresh machine fetches the app payload and boots.</span></label></li>
+              <li><label><input type="checkbox" /><span>App icon correct in Finder and Dock; the native appling shows its splash and owns the Dock tile.</span></label></li>
+              <li><label><input type="checkbox" /><span>Channel check: consumers on the release pointer get the released tip, not staging (<code>pear release production</code> was run).</span></label></li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="qa-headless" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Headless · Node 22 · Mac / Pi / Geekom VMs</span>
+              <h2>Headless Checklist</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-headless">0 / 0</span>
+          </div>
+          <div class="callout">
+            <strong>Prep:</strong> run from <code>listam-headless</code> against a scratch directory
+            (e.g. <code>/tmp/listam-qa</code>) — never against the personal instance's storage. Ops
+            are JSON lines on stdin; replies are JSON lines on stdout. Installer items need a Linux
+            host (Pi or <code>cassandrina-node</code>).
+          </div>
+
+          <div class="qa-group">
+            <h3>1 · Setup (participant)</h3>
+            <ul class="qa-list" data-qa="h-setup">
+              <li><label><input type="checkbox" /><span><code>node headless.mjs setup --storage /tmp/listam-qa --role participant</code> → <code>{ok:true,…}</code>; <code>headless-config.json</code> and <code>headless-secrets.json</code> exist with mode 0600.</span></label></li>
+              <li><label><input type="checkbox" /><span>Re-running the same setup without <code>--force</code> refuses (config exists); with <code>--force</code> it overwrites.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>--max-storage-bytes</code> and <code>--bootstrap</code> values land in the written config.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>2 · Run, status &amp; shutdown</h3>
+            <ul class="qa-list" data-qa="h-run">
+              <li><label><input type="checkbox" /><span><code>node headless.mjs run --storage …</code> prints the <code>{"event":"ready","role":"participant","controlPublicKey":…}</code> line.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>headless-status.json</code> refreshes every ~5 s with role, joined, peerCount, itemCount, and quota.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>node headless.mjs status --storage …</code> exits 0 while the service runs; &gt;60 s after stopping it, exits 1 (stale).</span></label></li>
+              <li><label><input type="checkbox" /><span>Ctrl-C (SIGINT) → graceful exit in &lt;5 s; SIGTERM the same.</span></label></li>
+              <li><label><input type="checkbox" /><span>Closing stdin (EOF) → clean shutdown, no orphan process left.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>run</code> against a directory with no config → clear "no valid config" error, non-zero exit.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>3 · Item ops over stdin</h3>
+            <ul class="qa-list" data-qa="h-items">
+              <li><label><input type="checkbox" /><span><code>{"id":1,"op":"add","text":"milk"}</code> → <code>{"id":1,"ok":true}</code>; the item shows in <code>dump</code>.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>edit</code>, <code>done</code>, and <code>delete</code> by <code>itemId</code> each succeed and are reflected in <code>dump</code>.</span></label></li>
+              <li><label><input type="checkbox" /><span>Mutation while not joined and with no reachable peers → fails fast with "mutation refused" (not a 20 s hang).</span></label></li>
+              <li><label><input type="checkbox" /><span>Unknown op or missing fields → <code>ok:false</code> error reply; the service keeps running.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>4 · Invite &amp; join</h3>
+            <ul class="qa-list" data-qa="h-join">
+              <li><label><input type="checkbox" /><span><code>{"op":"invite"}</code> returns a z32 invite key that a GUI peer can join with.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>{"op":"join","invite":…}</code> against a live host succeeds (budget up to 180 s); <code>status</code> then shows <code>joined:true</code> and the host's items.</span></label></li>
+              <li><label><input type="checkbox" /><span>Join with a garbage invite → <code>ok:false</code>; the service stays up.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>5 · Export &amp; import</h3>
+            <ul class="qa-list" data-qa="h-export">
+              <li><label><input type="checkbox" /><span><code>export</code> with a path writes JSON (version, exportedAt, baseId, items) with file mode 0600.</span></label></li>
+              <li><label><input type="checkbox" /><span>Round-trip: export → import on a fresh peer → items match by stable id, done flags and edits preserved; re-importing the same file creates no duplicates.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>6 · Storage lease</h3>
+            <ul class="qa-list" data-qa="h-lease">
+              <li><label><input type="checkbox" /><span>A second <code>run</code> on the same storage while the first lives → immediate "lease held by another running instance" failure.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>kill -9</code> the service → restart within 30 s is refused; after the lease TTL expires, restart succeeds.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>7 · Blind storage (C2 boundary)</h3>
+            <ul class="qa-list" data-qa="h-blind">
+              <li><label><input type="checkbox" /><span><code>setup --role blind-storage --base-key &lt;64-hex&gt;</code> works; a non-hex key is rejected.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>run</code> → status shows role blind-storage, <code>encryptionKey:"never-held"</code>, and pins whose length/contiguousLength grow as the source base appends.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>peek</code> returns hex ciphertext — never recognizable item text.</span></label></li>
+              <li><label><input type="checkbox" /><span>No encryption material exists anywhere in the blind node's storage directory.</span></label></li>
+              <li><label><input type="checkbox" /><span>With a tiny <code>--max-storage-bytes</code>, exceeding quota logs an <code>[AUDIT]</code> line and leaves swarm topics, but existing data is NOT deleted.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>8 · Owner control</h3>
+            <ul class="qa-list" data-qa="h-control">
+              <li><label><input type="checkbox" /><span><code>control-pair</code> mints a 6-digit code with ≤15 min expiry; after a desktop/mobile pairs, <code>control-devices</code> lists it with name and capabilities.</span></label></li>
+              <li><label><input type="checkbox" /><span>Remote <code>status</code>/<code>diagnostics</code> from the paired device work; capability-gated ops are denied where they should be (e.g. <code>invite</code> on a blind-storage node).</span></label></li>
+              <li><label><input type="checkbox" /><span><code>control-revoke</code> → the device can no longer command the node; <code>control-audit</code> shows the pairing/command/revoke events.</span></label></li>
+              <li><label><input type="checkbox" /><span>An expired pairing code is rejected.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>9 · Leaf bridge</h3>
+            <ul class="qa-list" data-qa="h-leaf">
+              <li><label><input type="checkbox" /><span><code>LISTAM_LEAF_BRIDGE_PORT=9993 node headless.mjs run …</code> → status includes <code>leafBridge</code> with port and controlKey.</span></label></li>
+              <li><label><input type="checkbox" /><span>A leaf connects and mirrors appends (full leaf scenario in <a href="#qa-cross-device">Cross-Device</a>).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>10 · Installer (Linux: Pi / cassandrina-node)</h3>
+            <ul class="qa-list" data-qa="h-installer">
+              <li><label><input type="checkbox" /><span><code>node headless.mjs install --storage ~/listam</code> creates <code>run.sh</code>, the systemd user unit, and enables linger; the service is active right after install.</span></label></li>
+              <li><label><input type="checkbox" /><span>Install with <code>--invite &lt;z32&gt;</code> → the node joins the base during install (joined:true within the 180 s budget).</span></label></li>
+              <li><label><input type="checkbox" /><span>Echo an op into <code>control.fifo</code> → the reply is visible in the journal (FIFO control path works).</span></label></li>
+              <li><label><input type="checkbox" /><span>Kill the process → systemd restarts it (Restart=always; allow the 30 s lease TTL).</span></label></li>
+              <li><label><input type="checkbox" /><span>Reboot the box → service returns without an interactive login (linger), or via the cron <code>@reboot</code> + 5-min guard fallback where systemd is unavailable.</span></label></li>
+              <li><label><input type="checkbox" /><span>Re-running <code>install</code> is idempotent (no duplicate cron lines); <code>uninstall</code> removes unit + cron entries but preserves the storage directory.</span></label></li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="qa-cross-device" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Multi-peer · real devices · mainnet DHT</span>
+              <h2>Cross-Device Scenarios</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-cross-device">0 / 0</span>
+          </div>
+          <div class="callout">
+            <strong>Pre-pass:</strong> run <code>node tools/cross-device/matrix.mjs</code> first
+            (mainnet by default; add <code>--esp32</code> when the board is wired) and
+            <code>node tools/cross-device/wedge-repro.mjs</code> for the unreachable-peer guard.
+            The manual pass below then focuses on real GUI devices and the flows the harness can't see.
+          </div>
+
+          <div class="qa-group">
+            <h3>1 · Two-peer pairs</h3>
+            <p class="qa-group-note">Run for each pairing whose code changed: desktop ↔ mobile, mobile ↔ mobile, desktop ↔ headless, mobile ↔ headless.</p>
+            <ul class="qa-list" data-qa="x-pairs">
+              <li><label><input type="checkbox" /><span>Invite from A, join from B → guest's joining flow completes; both lists are identical afterwards.</span></label></li>
+              <li><label><input type="checkbox" /><span>Add on A → appears on B within seconds (with the remote pulse on desktop).</span></label></li>
+              <li><label><input type="checkbox" /><span>Done-toggle on B → reflects on A; un-toggle propagates back.</span></label></li>
+              <li><label><input type="checkbox" /><span>Edit text on A while deleting a different item on B → both converge with no resurrected items.</span></label></li>
+              <li><label><input type="checkbox" /><span>The roster on both sides shows two writers with correct Owner / You labels.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>2 · Mesh (3+ peers)</h3>
+            <ul class="qa-list" data-qa="x-mesh">
+              <li><label><input type="checkbox" /><span>Desktop + mobile + headless all join one base; every peer writes one item; all converge to identical lists.</span></label></li>
+              <li><label><input type="checkbox" /><span>Peer counts on each device reflect the live connections.</span></label></li>
+              <li><label><input type="checkbox" /><span>Restart one peer → it catches up on the ops it missed while down.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>3 · Offline &amp; wedge regression</h3>
+            <ul class="qa-list" data-qa="x-offline">
+              <li><label><input type="checkbox" /><span>Guest goes offline, makes edits, returns → converges with no losses or duplicates.</span></label></li>
+              <li><label><input type="checkbox" /><span>Host goes offline; guest keeps writing; host returns → all guest writes arrive and the guest's writer never silently freezes (autobase#374 wedge regression).</span></label></li>
+              <li><label><input type="checkbox" /><span>The same item edited on two disconnected peers → after reconnect, every peer shows the same single winner.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>4 · Membership &amp; recovery across devices</h3>
+            <ul class="qa-list" data-qa="x-membership">
+              <li><label><input type="checkbox" /><span>Owner removes a member → remaining peers keep syncing (re-key) and the removed device can no longer write.</span></label></li>
+              <li><label><input type="checkbox" /><span>Owner recovery: code revealed on device A restores ownership on device B; roles end up consistent on every peer.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>5 · ESP32 leaf (when firmware or bridge changed)</h3>
+            <ul class="qa-list" data-qa="x-esp32">
+              <li><label><input type="checkbox" /><span>Hub bridge on (desktop or headless); the board's <code>cfg.toml</code> control key matches the hub key — a mismatch is detected and means "reflash the board".</span></label></li>
+              <li><label><input type="checkbox" /><span>Board serial status shows cores mirroring; appends on the hub grow the leaf's contiguousLength.</span></label></li>
+              <li><label><input type="checkbox" /><span>Power-cycle the board → the mirror resumes from flash without a full re-download.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="callout">
+            <strong>Infra gotchas:</strong> the Geekom VMs are guest-only for P2P (ufw drops inbound
+            holepunch) — host from the Mac, phones, or the Pi. Use the mainnet DHT for cross-machine
+            rows (the LAN testnet bootstrap is broken across machines). After a SIGKILL, wait out the
+            30 s storage-lease TTL before restarting a node.
+          </div>
+        </section>
+
+        <section id="qa-release" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Final gate · before tagging / shipping</span>
+              <h2>Release Gate</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-release">0 / 0</span>
+          </div>
+
+          <ul class="qa-list" data-qa="r-gate">
+            <li><label><input type="checkbox" /><span><code>npm run ci</code> green in <code>listam-mobile</code>, <code>listam-desktop</code>, and <code>listam-headless</code>.</span></label></li>
+            <li><label><input type="checkbox" /><span>Cross-device matrix run recorded — all rows ok in <code>/tmp/listam-xdev-report.json</code>.</span></label></li>
+            <li><label><input type="checkbox" /><span>Mobile backend bundles rebuilt for BOTH platforms (<code>npm run ios</code> / <code>npm run android</code> include <code>bundle:backend:*</code>) — any RPC table change must ship to both sides together.</span></label></li>
+            <li><label><input type="checkbox" /><span>Desktop version bumped; DMG built with <code>installer/build-macos.sh --release</code>; <code>pear release production</code> pointer moved.</span></label></li>
+            <li><label><input type="checkbox" /><span>Seed agent alive on the Mac (<code>installer/seed-agent.sh</code> LaunchAgent) — verified by a fresh-machine fetch.</span></label></li>
+            <li><label><input type="checkbox" /><span>The <a href="#qa-smoke">Smoke Matrix</a> above completed on release artifacts (installed appling, TestFlight/release mobile build), not dev builds.</span></label></li>
+            <li><label><input type="checkbox" /><span>New/changed strings exist in all locales (mobile <code>check:i18n</code> covers it; desktop scanned in the pseudo locales).</span></label></li>
+            <li><label><input type="checkbox" /><span>Wiki updated: phase log entry written, this QA page reviewed against new/changed features, sidebar "Updated" date bumped.</span></label></li>
+            <li><label><input type="checkbox" /><span>Known-issues review done — see below.</span></label></li>
+          </ul>
+
+          <div class="callout">
+            <strong>Known issues — don't re-debug:</strong>
+            <a href="https://github.com/holepunchto/autobase/issues/374">holepunchto/autobase#374</a>
+            (silent writer freeze + append busy-loop upstream, filed 2026-06-11 against v7.28.1).
+            Check the tracker state before chasing any new append hang; the local stale pre-join
+            "local" block cause was fixed with scoped join writers and is covered by
+            <code>wedge-repro.mjs</code>.
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+    <script>
+      (function () {
+        const STORE_KEY = "listam.wiki.qa.v1";
+        let state = {};
+        try {
+          state = JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+        } catch (error) {
+          state = {};
+        }
+
+        const boxes = [];
+        document.querySelectorAll(".qa-list[data-qa]").forEach((list) => {
+          const slug = list.dataset.qa;
+          list.querySelectorAll('input[type="checkbox"]').forEach((box, index) => {
+            const key = slug + "." + index;
+            box.checked = Boolean(state[key]);
+            box.addEventListener("change", () => {
+              if (box.checked) state[key] = 1;
+              else delete state[key];
+              localStorage.setItem(STORE_KEY, JSON.stringify(state));
+              updateCounters();
+            });
+            boxes.push(box);
+          });
+        });
+
+        const counters = Array.from(document.querySelectorAll("[data-qa-progress]"));
+
+        function updateCounters() {
+          counters.forEach((counter) => {
+            const section = document.getElementById(counter.dataset.qaProgress);
+            if (!section) return;
+            const sectionBoxes = Array.from(
+              section.querySelectorAll('.qa-list input[type="checkbox"]'),
+            );
+            const done = sectionBoxes.filter((box) => box.checked).length;
+            counter.textContent = done + " / " + sectionBoxes.length;
+            counter.classList.toggle(
+              "complete",
+              sectionBoxes.length > 0 && done === sectionBoxes.length,
+            );
+          });
+        }
+
+        const resetButton = document.getElementById("qa-reset");
+        if (resetButton) {
+          resetButton.addEventListener("click", () => {
+            if (!window.confirm("Clear every checkbox on this page?")) return;
+            state = {};
+            localStorage.removeItem(STORE_KEY);
+            boxes.forEach((box) => {
+              box.checked = false;
+            });
+            updateCounters();
+          });
+        }
+
+        updateCounters();
+      })();
+    </script>
+  </body>
+</html>

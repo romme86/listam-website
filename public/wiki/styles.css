@@ -821,7 +821,10 @@ summary.nav-subgroup:hover,
 
 #multi-app-plan > .grid,
 #multi-app-plan > .info-table,
-#multi-app-plan > .source {
+#multi-app-plan > .source,
+#leaf-peer-plan > .source,
+#leaf-peer-plan > .risk-board,
+#leaf-peer-plan > pre {
   margin-top: 1rem;
 }
 

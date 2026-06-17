@@ -120,6 +120,84 @@
                   <a href="phases.html#phase-log">Phase Log</a>
                 </div>
               </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Dark Theme</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#dark-theme-plan">Overview</a>
+                  <a href="plans.html#dark-theme-tokens">Token Model</a>
+                  <a href="plans.html#dark-theme-palette">Palette</a>
+                  <a href="plans.html#dark-theme-rules">Hard Rules</a>
+                  <a href="plans.html#dark-theme-switching">Theme Switching</a>
+                  <a href="plans.html#dark-theme-rollout">Rollout</a>
+                </div>
+              </details>
+              <details class="nav-subsection" open>
+                <summary class="nav-subgroup">
+                  <span>Leaf Peer (ESP32)</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#leaf-peer-plan">Overview</a>
+                  <a href="plans.html#leaf-architecture">Architecture</a>
+                  <a href="plans.html#leaf-builds">Builds &amp; Flash</a>
+                  <a href="plans.html#leaf-provisioning">Provisioning &amp; Roaming</a>
+                  <a href="plans.html#leaf-persistence">Flash Persistence</a>
+                  <a href="plans.html#leaf-vendored">Vendored Crates</a>
+                  <a href="plans.html#leaf-peripherals">Peripherals</a>
+                  <a href="plans.html#leaf-voice">Voice Plan</a>
+                  <a href="plans.html#leaf-roadmap">Next Steps</a>
+                </div>
+              </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Kanban Boards</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#kanban-plan">Overview</a>
+                  <a href="plans.html#kanban-product-rules">Product Rules</a>
+                  <a href="plans.html#kanban-architecture">Architecture</a>
+                  <a href="plans.html#kanban-data-model">Ticket Data Model</a>
+                  <a href="plans.html#kanban-board-config">Board Config</a>
+                  <a href="plans.html#kanban-domain-logic">Domain Logic</a>
+                  <a href="plans.html#kanban-backend">Backend Changes</a>
+                  <a href="plans.html#kanban-desktop-ui">Desktop UI</a>
+                  <a href="plans.html#kanban-additions">Other Additions</a>
+                  <a href="plans.html#kanban-testing">Testing &amp; Verification</a>
+                  <a href="plans.html#kanban-build-order">Build Order</a>
+                </div>
+              </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Mobile Kanban</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#mobile-kanban-plan">Overview</a>
+                  <a href="plans.html#mobile-kanban-decisions">Key Decisions</a>
+                  <a href="plans.html#mobile-kanban-registry">List Registry</a>
+                  <a href="plans.html#mobile-kanban-state">Mobile State</a>
+                  <a href="plans.html#mobile-kanban-nav">Navigation &amp; Gestures</a>
+                  <a href="plans.html#mobile-kanban-screens">Kanban Screens</a>
+                  <a href="plans.html#mobile-kanban-i18n">i18n &amp; Theme</a>
+                  <a href="plans.html#mobile-kanban-testing">Testing &amp; Verification</a>
+                  <a href="plans.html#mobile-kanban-risks">Risks &amp; Edge Cases</a>
+                  <a href="plans.html#mobile-kanban-build-order">Build Order</a>
+                </div>
+              </details>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Voice</summary>
+            <div class="nav-links">
+              <a href="voice.html#overview">Overview</a>
+              <a href="voice.html#architecture">Architecture</a>
+              <a href="voice.html#wake-words">Wake Words</a>
+              <a href="voice.html#commands">Commands</a>
+              <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#stt">Speech-to-Text</a>
+              <a href="voice.html#led">LED Feedback</a>
+              <a href="voice.html#status">Status</a>
             </div>
           </details>
 
@@ -164,7 +242,9 @@
               The reviewed architecture and hardening plan behind the multi-app milestone, kept as a
               historical design record. The plan has since been implemented: phases 0–15 are logged
               on the <a href="phases.html">Phases</a> page, and the apps shipped as listam-desktop
-              v0.12.0 and listam-headless v0.13.0.
+              v0.12.0 and listam-headless v0.13.0. Two later feature plans follow below the multi-app
+              plan: the desktop <a href="#kanban-plan">Kanban Boards</a> milestone and the
+              <a href="#mobile-kanban-plan">Mobile Kanban</a> phase that brought it to the phone.
             </p>
           </div>
 
@@ -1446,6 +1526,976 @@
           <a class="source" href="./listam-multi-app-plan.md">listam-multi-app-plan.md</a>
           <a class="source" href="./phases.html">phases.html</a>
           </section>
+
+          <section id="dark-theme-plan" class="plan-section">
+            <div class="section-heading plan-heading">
+              <span class="eyebrow">Desktop redesign · Kinetic Minimalist v2</span>
+              <div class="plan-title">
+                <h2>Dark Theme</h2>
+                <span class="status-pill">Implemented — KM v2 phase 1</span>
+              </div>
+            </div>
+
+            <div class="callout" id="dark-theme-goal" data-nav-section>
+              <strong>Goal (parameter P5 — tonal depth, two themes):</strong>
+              keep the no-shadow surface-ladder DNA, but formalize the desktop tokens so a true dark
+              theme falls out mechanically rather than being hand-tuned. Before v2 the desktop was
+              light-only and the Pear window background was hardcoded to <code>#fbf9f9</code>. Every
+              colour becomes a theme-paired semantic token, so switching themes only swaps the palette,
+              never the markup.
+            </div>
+
+            <div class="detail-list" id="dark-theme-tokens" data-nav-section>
+              <h3>Token model</h3>
+              <div>
+                <strong>Three theme-paired families</strong>
+                <p>
+                  <strong>Surfaces</strong> — the tonal ladder <code>--surface-0</code> (canvas) →
+                  <code>--surface-3</code> (pressed / selected-mute), plus <code>--card</code> (row and
+                  kv-row fill). <strong>Inks</strong> — <code>--ink</code>, <code>--ink-mute</code>,
+                  <code>--ink-faint</code> (metadata, AA-large only). <strong>Signals</strong> —
+                  <code>--signal</code> / <code>--on-signal</code> (acid) and <code>--danger</code> plus
+                  containers. No third hue: pending and offline states are carried by shape, not by
+                  adding amber.
+                </p>
+              </div>
+            </div>
+
+            <table class="info-table" id="dark-theme-palette" data-nav-section>
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Light</th>
+                  <th>Dark</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>--surface-0</code></td><td><code>#FBF9F9</code></td><td><code>#101212</code></td><td>canvas</td></tr>
+                <tr><td><code>--surface-1</code></td><td><code>#F5F3F3</code></td><td><code>#161919</code></td><td>sidebar, panels</td></tr>
+                <tr><td><code>--surface-2</code></td><td><code>#EFEDED</code></td><td><code>#1D2121</code></td><td>fills, hover, receded rows</td></tr>
+                <tr><td><code>--surface-3</code></td><td><code>#E3E2E2</code></td><td><code>#252A2A</code></td><td>pressed, selected-mute</td></tr>
+                <tr><td><code>--card</code></td><td><code>#FFFFFF</code></td><td><code>#181B1B</code></td><td>item rows, kv rows</td></tr>
+                <tr><td><code>--ink</code></td><td><code>#1B1C1C</code></td><td><code>#F1EFEF</code></td><td>primary text, selection fill</td></tr>
+                <tr><td><code>--ink-mute</code></td><td><code>#5D5F5F</code></td><td><code>#B0ABAB</code></td><td>secondary text</td></tr>
+                <tr><td><code>--ink-faint</code></td><td><code>#7E7576</code></td><td><code>#8A8485</code></td><td>metadata, mono labels (AA-large only)</td></tr>
+                <tr><td><code>--line</code></td><td><code>#CFC4C5</code></td><td><code>#34393A</code></td><td>hairline of last resort (dense tables only)</td></tr>
+                <tr><td><code>--signal</code></td><td><code>#C3F400</code></td><td><code>#C3F400</code></td><td>live / active / success</td></tr>
+                <tr><td><code>--on-signal</code></td><td><code>#161E00</code></td><td><code>#161E00</code></td><td>text on acid</td></tr>
+                <tr><td><code>--danger</code></td><td><code>#BA1A1A</code></td><td><code>#FFB4AB</code></td><td>destructive, attention</td></tr>
+              </tbody>
+            </table>
+
+            <div class="detail-list" id="dark-theme-rules" data-nav-section>
+              <h3>Hard rules</h3>
+              <div>
+                <strong>Acid is never text on light surfaces</strong>
+                <p>
+                  <code>#C3F400</code> on white is ~1.4:1. As a fill, acid always pairs with
+                  <code>--on-signal</code>; as text it appears only on <code>--ink-block</code>.
+                </p>
+              </div>
+              <div>
+                <strong><code>--ink-block</code> is theme-constant near-black and does not invert</strong>
+                <p>
+                  Any block carrying acid text (active nav, active locale) uses <code>--ink-block</code>:
+                  <code>#1B1C1C</code> in light, <code>#000000</code> in dark. The first mockup flipped the
+                  active-nav block to <code>--ink</code> in dark mode, which resolves to near-white and put
+                  acid text on a light fill (~1.4:1) — exactly the failure this rule prevents.
+                </p>
+              </div>
+              <div>
+                <strong>Acid stays identical across themes</strong>
+                <p>
+                  It is the brand constant. The adoption PR includes an AA audit table of every
+                  ink × surface pair actually used, and <code>--ink-faint</code> is restricted to ≥14px
+                  mono or non-text.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="dark-theme-switching" data-nav-section>
+              <h3>Theme switching</h3>
+              <div>
+                <strong>Mechanism</strong>
+                <p>
+                  Themes resolve through <code>html[data-theme="light" | "dark"]</code>; the default
+                  follows <code>prefers-color-scheme</code> with a pre-JS fallback so the first paint is
+                  already correct. The choice persists in preferences next to <code>isGridView</code>,
+                  cycles <code>system → light → dark</code> from the Settings dialog or the <code>T</code>
+                  shortcut, and <code>backend-boot</code> applies the persisted theme to the Pear window
+                  background at startup — replacing the hardcoded <code>#fbf9f9</code>.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="dark-theme-rollout" data-nav-section>
+              <h3>Rollout</h3>
+              <div>
+                <strong>Phase 1 — Tokens + themes + floors (CSS-only, shippable alone)</strong>
+                <p>
+                  Semantic tokens, the dark palette, and the contrast / scrollbar / label floors land
+                  with no markup changes — the biggest visible win for the least risk. Tabler outline
+                  icons inherit ink, so they theme automatically; <code>prefers-reduced-motion</code> and
+                  <code>forced-colors</code> (Windows high-contrast) both pass nearly for free because
+                  state is encoded as shape, not colour. Shipped 2026-06-11 as phases 1–2 of Kinetic
+                  Minimalist v2 (user-approved).
+                </p>
+              </div>
+            </div>
+
+            <span class="source">listam-desktop/design-guide/proposals/2026-06-kinetic-minimalist-v2.md</span>
+          </section>
+
+          <section class="plan-section" id="leaf-peer-plan">
+            <div class="section-heading plan-heading">
+              <span class="eyebrow">Hardware peer</span>
+              <div class="plan-title">
+                <h2>Leaf Peer — ESP32 Mirror</h2>
+                <span class="status-pill">On hardware — peripherals &amp; voice planned</span>
+              </div>
+              <p class="section-lede">
+                A <strong>leaf</strong> is a dumb, always-on <strong>blind replica</strong>: it mirrors a
+                project's hypercores over plain TCP and serves them while every real device is offline,
+                <em>without ever holding the encryption key</em>. It verifies signatures and merkle proofs
+                but only stores and forwards ciphertext — the same guarantee Holepunch blind peers give.
+                Two builds share one Rust core: <code>leaf-host</code> (Mac / Pi / VM, disk storage) and
+                <code>leaf-esp32</code> (ESP32-S3-N16R8 firmware). The host hub is the TCP leaf bridge in
+                <code>@listam/backend</code>, shipped in listam-headless and listam-desktop.
+              </p>
+            </div>
+
+            <div class="callout" id="leaf-architecture" data-nav-section>
+              <strong>How it fits together.</strong>
+              Provisioning is a single value — the <strong>control core key</strong>, printed by the bridge
+              at startup. The leaf dials every configured hub, speaks the hypercore v10/v11 wire protocol
+              (secret-stream + protomux compatible), mirrors the control core, learns the project's core
+              keys from its <code>{"add":[…]}</code> entries, then download-all mirrors and serves them.
+              Everything past the control key is learned in-band.
+            </div>
+
+            <pre><code>listam app (desktop / headless / mobile)
+   │  @listam/backend lib/leaf-bridge.mjs
+   │  - TCP listener, store.replicate(socket) per connection
+   │  - "leaf control core": hub-written hypercore announcing
+   │    {"add": ["&lt;core key hex&gt;", ...]} for every project core
+   ▼
+ TCP (LAN / tailscale / WireGuard — payload is Noise-encrypted)
+   ▲
+   │  leaf (leaf-host or ESP32)
+   │  - dials every app, speaks the hypercore v10/v11 wire protocol
+   │  - mirrors the control core, learns project core keys from it,
+   │    mirrors everything (download-all), serves requests</code></pre>
+
+            <div class="detail-list" id="leaf-builds" data-nav-section>
+              <h3>Builds &amp; flash</h3>
+              <div>
+                <strong>Two builds, one core</strong>
+                <p><code>leaf-host</code> is the desktop/server binary (disk or in-memory storage);
+                <code>leaf-esp32</code> is firmware for the ESP32-S3-N16R8; <code>leaf-core</code> is the
+                shared, platform-agnostic mirror logic. The firmware is provisioned from <code>cfg.toml</code>
+                (up to three 2.4GHz WiFi networks + hub address + control key; the real file with
+                credentials is gitignored).</p>
+              </div>
+              <div>
+                <strong>Which apps can host the bridge</strong>
+                <p>The bridge is transport-pluggable (callers inject a <code>net</code>-compatible module).
+                <strong>Headless</strong> = Node, shipped and enabled with <code>LISTAM_LEAF_BRIDGE_PORT</code>.
+                <strong>Desktop</strong> = Pear/Bare, shipped with full UI in the Peers &amp; Devices pane
+                (enable toggle, port field, provisioning-key display/copy, live "N boards connected"), off
+                by default. <strong>Mobile</strong> = planned only — a BareKit worklet dies when the app
+                backgrounds, so the recommended path is an always-on headless hub, not phone-as-hub.</p>
+              </div>
+              <div>
+                <strong>Flash command</strong>
+                <p>After <code>cp cfg.toml.example cfg.toml</code> and <code>. ~/export-esp.sh</code>, run
+                <code>cargo build --release</code> then
+                <code>espflash flash --monitor --flash-size 16mb --partition-table partitions.csv …/leaf-esp32</code>
+                (espflash ignores the IDF table, so pass <code>--partition-table</code> explicitly).</p>
+              </div>
+            </div>
+
+            <div class="callout" id="leaf-provisioning" data-nav-section>
+              <strong>Provisioning &amp; hub-aware roaming.</strong>
+              <code>cfg.toml</code> holds up to three 2.4GHz networks (the S3 has no 5GHz radio). The
+              firmware scans, joins the strongest known network, and — crucially — if <em>no hub becomes
+              reachable</em> through it within ~25s, rotates to the next known network. This handles
+              café/guest APs with client-isolation (a strong WiFi whose AP blocks client-to-client traffic):
+              the leaf won't sit uselessly on it, it roams to one where the hub actually answers. It also
+              re-scans and rejoins if WiFi drops, and reconnects (with a connection bounce) when it learns
+              new project cores.
+            </div>
+
+            <div class="detail-list" id="leaf-persistence" data-nav-section>
+              <h3>Flash persistence — proven on hardware</h3>
+              <div>
+                <strong>~13 MB wear-leveled FAT partition</strong>
+                <p>Mounted at <code>/data</code> via <code>esp_vfs_fat_spiflash_mount_rw_wl</code>; mirrored
+                cores persist there through a blocking <code>std::fs</code> storage backend
+                (<code>Storage::new_file_storage</code>) in the vendored hypercore. On boot the leaf reopens
+                the control core from flash and re-registers every announced core, so after a power cycle it
+                reloads the whole project and only syncs deltas. RAM (64 KiB PSRAM pages) is the fallback if
+                the FAT mount fails.</p>
+              </div>
+              <div>
+                <strong>Upstream datrs oplog bug found &amp; fixed</strong>
+                <p><code>Entry::decode</code> read <code>tree_upgrade</code> and <code>bitfield</code> under
+                the wrong flag bit (<code>flags &amp; 2</code> instead of bits 4 and 8), so any entry with
+                nodes + bitfield but no upgrade (a replicated data block) overran the buffer — invisible
+                in-memory, fatal on disk reopen. Fixed with regression tests in <code>oplog/entry.rs</code>.</p>
+              </div>
+              <div>
+                <strong>FATFS-specific storage quirks handled</strong>
+                <p>FATFS leaves seek-past-EOF gaps <em>undefined</em> (stale flash) but hypercore assumes
+                sparse-zero semantics → tree-store checksum corruption on multi-block downloads; fixed by
+                zero-filling gaps before any past-EOF write. FATFS also has no fd-<code>ftruncate</code>
+                (EPERM), emulated by a grow-by-zero-write / shrink-by-reopen <code>set_len_compat</code>.
+                <code>flush_infos</code> now <code>sync_all()</code>s each store (FATFS only persists size on
+                fsync/close); fresh-format FAT had no <code>/data/cores</code> dir → the mount now creates it.</p>
+              </div>
+            </div>
+
+            <div class="risk-board">
+              <article class="risk fix">
+                <h3>On-device bugs root-caused &amp; fixed</h3>
+                <ul>
+                  <li><strong>Duplicate channel opens.</strong> The driver opened each core at the Handshake event AND again on the hub's own Opens; JS protomux pairs only the first, so the duplicate channel goes half-dead and its block requests are never answered. Fixed with a per-connection <code>opened</code> set and an idempotent <code>command_open</code>.</li>
+                  <li><strong>Silently-dead-link wedge.</strong> The cipher layer swallowed EOF/reset as <code>Pending</code>, so a vanished hub parked the session forever. Fixed with a 16s receive-silence watchdog (hub keepalives ~5s) plus an in-flight guard so a resync tick can't double-download.</li>
+                  <li><strong>Multi-channel session panic.</strong> ESP-IDF async-io surfaces <code>NotConnected</code> mid-session, which the handshake crate <code>todo!()</code>-panicked on. Vendored the crate with a catch-all transient arm.</li>
+                </ul>
+              </article>
+              <article class="risk warn">
+                <h3>Serial &amp; toolchain gotchas</h3>
+                <ul>
+                  <li><strong>USB-Serial-JTAG.</strong> Plain device-node reads get nothing — it gates TX on DTE-present; use <code>espflash monitor</code> (needs a real TTY → wrap in <code>script</code>) or pyserial with <code>dtr=rts=True</code>. Monitor resets the board on attach <em>and</em> detach (<code>--no-reset</code> to peek).</li>
+                  <li><strong>Don't flash while monitoring.</strong> A monitor attach mid-<code>espflash flash</code> bricks the app partition → always <code>lsof</code> the serial port first; recover via <code>erase-flash</code> + reflash.</li>
+                  <li><strong>Other handled pitfalls:</strong> register <code>esp_vfs_eventfd</code> at boot; 64 KiB PSRAM pages (the default 1 MiB aborts); vendored <code>snow</code> for <code>ring?/std</code> (no Xtensa ring); milestone logs via the <code>log</code> crate, never tracing's <code>log</code> feature (UART spam).</li>
+                </ul>
+              </article>
+            </div>
+
+            <div class="detail-list" id="leaf-vendored" data-nav-section>
+              <h3>Vendored crates — v11 manifest support</h3>
+              <div>
+                <strong>Why fork the datrs stack</strong>
+                <p>listam cores are v11 manifest cores (key = manifestHash); the upstream
+                <code>hypercore</code> / <code>hypercore-protocol-rs</code> / <code>hypercore_schema</code>
+                crates can't do this yet. The <code>vendor/</code> forks add manifest codecs + hash + verify,
+                raw-key keyless cores (<code>HypercoreBuilder::raw_key</code> + <code>set_manifest</code>),
+                <code>Data.manifest</code> flag 16, <code>RequestSeek.padding</code>, the protomux batch
+                <em>encode</em> fix (Opens/Closes must be channel-0 control messages with type tags — JS
+                silently drops mistagged opens), and the file-storage / FATFS quirk handling above. All are
+                candidates for upstreaming.</p>
+              </div>
+              <div>
+                <strong>Pinned to the installed JS</strong>
+                <p>Golden vectors generated from JS hypercore 11.33 (<code>bridge-js/gen-vectors.mjs</code>)
+                pin the crypto (manifest codec, manifestHash, v1 signables, multisig encoding, signature
+                verification). The E2E harness (<code>bridge-js/e2e.mjs</code>) proves the contract against
+                the real headless app, and the board is a first-class <code>--esp32</code> row in the
+                cross-device test matrix.</p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="leaf-peripherals" data-nav-section>
+              <h3>Peripherals — mic &amp; SD card</h3>
+              <div>
+                <strong>INMP441 I2S mic + SPI micro-SD</strong>
+                <p>Added to the S3-N16R8 via a solderless screw-terminal shield. The pin map was
+                adversarially verified clean (it avoids the octal-PSRAM, flash, native-USB, UART0, and
+                strapping pins). Both modules run on <strong>3V3 only (never 5V)</strong>, shared GND; the
+                two buses are independent peripherals that need no coordination.</p>
+              </div>
+              <table class="info-table">
+                <thead>
+                  <tr><th>Module</th><th>Bus</th><th>Pins</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>INMP441 mic</td>
+                    <td><code>I2S0</code></td>
+                    <td>BCLK = GPIO4, WS = GPIO5, DIN = GPIO6, L/R → GND (left slot); no MCLK, no pull-ups</td>
+                  </tr>
+                  <tr>
+                    <td>micro-SD</td>
+                    <td><code>SPI2 / FSPI</code></td>
+                    <td>CS = GPIO10, MOSI = GPIO11, SCK = GPIO12, MISO = GPIO13; 10k pull-ups + 10µF/0.1µF cap at VCC</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div>
+                <strong>Mic bring-up verified on hardware</strong>
+                <p><code>leaf-esp32/src/bin/mic_test.rs</code> (an isolated bin that touches no leaf code) is
+                an I2S0 level-meter printing peak / RMS / dBFS per ~100ms window. Flashed and booted clean,
+                it tracked a full-scale transient (−0.0 dBFS) decaying smoothly to a ~−40 dBFS room floor
+                with symmetric min/max around 0 = healthy AC PCM. Mic + wiring confirmed recording correctly.</p>
+              </div>
+            </div>
+
+            <div class="callout" id="leaf-voice" data-nav-section>
+              <strong>Voice plan — board listens, host transcribes.</strong>
+              On-device full STT is infeasible on the S3, so the split is: the <strong>leaf</strong> does
+              wake-word + VAD on-device (a custom microWakeWord "hey listam", or ESP-SR WakeNet9 as the
+              turnkey fallback) and streams gated PCM to a paired host; the <strong>host</strong> does
+              STT + intent + append. Because the leaf opens cores <code>raw_key</code> (read-only, no secret
+              key) it <em>cannot</em> append — the writable list core lives on a desktop/headless/mobile
+              peer and the new item replicates back down (an LED ack is the zero-extra-hardware feedback
+              path). Host STT = whisper.cpp (one multilingual model for all six locales); the recommended
+              path is <strong>QVAC</strong> (Tether's Apache-2.0 SDK — same whisper.cpp engine, runs natively
+              in the Bare worker, distributes models P2P over hyperdrive), spike-gated behind a proven
+              whisper.cpp-subprocess fallback. ESP-SR MultiNet and Picovoice were both rejected (locale
+              coverage / never ran on Xtensa).
+            </div>
+
+            <div class="detail-list" id="leaf-roadmap" data-nav-section>
+              <h3>Known limitations &amp; next steps</h3>
+              <div>
+                <strong>Patched multisig verification</strong>
+                <p>Autobase <em>optimistic</em> writers (every invited member's first blocks) fail "Manifest
+                signature verification failed" — the verifier doesn't reconstruct the patched tree hash yet.
+                Owner / system / bootstrap cores verify fine (so single-member hubs and the ESP matrix row
+                pass); porting verifier.js's <code>_verifyMulti</code> patch path is needed only once a
+                multi-member project's member writer cores must mirror.</p>
+              </div>
+              <div>
+                <strong>SD-card storage</strong>
+                <p>For projects larger than the ~13 MB internal FAT, point <code>MirrorStorage::StdFs</code>
+                at <code>/sdcard/cores</code> via <code>esp_vfs_fat_sdspi_mount</code> (fallback
+                SD → internal FAT → RAM). <code>leaf-core</code> is unchanged — StdFs is path-agnostic and
+                reuses the existing zero-fill / no-ftruncate handling.</p>
+              </div>
+              <div>
+                <strong>Mobile bridge &amp; firmware listen-mode</strong>
+                <p>The mobile bridge plan is written but unimplemented: the real blocker is background
+                lifecycle (iOS has no supported background TCP listener; Android needs a foreground service),
+                not wiring. For the offline-LAN niche the preferred direction is to add an ESP firmware
+                <em>listen-mode</em> and have the phone dial the board, rather than run a background server.</p>
+              </div>
+            </div>
+
+            <span class="source">listam-hardware/leaf-peer/README.md</span>
+            <span class="source">listam-hardware/leaf-peer/docs/mobile-bridge-plan.md</span>
+            <span class="source">listam-hardware/leaf-peer/leaf-esp32/src/bin/mic_test.rs</span>
+            <span class="source">tools/cross-device/matrix.mjs</span>
+          </section>
+
+          <section id="kanban-plan" class="plan-section">
+            <div class="section-heading plan-heading">
+              <span class="eyebrow">Feature plan · post-parity milestone</span>
+              <div class="plan-title">
+                <h2>Kanban Boards — Rigor Mode, Time Tracking &amp; Congruency</h2>
+                <span class="status-pill">Implemented — desktop shipped</span>
+              </div>
+            </div>
+
+            <div class="callout">
+              <strong>Goal:</strong>
+              Turn Listam's flat grocery/list substrate into a kanban board where tickets are
+              first-class list items, estimation discipline is creator-controlled and enforceable,
+              delivery accuracy is measured objectively, and every peer agrees on the numbers. A
+              full board, two ticket-detail views, and a Properties/States/Automations/Rules config
+              were mocked first, then implemented on the desktop app.
+            </div>
+
+            <div class="detail-list" id="kanban-product-rules" data-nav-section>
+              <h3>Product rules</h3>
+              <div>
+                <strong>Rigor mode</strong>
+                <p>
+                  A board-level mode, <strong>on by default</strong>, that the board owner can
+                  disable. While on, creating a ticket requires at minimum a short description, a task
+                  checklist (≥1 item), estimated hours (&gt;0), and estimated complexity (1–100%).
+                </p>
+              </div>
+              <div>
+                <strong>Time tracking</strong>
+                <p>Accumulate the time a ticket spends in the <em>In Progress</em> state.</p>
+              </div>
+              <div>
+                <strong>On-time flagging</strong>
+                <p>
+                  On reaching <em>Done</em>, freeze a verdict from
+                  <code>delta = (actualInProgressHours − estimatedHours) / estimatedHours</code>:
+                  <code>delta &gt; +10%</code> → <strong>overtime</strong> (not in time);
+                  <code>delta &lt; −10%</code> → <strong>undertime</strong> (overestimated); otherwise
+                  <strong>on time</strong>.
+                </p>
+              </div>
+              <div>
+                <strong>Congruency score (per user)</strong>
+                <p>
+                  Calibration accuracy: a user is more congruent the closer their average estimated
+                  complexity is to the share of their tickets that missed the estimate (ran overtime
+                  or undertime).
+                </p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <strong>Authority model (user decision):</strong>
+              The <strong>signature of the board creator</strong> is the authority. Rigor mode and all
+              board configuration are stored as an owner-signed record verified against the creator's
+              authority key — no client (desktop, mobile, headless, leaf) can change them without that
+              signature. This reuses the proven <code>membership.mjs</code> owner-signed-record pattern.
+            </div>
+
+            <div class="detail-list" id="kanban-architecture" data-nav-section>
+              <h3>Load-bearing architecture (verified against source)</h3>
+              <div>
+                <strong>Tickets are list items</strong>
+                <p>
+                  <code>normalizeListItem</code> spreads <code>...item</code> before stamping the three
+                  required fields (<code>text</code>, <code>isDone</code>,
+                  <code>timeOfCompletion</code>), so arbitrary extra fields survive the reduction
+                  untouched. A ticket is a list item with <code>listType:'kanban'</code> plus optional
+                  fields — no new op types and no <code>LIST_OPERATION_VERSION</code> bump (stays
+                  <code>1</code>; ops with <code>version&gt;1</code> are dropped, so keeping it 1 stays
+                  forward-compatible with old peers).
+                </p>
+              </div>
+              <div>
+                <strong>RPC_UPDATE already passes extra fields through</strong>
+                <p>
+                  but <code>addItem(text, listId, listType)</code> discards everything but
+                  <code>text</code>. So <code>addItem</code> and the <code>RPC_ADD</code> handler must
+                  be extended to carry ticket fields — the one unavoidable backend change for ticket
+                  creation.
+                </p>
+              </div>
+              <div>
+                <strong>LWW on updatedAt</strong>
+                <p>
+                  <code>isStaleUpdate</code> drops any update with a lower <code>updatedAt</code>.
+                  Every ticket mutation (drag, block edit, checklist toggle, property edit) MUST set
+                  <code>updatedAt: Date.now()</code> — forgetting this is the #1 silent-no-op bug.
+                </p>
+              </div>
+              <div>
+                <strong>Owner-signed shared state precedent</strong>
+                <p>
+                  <code>membership.mjs</code> provides the template: an owner authority keypair, an
+                  owner check, records persisted to the view as <code>{op, record}</code>, rebuilt via
+                  a reducer plus <code>view-checkpoint.mjs</code>, and <code>normalizeViewEntry</code>
+                  ignoring control records so they never pollute the item reduction. Board config
+                  mirrors this exactly.
+                </p>
+              </div>
+            </div>
+
+            <table class="info-table" id="kanban-data-model" data-nav-section>
+              <thead>
+                <tr>
+                  <th>Ticket field</th>
+                  <th>Type</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>status</code></td>
+                  <td><code>todo | in_progress | blocked | review | done</code></td>
+                  <td>Board column. Keep <code>isDone = (status==='done')</code> so legacy UIs still read done-ness.</td>
+                </tr>
+                <tr><td><code>description</code></td><td><code>string</code></td><td>Rigor-required (short description).</td></tr>
+                <tr><td><code>checklist</code></td><td><code>{id,text,done}[]</code></td><td>Rigor-required (≥1).</td></tr>
+                <tr><td><code>estimatedHours</code></td><td><code>number</code></td><td>Rigor-required (&gt;0).</td></tr>
+                <tr><td><code>estimatedComplexity</code></td><td><code>number</code> (1–100)</td><td>Rigor-required.</td></tr>
+                <tr><td><code>priority</code></td><td><code>low | medium | high | urgent</code></td><td>Optional.</td></tr>
+                <tr><td><code>assignee</code></td><td><code>string</code> (writer-key hex)</td><td>Optional.</td></tr>
+                <tr><td><code>createdBy</code> / <code>completedBy</code></td><td><code>string</code> (writer-key hex)</td><td>Attribution, stamped write-side (self-asserted, honest-client).</td></tr>
+                <tr><td><code>inProgressMs</code></td><td><code>number</code></td><td>Cumulative accumulator.</td></tr>
+                <tr><td><code>inProgressSince</code></td><td><code>number | null</code></td><td>Wall-clock ms of the current in-progress entry.</td></tr>
+                <tr><td><code>actualInProgressHours</code></td><td><code>number</code></td><td>Frozen at Done.</td></tr>
+                <tr><td><code>timeliness</code></td><td><code>on_time | overtime | undertime</code></td><td>Frozen at Done.</td></tr>
+                <tr><td><code>blocks</code></td><td><code>Block[]</code></td><td>Block-based body: markdown, image, table, links, checklist, numberedList, callout, code.</td></tr>
+                <tr><td><code>kanbanVersion</code></td><td><code>number</code> (=1)</td><td>Field-level marker, independent of op version.</td></tr>
+              </tbody>
+            </table>
+
+            <div class="detail-list" id="kanban-board-config" data-nav-section>
+              <h3>Board configuration — one owner-signed record</h3>
+              <div>
+                <strong>Single signed record</strong>
+                <p>
+                  New module <code>backend/lib/board-config.mjs</code> (models <code>membership.mjs</code>).
+                  A single owner-signed record holds the whole board config — also what the
+                  Properties/States/Automations/Rules config edits:
+                </p>
+              </div>
+            </div>
+            <pre><code>{ type:'board-config', version:1, sequence, ownerAuthorityKey, createdAt,
+  rigorOn: true,                                 // default ON
+  states:     [{id,name,color,wipLimit,isDone}], // board columns
+  properties: [{key,label,kind,options}],        // ticket fields / property rail
+  rules:      [{id,kind,params,enforce:'block'|'warn'}],
+  automations:[{id,trigger,actions,enabled}],
+  signature }</code></pre>
+            <div class="detail-list">
+              <div>
+                <strong>Verification &amp; defaults</strong>
+                <p>
+                  <code>reduceBoardConfigOperation</code> verifies against
+                  <code>body.ownerAuthorityKey</code> and accepts only if it equals the board
+                  creator's authority key; it rejects wrong-base, replay (<code>sequence ≤ highest</code>),
+                  and bad signatures. This is how non-creators are prevented — purely cryptographic,
+                  no client trust. Absence of any record = defaults (rigor ON, the 4 default states).
+                </p>
+              </div>
+              <div>
+                <strong>Wiring</strong>
+                <p>
+                  <code>apply()</code> handles <code>isBoardConfigRecord(value)</code> after the
+                  membership branch (reduce, set state, persist <code>{op:'board-config'}</code>,
+                  broadcast); <code>view-checkpoint.mjs</code> collects the records and keeps them out
+                  of the item reduction; <code>state.mjs</code> holds <code>boardConfigState</code>,
+                  rebuilt on restart. Owner-only mutation RPC; non-owner attempts notify
+                  <code>{type:'config-denied', reason:'not-owner'}</code>.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="kanban-domain-logic" data-nav-section>
+              <h3>Shared domain logic — <code>@listam/domain/kanban.mjs</code> (pure)</h3>
+              <div>
+                <strong>validateTicketDraft(item, config)</strong>
+                <p>
+                  → <code>{ok, missing[]}</code>. When <code>config.rigorOn</code>, requires
+                  description, checklist≥1, estimatedHours&gt;0, estimatedComplexity∈[1,100]. Enforced
+                  on <strong>add</strong> only, never on update — so status changes of legacy /
+                  grandfathered tickets are never rejected.
+                </p>
+              </div>
+              <div>
+                <strong>applyStatusTransition(existing, incoming, now)</strong>
+                <p>
+                  On entering <code>in_progress</code>, set <code>inProgressSince=now</code>; on
+                  leaving, accumulate <code>inProgressMs</code> (clamp negative skew, cap a single
+                  slice). On entering <code>done</code>, flush the open slice, freeze
+                  <code>actualInProgressHours</code>, compute <code>delta</code>, freeze
+                  <code>timeliness</code>, set <code>isDone</code>/<code>timeOfCompletion</code>/<code>completedBy</code>.
+                  Reopen re-arms; re-completion recomputes. Timeliness/time are frozen at the source
+                  writer that owns the wall clock; every peer receives the verdict verbatim and agrees.
+                </p>
+              </div>
+              <div>
+                <strong>computeCongruency(tickets)</strong>
+                <p>
+                  Per-user, grouped by <code>completedBy ?? createdBy</code>:
+                  <code>offEstimateRatePct = 100·(#overtime + #undertime)/N</code>;
+                  <code>gap = |avgComplexityPct − offEstimateRatePct|</code>;
+                  <code>raw = 100 − gap</code>; volume-shrunk toward neutral 50 via
+                  <code>score = round(50 + (raw − 50)·N/(N+5))</code>. Also emits on-time/over/under
+                  counts and an optional tendency.
+                </p>
+              </div>
+              <div>
+                <strong>evaluateRules(config, nextItem, prevItem)</strong>
+                <p>
+                  → <code>{blocked[], warnings[]}</code> for WIP limit, required-owner-in-active,
+                  done-gate ("no open checklist items"), and blocked-needs-reason.
+                </p>
+              </div>
+            </div>
+
+            <table class="info-table" id="kanban-backend" data-nav-section>
+              <thead>
+                <tr>
+                  <th>Backend change</th>
+                  <th>What it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>protocol/index.mjs</code></td>
+                  <td>Add <code>RPC_SET_BOARD_CONFIG = 22</code>, <code>RPC_GET_BOARD_CONFIG = 23</code>; ticket CRUD reuses <code>RPC_ADD/UPDATE/DELETE</code>. Bump package version.</td>
+                </tr>
+                <tr>
+                  <td><code>backend/lib/item.mjs</code></td>
+                  <td>Extend <code>addItem</code> to carry ticket fields (stamp <code>createdBy</code>, default <code>status:'todo'</code>); in <code>updateItem</code> diff status and run <code>applyStatusTransition</code>; add <code>readPersistedBoardConfigRecords()</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>backend/lib/board-config.mjs</code> (new)</td>
+                  <td>Owner-signed config: create state/record, reduce operation/log, <code>isBoardConfigRecord</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>backend/backend.mjs</code></td>
+                  <td><code>apply()</code> board-config branch + rigor add-gate (fail OPEN when indeterminate so a write is never permanently dropped); owner-guarded <code>RPC_SET_BOARD_CONFIG</code>; <code>RPC_GET_BOARD_CONFIG</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>view-checkpoint.mjs</code> · <code>state.mjs</code></td>
+                  <td>Collect <code>op:'board-config'</code> records; hold <code>boardConfigState</code> with a setter, rebuilt on restart.</td>
+                </tr>
+                <tr>
+                  <td>Attribution caveat</td>
+                  <td><code>createdBy/completedBy/assignee</code> are self-asserted (honest-client). The rigor rule is signature-enforced; per-ticket attribution is not — upgrade path is <code>node.from</code> in <code>apply()</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="detail-list" id="kanban-desktop-ui" data-nav-section>
+              <h3>Desktop UI — <code>listam-desktop/src/</code></h3>
+              <div>
+                <strong>New pure module <code>src/ticket.mjs</code></strong>
+                <p>
+                  Selectors/helpers that keep <code>ui.mjs</code> presentational and re-export the
+                  shared math: <code>isTicket</code>, <code>isKanbanList</code>,
+                  <code>groupByStatus</code>, <code>ticketBadges</code>, <code>selectBoardConfig</code>,
+                  <code>selectWriterStats</code> (delegates to <code>computeCongruency</code>),
+                  <code>validateRigorDraft</code>.
+                </p>
+              </div>
+              <div>
+                <strong>Board pane &amp; cards</strong>
+                <p>
+                  <code>renderBoardPane</code> builds columns from <code>groupByStatus</code>;
+                  <code>renderTicketCard</code> shows priority pill, assignee avatar, due, checklist
+                  count, an in-progress timer, and the on-time / overtime / undertime badge when done.
+                </p>
+              </div>
+              <div>
+                <strong>Two detail presentations + block editor</strong>
+                <p>
+                  Three shared pure builders (<code>renderTicketSummary</code>,
+                  <code>renderTicketBody</code>, <code>renderPropertyRail</code>) feed both a right-hand
+                  split panel and a full-screen <code>.ticket-doc</code> grid (no duplication). The
+                  8-block body editor dispatches per type with a hover gutter, <code>/</code> slash
+                  menu, and one <code>commitBlocks</code> → <code>RPC_UPDATE</code> with
+                  <code>updatedAt</code>. Live markdown is a minimal subset (bold/italic/code/links).
+                </p>
+              </div>
+              <div>
+                <strong>Rigor create dialog &amp; owner-gated config</strong>
+                <p>
+                  The <code>add-ticket-rigor</code> dialog validates required fields with a
+                  <code>.shake</code> + <code>.rigor-notice</code>; the Settings rigor row and the
+                  Properties/States/Automations/Rules config dialog are owner-gated and write
+                  <code>RPC_SET_BOARD_CONFIG</code> (read-only chip for non-creators).
+                </p>
+              </div>
+              <div>
+                <strong>Drag-and-drop &amp; congruency</strong>
+                <p>
+                  Native HTML5 DnD (survives full re-render; feedback via <code>classList</code>; one
+                  <code>RPC_UPDATE</code> on drop; <code>Ctrl+←/→</code> keyboard fallback).
+                  <code>renderCongruencyPane</code> shows one card per user: completed count,
+                  on-time/over/under bar, score numeral + reason. Board/rigor/stats all derive from
+                  <code>state.items</code> — no duplicated ticket state.
+                </p>
+              </div>
+              <div>
+                <strong>i18n</strong>
+                <p>
+                  All new keys land in <strong>all 6 catalogs</strong> (en/es/de/fr/it/pt) or the
+                  <code>assertCompleteCatalog</code> parity test fails.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="kanban-additions" data-nav-section>
+              <h3>Other additions</h3>
+              <div>
+                <strong>Activity feed &amp; reopen handling</strong>
+                <p>
+                  Persist <code>{op:'activity'}</code> entries (ticket completed + timeliness, config
+                  changed); <code>done→in_progress</code> re-arms timing and re-completion recomputes
+                  timeliness.
+                </p>
+              </div>
+              <div>
+                <strong>listType filtering &amp; mock fixtures</strong>
+                <p>
+                  Control records and the grocery list never render kanban tickets and vice-versa
+                  (filter by <code>listType</code>); <code>mock-backend.mjs</code> seeds kanban tickets
+                  (mixed statuses, each timeliness) + a board-config so <code>?mock=1</code> exercises
+                  board/rigor/congruency without a backend.
+                </p>
+              </div>
+              <div>
+                <strong>Accessibility &amp; back-compat</strong>
+                <p>
+                  Keyboard drag, focus management, <code>prefers-reduced-motion</code>; no op-version
+                  bump, optional fields, default config when no record, old peers ignore unknown fields
+                  and re-emit them intact. Mobile/headless reuse the same shared logic (UI is a
+                  follow-up — see the Mobile Kanban plan below).
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="kanban-testing" data-nav-section>
+              <h3>Testing &amp; verification</h3>
+              <div>
+                <strong>Unit (node:test)</strong>
+                <p>
+                  <code>domain/kanban.test.mjs</code> (validate, transition accumulation/freeze/reopen,
+                  congruency gap + shrinkage), <code>board-config.test.mjs</code> (default rigor ON,
+                  creator flips it, non-creator/replay/wrong-base rejected, log rebuild), backend apply
+                  integration (rigor add-gate, checkpoint keeps config out of item reduction), desktop
+                  <code>ticket.test.mjs</code>/<code>store.test.mjs</code>, and the i18n parity test.
+                </p>
+              </div>
+              <div>
+                <strong>End-to-end</strong>
+                <p>
+                  <code>npm test</code> in <code>listam-packages</code> + <code>listam-desktop</code>;
+                  <code>?mock=1</code> board walk (rigor validation, drag, in-progress timer, frozen
+                  badge, congruency); a two-peer cross-device run proves a non-creator rigor toggle is
+                  rejected cluster-wide and a ticket completed on peer A shows the same timeliness on
+                  peer B.
+                </p>
+              </div>
+            </div>
+
+            <div class="primitive-flow" id="kanban-build-order" data-nav-section>
+              <h3>Suggested build order (single milestone)</h3>
+              <ol>
+                <li><code>domain/kanban.mjs</code> + tests (pure, no UI/backend).</li>
+                <li><code>board-config.mjs</code> + tests; protocol constants; <code>apply()</code>/checkpoint/state wiring.</li>
+                <li><code>item.mjs</code> add-fields + time/timeliness; backend apply gate; integration tests.</li>
+                <li>Desktop: icons + i18n; <code>ticket.mjs</code>; <code>app.css</code>; board (read-only) → DnD → detail (split + full) → block editor → rigor dialog → settings/board-config (owner-gated) → congruency.</li>
+                <li>Mock fixtures; manual + two-peer verification.</li>
+              </ol>
+            </div>
+
+            <a class="source" href="./listam-kanban-plan.md">listam-kanban-plan.md</a>
+          </section>
+
+          <section id="mobile-kanban-plan" class="plan-section">
+            <div class="section-heading plan-heading">
+              <span class="eyebrow">Feature plan · mobile phase</span>
+              <div class="plan-title">
+                <h2>Mobile Kanban — Typed Lists, Groups, Swipe Nav &amp; Board</h2>
+                <span class="status-pill">Implemented — mobile shipped</span>
+              </div>
+            </div>
+
+            <div class="callout">
+              <strong>Goal:</strong>
+              Bring the shipped desktop kanban to the mobile app (Expo / React Native + Redux Toolkit,
+              single-screen). The user organizes typed lists (grocery + kanban) into <strong>groups</strong>,
+              flags one list <strong>default</strong> (the app opens there), and navigates by
+              <strong>swiping</strong> between lists; kanban lists get a board, ticket detail, rigor
+              create, time tracking, on-time flagging, and congruency — all reusing the shared
+              <code>@listam/domain/kanban</code>.
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-decisions" data-nav-section>
+              <h3>Key architecture decisions (2026-06-15)</h3>
+              <div>
+                <strong>Synced list registry via reserved meta-items (no new backend)</strong>
+                <p>
+                  List + group metadata are ordinary synced items in a reserved meta list
+                  (<code>listType:'registry'</code>), each carrying
+                  <code>{ kind:'list'|'group', name, type?, groupId?, order }</code>. They flow through
+                  the existing <code>RPC_ADD/UPDATE/DELETE</code> → sync → reduce pipeline (LWW,
+                  encrypted, attributed) with zero backend changes; frontends reduce them into a
+                  registry and filter <code>listType:'registry'</code> out of user-facing views. The
+                  fallback is a dedicated owner-signed <code>list-registry</code> record mirroring
+                  <code>board-config.mjs</code>.
+                </p>
+              </div>
+              <div>
+                <strong>Default list is per-device</strong>
+                <p>"Opens here on launch" is inherently local — <code>preferencesSlice</code> + AsyncStorage, not synced.</p>
+              </div>
+              <div>
+                <strong>Pager on PanResponder + Animated — no new deps</strong>
+                <p>
+                  Capture-phase <code>PanResponder</code> + <code>Animated</code> translateX (no
+                  <code>react-native-gesture-handler</code> / <code>pager-view</code>;
+                  <code>check-deps.mjs</code> gates new imports). Content swaps by dispatching
+                  <code>selectedListChanged</code>.
+                </p>
+              </div>
+              <div>
+                <strong>Gesture model</strong>
+                <p>
+                  Flip grocery swipe-to-delete to swipe-<strong>left</strong> and switch kanban columns
+                  by <strong>tapping</strong> — horizontal swipe is reserved for list navigation.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-registry" data-nav-section>
+              <h3>Shared / domain (small)</h3>
+              <div>
+                <strong><code>@listam/domain/list-registry.mjs</code> (new, pure)</strong>
+                <p>
+                  <code>reduceRegistry(metaItems)</code> →
+                  <code>{ groups:[{id,name,order}], lists:[{id,name,type,groupId,order}] }</code> with
+                  LWW by <code>updatedAt</code>, tombstone deletes, stable sort by order then name, and
+                  unfiled lists folded into an implicit "Ungrouped" group last.
+                  <code>REGISTRY_LIST_TYPE='registry'</code>; no backend changes (rides item ops). Used
+                  by mobile now and desktop later.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-state" data-nav-section>
+              <h3>Mobile state — <code>listam-mobile/app/store/</code></h3>
+              <div>
+                <strong><code>boardConfigSlice.ts</code></strong>
+                <p>
+                  <code>{ config, canAdminister }</code>; <code>boardConfigReceived</code>/<code>boardConfigReset</code>;
+                  <code>selectBoardConfig</code> falls back to <code>normalizeBoardConfig(null)</code>
+                  (never null).
+                </p>
+              </div>
+              <div>
+                <strong>List registry projection</strong>
+                <p>
+                  Reduces synced registry meta-items (via <code>@listam/domain/list-registry</code>)
+                  plus the local default; thunks send <code>RPC_ADD/UPDATE/DELETE</code> for the
+                  meta-items; selectors <code>selectGroupedLists</code>,
+                  <code>selectListsInGroup</code>, <code>selectListIndexInGroup</code>.
+                </p>
+              </div>
+              <div>
+                <strong>preferences &amp; decoder</strong>
+                <p>
+                  <code>preferencesSlice.defaultListId</code> (+ AsyncStorage hydration);
+                  <code>_useWorklet.ts</code> decoder gains <code>board-config</code> →
+                  <code>boardConfigReceived</code> and <code>config-denied</code> → snackbar, re-exports
+                  the two board-config RPCs. Registry meta-items arrive through the existing
+                  sync/from-backend cases — no new transport.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-nav" data-nav-section>
+              <h3>Navigation + gesture layer</h3>
+              <div>
+                <strong><code>app/nav/listNav.ts</code> (pure)</strong>
+                <p>
+                  <code>step(lib,curId,dir,{jumpGroup,wrap})</code>, <code>nextList</code>/<code>prevList</code>,
+                  <code>crossesGroupBoundary</code> (→ toast group name),
+                  <code>resolveLaunchList</code> (default → first-of-first-group → null; stale default
+                  falls through). No wrap by default.
+                </p>
+              </div>
+              <div>
+                <strong><code>ListSwipePager.tsx</code> + <code>useListPager.ts</code></strong>
+                <p>
+                  Capture-phase PanResponder claims horizontal only when clearly horizontal (dead-zone
+                  ~14px + axis-lock) AND no category drag active AND not in a no-pager zone; animates one
+                  translateX, dispatches on settle; long-press a blank area (~250ms) arms
+                  <code>jumpGroup</code> + haptic; reduced-motion → instant swap.
+                </p>
+              </div>
+              <div>
+                <strong>Indicators, menu &amp; the swipe flip</strong>
+                <p>
+                  <code>PositionIndicator.tsx</code> (green active dot, hidden when ≤1);
+                  <code>ListsMenu.tsx</code> (grouped list of every list, opened from the top-left menu;
+                  current highlighted, default starred); <code>ListItem.tsx</code> swipe-to-delete
+                  flipped to <strong>left</strong>; <code>Header.tsx</code> top-right default star;
+                  <code>index.tsx</code> wraps the list view in the pager and resolves the launch list.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-screens" data-nav-section>
+              <h3>Kanban screens — <code>app/components/kanban/</code></h3>
+              <div>
+                <strong>Ported <code>ticket.ts</code></strong>
+                <p>
+                  From desktop <code>src/ticket.mjs</code> with the DOM/<code>innerHTML</code> markdown
+                  bits dropped — pure reuse of <code>@listam/domain/kanban</code>
+                  (<code>groupByStatus</code>, <code>ticketBadges</code>, <code>buildStatusChange</code>,
+                  <code>validateRigorDraft</code>, <code>formatDuration</code>, block helpers).
+                </p>
+              </div>
+              <div>
+                <strong>Board, detail, create, congruency</strong>
+                <p>
+                  Board switches columns by <strong>tapping</strong> a segmented control (one column at
+                  a time); cards via <code>ticketBadges</code> with a live in-progress timer; a
+                  full-screen ticket detail sends one <code>RPC_UPDATE</code> via
+                  <code>buildStatusChange</code> (backend freezes time/timeliness); the rigor create
+                  form runs <code>validateRigorDraft</code> before <code>RPC_ADD</code>; the congruency
+                  view renders <code>selectWriterStats</code> as monochrome bars; a new-list bottom
+                  sheet (grocery vs kanban) calls <code>createListThunk</code>.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-i18n" data-nav-section>
+              <h3>i18n &amp; theme</h3>
+              <div>
+                <strong>Only new nav keys</strong>
+                <p>
+                  Kanban/ticket/board keys already exist in all 6 <code>@listam/i18n</code> catalogs.
+                  Add only new nav keys (<code>nav.toast.enteredGroup</code>,
+                  <code>nav.hint.jumpArmed</code>, <code>board.configDenied</code>, group/menu/default-star
+                  labels) to all 6 + the <code>MessageKey</code> union; the parity test gates it.
+                </p>
+              </div>
+              <div>
+                <strong>Strictly monochrome + green</strong>
+                <p>
+                  Consume <code>useTheme()</code> tokens only; green (<code>colors.accent</code>, the
+                  native <code>#2f9e44</code> — not the desktop acid green) is reserved for
+                  active/positive: default star, FAB, active column/tab, live timer, done/on-time,
+                  primary actions, slider.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-testing" data-nav-section>
+              <h3>Testing &amp; verification</h3>
+              <div>
+                <strong>node --test only (no Jest)</strong>
+                <p>
+                  Co-locate <code>.mjs</code> tests under <code>listam-mobile/backend/lib/</code> and
+                  extract pure logic the <code>.ts</code> imports:
+                  <code>list-registry.test.mjs</code> (LWW, deletes, ordering, Ungrouped),
+                  <code>list-nav.test.mjs</code> (next/prev, cross-boundary toast, jumpGroup, no-wrap,
+                  stale default), <code>kanban-ticket.test.mjs</code> (ported helpers; domain math is
+                  already covered in <code>packages/domain/kanban.test.mjs</code>).
+                </p>
+              </div>
+              <div>
+                <strong>End-to-end</strong>
+                <p>
+                  <code>npm test</code> (mobile + packages); Expo simulator: create a grocery and a
+                  kanban list, file them into groups, star a default and relaunch, swipe between lists
+                  (confirm the group-boundary toast), long-press + swipe to jump a group, confirm
+                  grocery delete swipes left, tap kanban columns vs swipe to change list, rigor create
+                  validation, an on-time badge, congruency; a two-device run proves registry sync and
+                  shared timeliness with per-device defaults.
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-list" id="mobile-kanban-risks" data-nav-section>
+              <h3>Risks &amp; edge cases</h3>
+              <div>
+                <strong>Reserved meta-items must be filtered everywhere</strong>
+                <p>Centralize an <code>isRegistryItem</code> guard; if overloading items feels wrong, switch to the owner-signed <code>list-registry</code> record fallback (more backend work).</p>
+              </div>
+              <div>
+                <strong>Gesture arbitration is the highest risk</strong>
+                <p>Vertical FlatList scroll must never be captured (axis-lock is the invariant); category long-press-drag (~280ms on rows) and jump-arm (~250ms on blank space) are disjoint by surface — verify on device.</p>
+              </div>
+              <div>
+                <strong>Registry races &amp; scope</strong>
+                <p>Any-writer registry edits race under LWW (two peers rename a group → last write wins, acceptable). Desktop multi-list/group UI is out of scope; the shared reducer lets desktop adopt it later for parity.</p>
+              </div>
+            </div>
+
+            <div class="primitive-flow" id="mobile-kanban-build-order" data-nav-section>
+              <h3>Suggested build order</h3>
+              <ol>
+                <li><code>@listam/domain/list-registry</code> + tests (pure).</li>
+                <li>Mobile state: <code>boardConfigSlice</code>, registry projection, <code>preferences.defaultListId</code>, <code>_useWorklet</code> decoder + RPC re-exports + tests.</li>
+                <li>Nav: <code>listNav</code> + tests → <code>useListPager</code> → <code>ListSwipePager</code> + <code>PositionIndicator</code> → <code>ListsMenu</code> → <code>index.tsx</code>/<code>Header.tsx</code> wiring → <code>ListItem</code> delete flip.</li>
+                <li>Kanban: port <code>ticket.ts</code> + tests → board (tap columns) → ticket detail + status change → rigor create → congruency → new-list sheet.</li>
+                <li>i18n nav keys (6 catalogs) + monochrome/green pass; simulator + two-device verification.</li>
+              </ol>
+            </div>
+
+            <a class="source" href="./listam-kanban-plan.md">listam-kanban-plan.md</a>
+          </section>
+
         </section>
 
       </main>

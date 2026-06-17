@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Listam CodeWiki — Voice Assistant</title>
+    <meta
+      name="description"
+      content="Voice assistant for Listam: ESP32 leaf wake words, voice commands, and the dictation notetaker."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Listam CodeWiki home">
+          <img src="../assets/icon.png" alt="" />
+          <span>
+            <strong>Listam</strong>
+            <small>CodeWiki</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Study sections">
+          <details class="nav-section">
+            <summary class="nav-group">Global</summary>
+            <div class="nav-links">
+              <a href="/">Main Website</a>
+              <a href="index.html#overview">Overview</a>
+              <a href="index.html#thesis">Core Thesis</a>
+              <a href="index.html#architecture">Architecture</a>
+              <a href="index.html#data-model">Data Model</a>
+              <a href="index.html#p2p-primitives">P2P Primitives</a>
+              <a href="index.html#security">Security</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Mobile</summary>
+            <div class="nav-links">
+              <a href="mobile.html#structure">Project Structure</a>
+              <a href="mobile.html#runtime">Runtime Flows</a>
+              <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#backend">Backend</a>
+              <a href="mobile.html#storage">Storage</a>
+              <a href="mobile.html#libraries">Libraries</a>
+              <a href="mobile.html#quality">Quality Notes</a>
+              <a href="mobile.html#study">Study Path</a>
+              <a href="mobile.html#file-index">File Index</a>
+              <a href="mobile.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Desktop</summary>
+            <div class="nav-links">
+              <a href="desktop.html#structure">Project Structure</a>
+              <a href="desktop.html#runtime">Runtime Flows</a>
+              <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#backend">Worker Backend</a>
+              <a href="desktop.html#devices">Peers &amp; Devices</a>
+              <a href="desktop.html#storage">Storage</a>
+              <a href="desktop.html#installer">Installer &amp; Releases</a>
+              <a href="desktop.html#libraries">Libraries</a>
+              <a href="desktop.html#file-index">File Index</a>
+              <a href="desktop.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Headless</summary>
+            <div class="nav-links">
+              <a href="headless.html#structure">Project Structure</a>
+              <a href="headless.html#roles">Roles</a>
+              <a href="headless.html#runtime">Runtime Flows</a>
+              <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#owner-control">Owner Control</a>
+              <a href="headless.html#storage">Storage</a>
+              <a href="headless.html#installer">Service Installer</a>
+              <a href="headless.html#libraries">Libraries</a>
+              <a href="headless.html#file-index">File Index</a>
+              <a href="headless.html#testing">Testing</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">Plans</summary>
+            <div class="nav-links">
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Multi-App Plan</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#multi-app-plan">Overview</a>
+                  <a href="plans.html#review-findings">Review Findings</a>
+                  <a href="plans.html#implementation-plans">Implementation Plans</a>
+                  <a href="plans.html#lower-severity-items">Lower-Severity Items</a>
+                  <a href="plans.html#strategy-improvements">Strategy Improvements</a>
+                  <a href="plans.html#shared-test-harness">Shared Test Harness</a>
+                  <a href="plans.html#redux-decision">Redux Decision</a>
+                  <a href="plans.html#app-targets">App Targets</a>
+                  <a href="plans.html#shared-package-plan">Shared Packages</a>
+                  <a href="plans.html#state-manager-phase">State Manager</a>
+                  <a href="plans.html#technical-architecture-notes">Technical Notes</a>
+                  <a href="plans.html#shared-command-event-flow">Command Flow</a>
+                  <a href="plans.html#p2p-owner-control">Owner Control</a>
+                  <a href="plans.html#headless-first-run">Headless Setup</a>
+                  <a href="plans.html#headless-co-invite">Co-Invite Flow</a>
+                  <a href="plans.html#logging-strategy">Logging</a>
+                  <a href="plans.html#development-peer-log-flow">Peer Log Flow</a>
+                  <a href="plans.html#logging-controls">Logging Controls</a>
+                  <a href="plans.html#secret-storage-plan">Secret Storage</a>
+                  <a href="plans.html#implementation-hardening">Hardening</a>
+                  <a href="plans.html#implementation-constraints">Constraints</a>
+                  <a href="plans.html#future-direction">Future Direction</a>
+                  <a href="plans.html#test-plan">Test Plan</a>
+                  <a href="plans.html#assumptions">Assumptions</a>
+                </div>
+              </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Dark Theme</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#dark-theme-plan">Overview</a>
+                  <a href="plans.html#dark-theme-tokens">Token Model</a>
+                  <a href="plans.html#dark-theme-palette">Palette</a>
+                  <a href="plans.html#dark-theme-rules">Hard Rules</a>
+                  <a href="plans.html#dark-theme-switching">Theme Switching</a>
+                  <a href="plans.html#dark-theme-rollout">Rollout</a>
+                </div>
+              </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Leaf Peer (ESP32)</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#leaf-peer-plan">Overview</a>
+                  <a href="plans.html#leaf-architecture">Architecture</a>
+                  <a href="plans.html#leaf-builds">Builds &amp; Flash</a>
+                  <a href="plans.html#leaf-provisioning">Provisioning &amp; Roaming</a>
+                  <a href="plans.html#leaf-persistence">Flash Persistence</a>
+                  <a href="plans.html#leaf-vendored">Vendored Crates</a>
+                  <a href="plans.html#leaf-peripherals">Peripherals</a>
+                  <a href="plans.html#leaf-voice">Voice Plan</a>
+                  <a href="plans.html#leaf-roadmap">Next Steps</a>
+                </div>
+              </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Kanban Boards</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#kanban-plan">Overview</a>
+                  <a href="plans.html#kanban-product-rules">Product Rules</a>
+                  <a href="plans.html#kanban-architecture">Architecture</a>
+                  <a href="plans.html#kanban-data-model">Ticket Data Model</a>
+                  <a href="plans.html#kanban-board-config">Board Config</a>
+                  <a href="plans.html#kanban-domain-logic">Domain Logic</a>
+                  <a href="plans.html#kanban-backend">Backend Changes</a>
+                  <a href="plans.html#kanban-desktop-ui">Desktop UI</a>
+                  <a href="plans.html#kanban-additions">Other Additions</a>
+                  <a href="plans.html#kanban-testing">Testing &amp; Verification</a>
+                  <a href="plans.html#kanban-build-order">Build Order</a>
+                </div>
+              </details>
+              <details class="nav-subsection">
+                <summary class="nav-subgroup">
+                  <span>Mobile Kanban</span>
+                </summary>
+                <div class="nav-sublinks">
+                  <a href="plans.html#mobile-kanban-plan">Overview</a>
+                  <a href="plans.html#mobile-kanban-decisions">Key Decisions</a>
+                  <a href="plans.html#mobile-kanban-registry">List Registry</a>
+                  <a href="plans.html#mobile-kanban-state">Mobile State</a>
+                  <a href="plans.html#mobile-kanban-nav">Navigation &amp; Gestures</a>
+                  <a href="plans.html#mobile-kanban-screens">Kanban Screens</a>
+                  <a href="plans.html#mobile-kanban-i18n">i18n &amp; Theme</a>
+                  <a href="plans.html#mobile-kanban-testing">Testing &amp; Verification</a>
+                  <a href="plans.html#mobile-kanban-risks">Risks &amp; Edge Cases</a>
+                  <a href="plans.html#mobile-kanban-build-order">Build Order</a>
+                </div>
+              </details>
+            </div>
+          </details>
+
+          <details class="nav-section" open>
+            <summary class="nav-group">Voice</summary>
+            <div class="nav-links">
+              <a href="voice.html#overview">Overview</a>
+              <a href="voice.html#architecture">Architecture</a>
+              <a href="voice.html#wake-words">Wake Words</a>
+              <a href="voice.html#commands">Commands</a>
+              <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#stt">Speech-to-Text</a>
+              <a href="voice.html#led">LED Feedback</a>
+              <a href="voice.html#status">Status</a>
+            </div>
+          </details>
+
+          <details class="nav-section">
+            <summary class="nav-group">QA</summary>
+            <div class="nav-links">
+              <a href="qa.html#qa-overview">Release QA Overview</a>
+              <a href="qa.html#qa-smoke">Smoke Matrix</a>
+              <a href="qa.html#qa-mobile">Mobile Checklist</a>
+              <a href="qa.html#qa-desktop">Desktop Checklist</a>
+              <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
+              <a href="qa.html#qa-release">Release Gate</a>
+            </div>
+          </details>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Generated</span>
+          <strong>2026-06-16</strong>
+          <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
+        </div>
+      </aside>
+
+            <main class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Voice assistant · leaf wake → host STT</span>
+            <h1>Voice Assistant</h1>
+          </div>
+          <label class="search">
+            <span>Search</span>
+            <input id="site-search" type="search" placeholder="Try: wake word, whisper, notetaker, dB gate..." />
+          </label>
+        </header>
+
+        <section id="overview" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">What it is</span>
+            <h2>Overview</h2>
+            <p class="section-lede">
+              Hands-free Listam: talk to the ESP32 <strong>leaf</strong> and have items added,
+              removed, or dictated as notes — without touching a screen. The leaf only listens for a
+              wake word and streams the utterance; everything intelligent runs on a writable host
+              peer, and the result replicates back like any other change. Scope is deliberately
+              small to start: three wake words, three commands, and a dictation notetaker.
+            </p>
+          </div>
+          <div class="callout">
+            <strong>Host-only writability:</strong> the leaf is a read-only hypercore replica — it
+            cannot write list items. So voice <em>actions</em> always execute on the paired host
+            (the headless peer for v1) that holds the writable list core. Voice needs that host
+            reachable, exactly as any write does.
+          </div>
+        </section>
+
+        <section id="architecture" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Pipeline</span>
+            <h2>Architecture</h2>
+          </div>
+          <div class="flow">
+            <div>
+              <span>1</span>
+              <h3>Wake &amp; gate (leaf)</h3>
+              <p>The INMP441 mic feeds an on-device wake detector. A loudness (dB) gate fronts the
+                 "yo" word so only a deliberate, loud "yo" triggers. Audio stays on the device until
+                 a wake word fires.</p>
+              <span class="source">leaf-esp32/src/voice.rs</span>
+            </div>
+            <div>
+              <span>2</span>
+              <h3>Stream (leaf → host)</h3>
+              <p>After wake, the leaf streams PCM16 (16&nbsp;kHz mono) over a dedicated side-band TCP
+                 connection until end-of-utterance (VAD silence) — the proven replication socket is
+                 left untouched.</p>
+              <span class="source">audio-bridge.mjs</span>
+            </div>
+            <div>
+              <span>3</span>
+              <h3>Transcribe &amp; parse (host)</h3>
+              <p>The host runs whisper.cpp on the utterance, then a deterministic per-locale grammar
+                 turns the transcript into <code>{intent, slots}</code>.</p>
+              <span class="source">voice-intent.mjs</span>
+            </div>
+            <div>
+              <span>4</span>
+              <h3>Execute &amp; replicate</h3>
+              <p>The controller maps the intent onto the existing add/remove/note write paths and
+                 appends to the writable core; the new item replicates back to the leaf.</p>
+              <span class="source">voice-controller.mjs</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="wake-words" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">On the leaf</span>
+            <h2>Wake Words</h2>
+            <p class="section-lede">
+              Three custom wake words, detected entirely on-device with custom
+              <strong>microWakeWord</strong> models. The loudness gate is a hard requirement in
+              front of "yo", reusing the mic's existing RMS/dBFS math.
+            </p>
+          </div>
+          <table class="info-table">
+            <thead><tr><th>Wake word</th><th>Detection</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>yo</code> / <code>yoooo</code></td><td>model + dB gate</td><td>Only fires above a configurable loudness threshold (<code>wake_db_threshold</code>) — a quiet "yo" is ignored.</td></tr>
+              <tr><td><code>hey listam</code></td><td>model</td><td>The primary phrase wake word.</td></tr>
+              <tr><td><code>dai dai dai dai</code></td><td>model</td><td>Rhythmic four-syllable trigger.</td></tr>
+            </tbody>
+          </table>
+          <div class="callout">
+            <strong>Memory gate:</strong> the wake model's tensor arena shares PSRAM with the
+            hypercore stack on the N16R8, so an on-device allocation probe runs before models ship
+            (known esphome&nbsp;#7242 failure mode).
+          </div>
+        </section>
+
+        <section id="commands" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">On the host</span>
+            <h2>Commands</h2>
+            <p class="section-lede">
+              Parsed by a deterministic grammar (English complete; the other five UI locales follow,
+              accent-folded). Wake words spoken in the pre-roll are stripped before parsing.
+            </p>
+          </div>
+          <table class="info-table">
+            <thead><tr><th>Say</th><th>Does</th><th>Intent</th></tr></thead>
+            <tbody>
+              <tr><td>"add milk to groceries"</td><td>Adds the item to the named list (resolved via the list registry). Bare "add milk" uses the default list.</td><td><code>add_item</code></td></tr>
+              <tr><td>"remove milk"</td><td>Removes every exact match across all lists. Never deletes board tickets or registry entries; ambiguous fuzzy matches are a safe no-op.</td><td><code>remove_item</code></td></tr>
+              <tr><td>"note … end note"</td><td>Saves the dictated text as a note (see Notetaker).</td><td><code>note</code></td></tr>
+            </tbody>
+          </table>
+          <pre><code>parseIntent("add milk to groceries")
+→ { intent: "add_item", slots: { item: "milk", list: "groceries" }, confidence: 0.9 }</code></pre>
+        </section>
+
+        <section id="notetaker" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Dictation</span>
+            <h2>Notetaker</h2>
+            <p class="section-lede">
+              "note &lt;stream of words&gt; end note" captures free-form speech and saves it to a
+              dedicated <strong>notes</strong> destination — a new net-new list type
+              (<code>NOTES_LIST_TYPE = 'notes'</code>, mirroring the text-only <code>todo</code> type,
+              no dual-read shim). Note items sync now; a dedicated Notes surface lands in the desktop
+              and mobile UI later.
+            </p>
+          </div>
+          <span class="source">@listam/domain/identity.mjs · voice-controller.mjs</span>
+        </section>
+
+        <section id="stt" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Transcription</span>
+            <h2>Speech-to-Text</h2>
+          </div>
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>whisper.cpp (v1)</h3>
+              <p>Runs as a subprocess on the always-on headless peer — proven, no Bare-runtime
+                 limits, works while the desktop is closed. One multilingual GGML model covers all
+                 six UI locales (en/es/de/fr/it/pt).</p>
+              <span class="source">lib/stt/whisper-cpp-subprocess.mjs</span>
+            </article>
+            <article class="card accent-blue">
+              <h3>QVAC (later)</h3>
+              <p>Tether's QVAC SDK (ASR = whisper.cpp under the hood) runs natively in the Bare
+                 worker and distributes models P2P over hyperdrive — a spike-gated upgrade for the
+                 desktop path, with an optional local LLM for multilingual intent.</p>
+              <span class="source">lib/stt/qvac.mjs</span>
+            </article>
+          </div>
+        </section>
+
+        <section id="led" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Feedback</span>
+            <h2>LED Feedback</h2>
+            <p class="section-lede">
+              The board has no buzzer, so its onboard addressable RGB LED reports state (driven over
+              RMT). The state machine is owned by the voice thread.
+            </p>
+          </div>
+          <table class="info-table">
+            <thead><tr><th>State</th><th>LED</th></tr></thead>
+            <tbody>
+              <tr><td>idle / normal</td><td>off</td></tr>
+              <tr><td>awake / listening</td><td>blinking yellow</td></tr>
+              <tr><td>sending the command</td><td>solid green</td></tr>
+            </tbody>
+          </table>
+          <span class="source">leaf-esp32/src/led.rs</span>
+        </section>
+
+        <section id="status" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Where it stands</span>
+            <h2>Status</h2>
+          </div>
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>Shipped &amp; tested</h3>
+              <p>The host command core: the <code>notes</code> list type, the multilingual intent
+                 parser, and the voice controller (add / remove-everywhere / note) — with unit tests
+                 and the <code>voice.*</code> i18n keys across all six catalogs.</p>
+            </article>
+            <article class="card accent-amber">
+              <h3>In progress</h3>
+              <p>Host audio + STT bridge (whisper.cpp subprocess + headless wiring); leaf firmware
+                 (voice thread, dB gate, side-band streaming, RGB LED); microWakeWord model training
+                 and the on-device PSRAM arena probe + hardware verification.</p>
+            </article>
+          </div>
+          <div class="callout">
+            <strong>Privacy:</strong> all audio is transcribed locally on the host — nothing leaves
+            the LAN. (An opt-in cloud STT fallback for weak hosts is off by default.)
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js?v=wiki-pages"></script>
+  </body>
+</html>

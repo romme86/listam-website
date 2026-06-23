@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -195,6 +198,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -209,6 +213,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -217,7 +222,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -242,7 +247,7 @@
               The reviewed architecture and hardening plan behind the multi-app milestone, kept as a
               historical design record. The plan has since been implemented: phases 0–15 are logged
               on the <a href="phases.html">Phases</a> page, and the apps shipped as listam-desktop
-              v0.12.0 and listam-headless v0.13.0. Two later feature plans follow below the multi-app
+              v0.13.0 and listam-headless v0.13.1. Two later feature plans follow below the multi-app
               plan: the desktop <a href="#kanban-plan">Kanban Boards</a> milestone and the
               <a href="#mobile-kanban-plan">Mobile Kanban</a> phase that brought it to the phone.
             </p>
@@ -1405,6 +1410,33 @@
             </div>
           </div>
 
+          <div class="callout">
+            <strong>Post-milestone delta (shipped since):</strong>
+            With current-Listam parity proven across mobile, desktop, and headless, a wave of features
+            landed on top of the foundation — exactly the "architecture that makes them possible" the
+            milestone boundary called for. Shipped since the core milestone (at
+            listam-desktop v0.13.0 / listam-headless v0.13.1 / listam-mobile v1.0.1):
+            an <strong>Overview / day-plan</strong> surface over a synced pointer channel
+            (<code>@listam/domain/plan.mjs</code>); <strong>move-between-lists</strong>
+            (<code>RPC_MOVE = 28</code>, <code>@listam/domain/list-move.mjs</code>); cross-list
+            <strong>item reordering</strong> via a shared last-write-wins <code>order</code> field
+            (<code>@listam/domain/ordering.mjs</code>); <strong>encrypted backup / import + instance-seed
+            export</strong> (<code>RPC_EXPORT_DATA = 24</code>, <code>RPC_EXPORT_SEED = 25</code>,
+            <code>RPC_IMPORT = 26</code>; Argon2id + XChaCha20 in
+            <code>backend/lib/backup-crypto.mjs</code>, <code>backup-payload.mjs</code>,
+            <code>backup.mjs</code>); a <strong>WYSIWYG markdown editor</strong> over the DOM-free
+            <code>@listam/domain/markdown.mjs</code>; <strong>synced peer / device names + built-in list
+            rename</strong> (<code>@listam/domain/labels.mjs</code>); the full <strong>voice
+            assistant</strong> (leaf firmware mic + on-device "yo" wake word → host whisper.cpp STT →
+            intent → append, with desktop-native hosting in the Pear worker); <strong>BLE leaf
+            provisioning</strong> (the zero-dep <code>@listam/provisioning</code> wire contract +
+            <code>RPC_LEAF_PROVISION_INFO = 27</code>); a net-new text-only <strong><code>todo</code> list
+            type</strong>; the desktop <strong>Servers pane</strong> for owner-controlling remote headless
+            peers; and the desktop <strong>open-empty / general-group</strong> rework that reframes the
+            built-in surfaces as ordinary deletable lists. The full per-phase log lives on the
+            <a href="phases.html#phase-log">Phases</a> page.
+          </div>
+
           <table class="info-table" id="test-plan" data-nav-section>
             <thead>
               <tr>
@@ -1726,6 +1758,22 @@
               new project cores.
             </div>
 
+            <div class="callout">
+              <strong>Shipped: BLE provisioning.</strong>
+              Beyond editing <code>cfg.toml</code> and USB-flashing, a leaf can now be initialized over
+              <strong>Bluetooth from any app</strong>. When the firmware is unprovisioned (or booted while
+              holding the GPIO0/BOOT button) it advertises a NimBLE GATT service named
+              <code>listam-leaf-XXXX</code> (a MAC-derived suffix, e.g. <code>listam-leaf-3F7A</code>),
+              accepts a chunked, CRC16-verified JSON config (WiFi credentials, the control key, and the
+              hub / audio addresses), persists it to <strong>NVS</strong> (NVS takes precedence over a baked
+              <code>cfg.toml</code>), then reboots into normal mirror mode. The wire contract — UUIDs,
+              payload schema, CRC16, and BEGIN/CHUNK/COMMIT framing — is the zero-dep
+              <code>@listam/provisioning</code> package; the hub-side values an app sends come from
+              <code>RPC_LEAF_PROVISION_INFO = 27</code>. The status LED is <strong>blue</strong> while
+              advertising, <strong>green</strong> on a successful apply, and <strong>red</strong> on a bad
+              payload (CRC or schema failure).
+            </div>
+
             <div class="detail-list" id="leaf-persistence" data-nav-section>
               <h3>Flash persistence — proven on hardware</h3>
               <div>
@@ -1980,6 +2028,21 @@
                   mirrors this exactly.
                 </p>
               </div>
+              <div>
+                <strong>Renamed "Board" with a dual-read migration</strong>
+                <p>
+                  The surface was renamed from "Kanban" to <strong>Board</strong>. To avoid forking
+                  <code>apply()</code> across a partially-updated mesh, the migration is
+                  <strong>dual-read</strong>: <code>isBoardType()</code> accepts both the canonical
+                  <code>'board'</code> value and the legacy <code>'kanban'</code> value, while tickets are
+                  still <strong>written</strong> with the legacy wire type <code>'kanban'</code> until the
+                  whole mesh (including the pre-bundled mobile backend) ships dual-read — only then does the
+                  write-side flip to <code>'board'</code>. The pure block / ticket / congruency logic now
+                  lives in the shared <code>@listam/domain/board.mjs</code>
+                  (<code>BOARD_LIST_TYPE = 'board'</code>, <code>LEGACY_BOARD_LIST_TYPE = 'kanban'</code>),
+                  generic enough to back both desktop and mobile.
+                </p>
+              </div>
             </div>
 
             <table class="info-table" id="kanban-data-model" data-nav-section>
@@ -2055,7 +2118,7 @@
             </div>
 
             <div class="detail-list" id="kanban-domain-logic" data-nav-section>
-              <h3>Shared domain logic — <code>@listam/domain/kanban.mjs</code> (pure)</h3>
+              <h3>Shared domain logic — <code>@listam/domain/board.mjs</code> (pure; renamed from <code>kanban.mjs</code>)</h3>
               <div>
                 <strong>validateTicketDraft(item, config)</strong>
                 <p>

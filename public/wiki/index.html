@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -192,6 +195,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -206,6 +210,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -214,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -260,8 +265,8 @@
               <strong>Autobase + Hyperswarm</strong>
             </div>
             <div class="metric">
-              <span>Tests Found</span>
-              <strong>0</strong>
+              <span>Tests</span>
+              <strong>node:test suites</strong>
             </div>
           </div>
         </section>
@@ -417,9 +422,52 @@
 
           <div class="callout">
             <strong>Identity rule:</strong>
-            The effective item key is <code>text</code>, not <code>id</code>. Add/update/delete logic
-            filters and maps by text, so duplicate grocery names collapse into one item. This is simple
-            and human-friendly, but it makes quantities or duplicate stores hard to model later.
+            Items now carry <strong>stable ids</strong>. The backend reduces the operation log
+            <strong>id-keyed with last-write-wins</strong> — newer <code>updatedAt</code> wins per id —
+            using the <em>same</em> <span class="source">@listam/domain</span> reducer on desktop,
+            mobile, headless, and inside the backend itself. Duplicate grocery names now stay distinct
+            instead of collapsing into one item, and legacy text-only items get a deterministic
+            <code>legacy-…</code> id so old peers stay compatible.
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-green">
+              <h3>Newer item fields</h3>
+              <ul>
+                <li>
+                  <strong><code>order</code></strong> — optional shared float for drag/reorder, applied
+                  via <span class="source">@listam/domain/ordering.mjs</span>
+                  (<code>sortByOrder</code> / <code>computeReorder</code>).
+                </li>
+                <li>
+                  <strong><code>listType</code></strong> — <code>grocery</code>, <code>todo</code>, or
+                  <code>board</code>. Board tickets are still <em>written</em> with the legacy wire type
+                  <code>'kanban'</code>; <code>isBoardType()</code> dual-reads <code>board</code> +
+                  <code>kanban</code> so the whole mesh interops while the write-side switch is gated.
+                </li>
+                <li>
+                  Named lists, groups, and per-list view settings layer on top through the synced list
+                  <strong>registry</strong> (<span class="source">@listam/domain/list-registry.mjs</span>).
+                </li>
+              </ul>
+            </article>
+            <article class="card accent-blue">
+              <h3>Reserved synced meta-item buckets</h3>
+              <p>
+                Several features ride the same operation log as reserved meta-items rather than new RPC
+                channels, so they sync and reduce exactly like ordinary items:
+              </p>
+              <ul>
+                <li><code>__plan__</code> — Overview / day-plan pointers (<span class="source">@listam/domain/plan.mjs</span>).</li>
+                <li><code>__peers__</code> — self-asserted legible peer / device names (synced labels).</li>
+                <li><code>__surfacenames__</code> — cross-device built-in surface renames (synced labels, <span class="source">@listam/domain/labels.mjs</span>).</li>
+                <li><code>__registry__</code> — the list registry's named lists and groups.</li>
+              </ul>
+              <p>
+                Every list projection must skip these buckets so meta-items never render as grocery rows.
+                Device-local state (theme, device name, locale) is deliberately <em>not</em> replicated.
+              </p>
+            </article>
           </div>
         </section>
 
@@ -608,36 +656,65 @@
                 <li>Mutations are rejected when the local Autobase is not writable.</li>
                 <li>Backend duplicate instances are guarded by an exclusive lock file.</li>
                 <li>Camera permission is requested only for loyalty card scanning.</li>
+                <li>
+                  <strong>Members can be removed.</strong> <code>RPC_REMOVE_MEMBER</code> (=14) drives a
+                  key-epoch re-key so a removed peer loses access — separating "revoke invite" from
+                  "revoke access" (Phase 4, see <a href="phases.html#phase-log">the phase log</a>).
+                </li>
+                <li>
+                  <strong>Owner-only membership authority.</strong> <code>add-writer</code> is
+                  signature-checked in <code>apply</code> against an owner key, so an arbitrary writer can
+                  no longer co-opt membership (Phase 3).
+                </li>
+                <li>
+                  <strong>Link joins require confirmation.</strong> A link-initiated join now needs
+                  explicit user confirmation and does <em>not</em> tear down the current base until
+                  confirmed (Phase 1).
+                </li>
+                <li>
+                  <strong>Invites are single-use with enforced expiry.</strong> Invites default to
+                  single-use and a ~10-minute expiry is enforced, not just stored (Phase 1).
+                </li>
+                <li>
+                  <strong>No silent corruption wipe.</strong> Corruption recovery is now
+                  recovery/quarantine with consent instead of auto-deleting and recreating the base
+                  (Phase 11).
+                </li>
+                <li>
+                  <strong>Capability-scoped remote control.</strong> Owner-control adds signed,
+                  capability-scoped grants with monotonic-sequence replay defense
+                  (<span class="source">@listam/owner-control</span>, Phase 14).
+                </li>
               </ul>
             </article>
             <article class="risk warn">
               <h3>Review Carefully</h3>
               <ul>
-                <li>Base keys, encryption keys, and invite data are stored as plain files, not Keychain/Keystore entries.</li>
-                <li>Verbose logs print base keys, local writer keys, invite codes, peer keys, and item payloads.</li>
-                <li>Invites are reusable up to ten pairings and do not have an obvious user-facing revocation control.</li>
-                <li>Joining shares the encryption key and adds the guest as a full writer/indexer. Membership is append-only — there is no <code>remove-writer</code>, so a peer cannot be removed once joined.</li>
-                <li>Any writer can add further writers via <code>add-writer</code> in <code>apply</code>; there is no owner-only membership authority.</li>
-                <li>Read access requires the encryption key, which also grants full decrypt — there is no read-only or sync-only credential to back "storage helper" / "relay-only" roles.</li>
-                <li>Deep links (<code>listam.ch/join?invite=</code>) auto-join with no confirmation and tear down the current base.</li>
-                <li>Invite expiry (<code>expires</code>) is stored but never enforced; <code>lista-invite.json</code> is persisted but never read back.</li>
+                <li>Base keys, encryption keys, and invite data are stored as plain files, not Keychain/Keystore entries on every platform.</li>
+                <li>Verbose logs can print base keys, local writer keys, invite codes, peer keys, and item payloads (redaction is still being rolled across surfaces).</li>
+                <li>Read access requires the encryption key, which also grants full decrypt — there is no read-only or sync-only credential to back "storage helper" / "relay-only" roles. The blind leaf mirror is the exception (signature-/proof-verifying, never holds a key).</li>
                 <li>Loyalty card barcodes are stored in AsyncStorage rather than secure storage.</li>
-                <li>Autobase corruption recovery deletes the base and recreates a fresh one, silently destroying data and identity.</li>
-                <li>The app has no automated tests for join, corruption recovery, or storage migration.</li>
               </ul>
+              <p class="section-lede">
+                Several items that were here — append-only membership, any-writer
+                <code>add-writer</code>, unconfirmed deep-link joins, unenforced invite expiry, and
+                silent corruption wipe — are now <strong>resolved</strong>. See the Strengths column and
+                <a href="phases.html#phase-log">the phase log</a> (Phases 1, 3, 4, 11, 14).
+              </p>
             </article>
             <article class="risk fix">
               <h3>Recommended Hardening</h3>
               <ul>
-                <li>Design a membership-authority + encryption-key-rotation model so members can actually be removed; separate "revoke invite" (stop new joins) from "revoke access" (re-key and re-invite).</li>
-                <li>Restrict <code>add-writer</code> to an owner key, signature-verified in <code>apply</code>.</li>
-                <li>Require explicit user confirmation before any link-initiated join, and do not tear down the current base until confirmed.</li>
-                <li>Default invites to single-use with enforced expiry; delete the unused <code>lista-invite.json</code> persistence.</li>
-                <li>Move encryption keys, writer keys, owner-control tokens, invite secrets, pairing secrets, and loyalty card barcode data into platform secure storage.</li>
-                <li>Redact secrets and item/card payloads from logs, then add production log-level gates, a <code>no-console</code> lint rule, a CI secret-grep gate, and automated redaction tests.</li>
-                <li>Back up / export and require consent before any corruption-triggered wipe; never auto-wipe a headless storage node.</li>
-                <li>Add invite revoke/rotate controls, visible lifetime, bounded use counts, access-mode labels, expiration, and audit events.</li>
-                <li>Add tests for item reduction, duplicate handling, category lookup, join rollback, corruption recovery, storage migration, and invite lifecycle behavior.</li>
+                <li><strong>Resolved (Phase 4):</strong> membership-authority + encryption-key-rotation model so members can be removed; "revoke invite" is separated from "revoke access" (re-key) via <code>RPC_REMOVE_MEMBER</code>.</li>
+                <li><strong>Resolved (Phase 3):</strong> <code>add-writer</code> restricted to an owner key, signature-verified in <code>apply</code>.</li>
+                <li><strong>Resolved (Phase 1):</strong> explicit user confirmation before any link-initiated join; the current base is not torn down until confirmed.</li>
+                <li><strong>Resolved (Phase 1):</strong> invites default to single-use with enforced ~10-minute expiry.</li>
+                <li><strong>Resolved (Phase 11):</strong> corruption recovery exports / quarantines with consent instead of auto-wiping a storage node.</li>
+                <li><strong>Resolved (Phase 14):</strong> owner-control adds capability-scoped grants and audit-style replay defense for remote operation.</li>
+                <li>Move encryption keys, writer keys, owner-control tokens, invite secrets, pairing secrets, and loyalty card barcode data into platform secure storage on every platform.</li>
+                <li>Finish redacting secrets and item/card payloads from logs everywhere, with production log-level gates, a <code>no-console</code> lint rule, a CI secret-grep gate, and automated redaction tests.</li>
+                <li>Expand invite controls: visible lifetime, bounded use counts, and access-mode labels.</li>
+                <li>Keep extending coverage: item reduction, duplicate handling, category lookup, join rollback, corruption recovery, storage migration, and invite lifecycle behavior.</li>
                 <li>Add direct dependencies for loyalty-card rendering imports such as <code>react-native-svg</code> and <code>qrcode-terminal</code>, then add an undeclared-import check.</li>
               </ul>
             </article>

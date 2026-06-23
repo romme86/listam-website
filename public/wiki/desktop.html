@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -192,6 +195,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -206,6 +210,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -214,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -222,7 +227,7 @@
       <main class="content">
         <header class="topbar">
           <div>
-            <span class="eyebrow">Desktop · Pear / Bare · v0.12.0</span>
+            <span class="eyebrow">Desktop · Pear / Bare · v0.13.0</span>
             <h1>Desktop App</h1>
           </div>
           <label class="search">
@@ -236,7 +241,7 @@
             <span class="eyebrow">Folder intent</span>
             <h2>Project Structure</h2>
             <p class="section-lede">
-              <code>listam-desktop</code> (v0.12.0) is a Pear desktop app. The renderer is vanilla
+              <code>listam-desktop</code> (v0.13.0) is a Pear desktop app. The renderer is vanilla
               DOM + CSS; the real backend is the shared <code>@listam/backend</code> engine — the
               same one the mobile worklet and the headless service run — booted in a Pear worker
               because <code>bare-*</code> modules cannot load in the renderer.
@@ -386,11 +391,29 @@
             <article class="card accent-blue">
               <h3>Shell and sidebar IA</h3>
               <p>
-                A frameless 1280×860 window with draggable titlebar. The left rail navigates list
-                types — Groceries is live; Overview, Todo, and Travel are disabled "soon"
-                placeholders — and a bottom strip holds the peer-status dot plus system panes:
-                Peers, Diagnostics (activity log), and Settings.
+                A frameless 1280×860 window with draggable titlebar. The left rail layers
+                registry-driven named lists and groups on top of three built-in surfaces —
+                Groceries, Board, and Todo. The active surface is keyed as a
+                <code>(listId, type)</code> pair, so legacy single-list <code>default</code> data
+                always shows. The app opens with no list selected, and every list belongs to a
+                group: <code>general</code> is the mandated, synced, protected default home.
               </p>
+              <span class="source">src/ui.mjs</span>
+              <span class="source">@listam/domain/list-registry.mjs</span>
+            </article>
+            <article class="card accent-blue">
+              <h3>Groups and collapsible rail</h3>
+              <p>
+                Groups and lists are renamable and deletable; deleting a group re-homes its lists to
+                <code>general</code>. Device-local preferences pick which built-ins show
+                (<code>hiddenBuiltins</code>) and which surface opens
+                (<code>defaultSurfaceKey</code>). Rail groups collapse
+                (<code>preferences.collapsedGroups</code>): a collapsed group shows one green badge
+                summing its surfaces' counts and auto-expands when a surface inside it is selected.
+                The old "Live · N peers" status strip is gone — the peer count moved to the Peers
+                &amp; Devices nav badge.
+              </p>
+              <span class="source">src/store.mjs</span>
               <span class="source">src/ui.mjs</span>
             </article>
             <article class="card accent-green">
@@ -427,6 +450,55 @@
               </p>
               <span class="source">app.css</span>
               <span class="source">design-guide/</span>
+            </article>
+            <article class="card accent-green">
+              <h3>Board &amp; editing</h3>
+              <p>
+                Beyond Groceries, a Board surface (status-chip + card view with a ticket-detail /
+                rigor editor) and a text-only Todo surface. Items reorder via <code>Alt</code>+↑/↓
+                and drag (<code>@listam/domain/ordering</code>). A "Move to…" picker moves items
+                between lists and types and promotes an item to a board
+                (<code>RPC_MOVE</code> = 28, <code>@listam/domain/list-move</code>). Board-ticket
+                markdown fields edit as live WYSIWYG via a <code>contentEditable</code> over
+                <code>@listam/domain/markdown</code>; the stored value stays markdown.
+              </p>
+              <span class="source">src/ticket.mjs</span>
+              <span class="source">@listam/domain/list-move.mjs</span>
+              <span class="source">@listam/domain/markdown.mjs</span>
+            </article>
+          </div>
+        </section>
+
+        <section id="overview" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Pinned surface</span>
+            <h2>Overview / Day-plan</h2>
+            <p class="section-lede">
+              A pinned Overview surface pairs a Focus list with a Planner, letting you pull anything
+              from across the app into today's plan without copying it.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-amber">
+              <h3>Focus &amp; flagging</h3>
+              <p>
+                Flag any grocery item (including from the grid and shopping-mode cards), board
+                ticket, or list into today's focus. Marking a focus item done writes through to the
+                source list, so the plan and the underlying lists never drift. Drag-reorder is
+                discoverable within the Focus list.
+              </p>
+              <span class="source">src/store.mjs</span>
+            </article>
+            <article class="card accent-blue">
+              <h3>Planner &amp; sync</h3>
+              <p>
+                A 7-day strip with a future-day popover lets you schedule items ahead. The plan is
+                shared via <code>@listam/domain/plan</code> over a <code>__plan__</code> meta-item
+                channel — no new RPC; it rides an <code>RPC_UPDATE</code> upsert like the other
+                synced meta channels (registry, labels).
+              </p>
+              <span class="source">src/store.mjs · @listam/domain/plan.mjs</span>
             </article>
           </div>
         </section>
@@ -516,6 +588,24 @@
                 light/dark the moment the OS scheme flips — no restart, no stale theme.
               </p>
             </div>
+            <div>
+              <strong>Voice hosting in the worker.</strong>
+              <p>
+                The Pear/Bare worker can host the full voice pipeline itself
+                (<code>src/voice-host-worker.mjs</code>): a leaf streams 16&nbsp;kHz audio to the
+                desktop's audio bridge on TCP&nbsp;<code>:9994</code>, the worker runs
+                whisper.cpp STT via <code>bare-subprocess</code> plus intent parsing, and writes
+                items into the desktop's own base — no separate headless leaf-hub or orphan base.
+              </p>
+            </div>
+            <div>
+              <strong>Worker stays alive on crashes.</strong>
+              <p>
+                A <code>Bare.on('uncaughtException')</code> handler keeps the worker running and
+                appends the failure to <code>{Pear storage}/worker-errors.log</code> instead of
+                aborting the whole app — a leaf-connect error no longer takes the backend down.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -545,25 +635,61 @@
               <span class="source">src/ui.mjs</span>
             </article>
             <article class="card accent-green">
+              <h3>Device &amp; peer names</h3>
+              <p>
+                A Settings Device-name field advertises a self peer-label
+                (<code>@listam/domain/labels</code>), so the roster shows a legible name instead of
+                the raw writer key. Built-in surfaces are renamable too, carried over the same
+                synced surface-labels meta channel.
+              </p>
+              <span class="source">@listam/domain/labels.mjs</span>
+            </article>
+            <article class="card accent-green">
               <h3>Leaf bridge (hardware peers)</h3>
               <p>
                 A worker-side TCP listener (default port 9993, via <code>bare-tcp</code>) that
                 ESP32 leaf peers dial to mirror cores, gated by a 64-hex control key shown with a
                 Copy button. Status reads off / waiting / connected(N); the toggle and port persist
-                and the bridge auto-starts on relaunch. In browser/mock mode the section shows its
-                "requires Pear runtime" state.
+                and the bridge auto-starts on relaunch. A nearby leaf can also be provisioned over
+                Web Bluetooth (<code>navigator.bluetooth</code>, <code>@listam/provisioning</code>)
+                — this writes the bridge control key plus the LAN <code>hubAddr</code>/<code>audioAddr</code>
+                into the leaf, and falls back to copy-paste when <code>navigator.bluetooth</code> is
+                absent. In browser/mock mode the section shows its "requires Pear runtime" state.
               </p>
               <span class="source">src/leaf-bridge-manager.mjs</span>
-              <span class="source">src/leaf-bridge-config.mjs</span>
+              <span class="source">@listam/provisioning</span>
             </article>
+          </div>
+
+          <div class="section-heading" style="margin-top: 1.5rem;">
+            <span class="eyebrow">Subsection</span>
+            <h3>Servers (remote headless peers)</h3>
+            <p class="section-lede">
+              A top-level Servers surface pairs with and monitors remote headless peers over
+              owner-control.
+            </p>
+          </div>
+
+          <div class="grid two">
             <article class="card accent-amber">
-              <h3>Owner control (headless devices)</h3>
+              <h3>Pair &amp; monitor</h3>
               <p>
                 Paste a pairing code minted on a headless node (<code>control-pair</code>) plus a
-                name → the device pairs over an encrypted HyperDHT session and appears with its
-                capabilities. Query fetches the node's status snapshot through signed,
-                capability-scoped command envelopes; a stopped node times out with a notice instead
-                of hanging the UI.
+                name → the device pairs over an encrypted HyperDHT session and appears as a status
+                card with its capabilities. Status cards re-poll roughly every 20&nbsp;s while open;
+                a stopped node times out with a notice instead of hanging the UI. The Pear runtime
+                is required — the <code>?mock=1</code> preview is read-only.
+              </p>
+              <span class="source">src/owner-control.mjs</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>Signed, capability-scoped controls</h3>
+              <p>
+                Safe controls — refresh/status, mint invite, export, shutdown — travel as
+                Ed25519-signed, capability-scoped envelopes over HyperDHT with monotonic-sequence
+                replay defense. <code>src/owner-control.mjs</code> was hardened from a
+                connect-per-request model to one persistent connection, because HyperDHT will not
+                let you reconnect to a server key once a connection to it has closed.
               </p>
               <span class="source">src/owner-control.mjs</span>
             </article>
@@ -625,6 +751,18 @@
               </tr>
             </tbody>
           </table>
+
+          <div class="callout">
+            <strong>Backup &amp; data:</strong>
+            Settings exposes Export data (<code>.listam</code>), Import (auto-detects a data archive
+            vs. an instance seed), and Export instance seed (<code>.listamseed</code>) — all
+            password-encrypted. The crypto lives in <code>@listam/backend</code> (Argon2id key
+            derivation + XChaCha20-Poly1305) and rides the protocol commands
+            <code>RPC_EXPORT_DATA</code> = 24, <code>RPC_EXPORT_SEED</code> = 25, and
+            <code>RPC_IMPORT</code> = 26 (import merges last-write-wins). Separately, the Congruency
+            and Activity analytics moved out of the rail into a new Analytics section of the
+            Settings dialog.
+          </div>
         </section>
 
         <section id="installer" class="page page-searchable">

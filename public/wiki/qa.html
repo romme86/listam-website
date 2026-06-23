@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -192,6 +195,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -206,6 +210,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -214,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Updated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Manual release QA: checklists for the mobile, desktop, and headless apps plus cross-device scenarios.</p>
         </div>
       </aside>
@@ -496,13 +501,35 @@
           <div class="qa-group">
             <h3>12 · Language</h3>
             <ul class="qa-list" data-qa="m-language">
-              <li><label><input type="checkbox" /><span>Locale System / English / French / German / Italian / Spanish → UI strings switch immediately and persist across restart.</span></label></li>
+              <li><label><input type="checkbox" /><span>Locale System / English / Spanish / German / French / Italian / Portuguese → UI strings switch immediately and persist across restart.</span></label></li>
               <li><label><input type="checkbox" /><span>Spot-check one non-English locale across menu, dialogs, snackbars, and paywall — no missing-key strings, no overflowing labels.</span></label></li>
             </ul>
           </div>
 
           <div class="qa-group">
-            <h3>13 · Lifecycle &amp; sync resilience</h3>
+            <h3>13 · Overview, lists &amp; new surfaces</h3>
+            <ul class="qa-list" data-qa="m-surfaces">
+              <li><label><input type="checkbox" /><span>Overview screen renders Focus + the day plan; swipe-right on a row flags it into Focus (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/OverviewScreen.tsx">app/components/OverviewScreen.tsx</a>).</span></label></li>
+              <li><label><input type="checkbox" /><span>The plan sheet opens for a day, lets you plan/flag items, and changes sync to peers (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/PlanSheet.tsx">app/components/PlanSheet.tsx</a>).</span></label></li>
+              <li><label><input type="checkbox" /><span>"Move to…" sheet relocates an item to another list / promotes it to a board (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/MoveItemSheet.tsx">app/components/MoveItemSheet.tsx</a>; RPC_MOVE=28).</span></label></li>
+              <li><label><input type="checkbox" /><span>The reorder overlay (long-press) offers "Move to top" / "Move to bottom"; the new order persists and replicates.</span></label></li>
+              <li><label><input type="checkbox" /><span>Board surface (when <code>boardEnabled</code>): status chips + cards, full-screen ticket detail with the 8-block editor and rigor form; tickets dual-read <code>board</code>/<code>kanban</code>.</span></label></li>
+              <li><label><input type="checkbox" /><span>Todo surface: text-only list, no grocery categories / grid / icons.</span></label></li>
+              <li><label><input type="checkbox" /><span>Rich markdown editor: a markdown block edits as live WYSIWYG and the stored value stays markdown (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/board/RichMarkdownEditor.tsx">app/components/board/RichMarkdownEditor.tsx</a>).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>14 · Backup, device name &amp; leaf pairing</h3>
+            <ul class="qa-list" data-qa="m-settings">
+              <li><label><input type="checkbox" /><span>Backup settings: export and import all data (password-encrypted, LWW merge) plus export the instance seed round-trip on a fresh install (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/BackupSettings.tsx">app/components/BackupSettings.tsx</a>; RPC 24/25/26).</span></label></li>
+              <li><label><input type="checkbox" /><span>The device-name input sets this device's synced label; it appears in the members/peers roster on another device.</span></label></li>
+              <li><label><input type="checkbox" /><span>Leaf pairing dialog reads the hub's controlKey/hubAddr via owner-control <code>status</code> and provisions a nearby leaf over BLE — requires a dev-client rebuild (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/LeafPairingDialog.tsx">app/components/LeafPairingDialog.tsx</a>).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>15 · Lifecycle &amp; sync resilience</h3>
             <ul class="qa-list" data-qa="m-lifecycle">
               <li><label><input type="checkbox" /><span>Force-kill + relaunch → items, preferences, loyalty cards, and membership all restored.</span></label></li>
               <li><label><input type="checkbox" /><span>Background the app 10+ minutes, foreground → list resyncs without duplicates; peer edits made meanwhile arrive.</span></label></li>
@@ -532,9 +559,10 @@
             <h3>1 · Launch &amp; shell</h3>
             <ul class="qa-list" data-qa="d-shell">
               <li><label><input type="checkbox" /><span>Frameless window opens with working traffic lights (close / minimize / maximize) and a draggable titlebar.</span></label></li>
-              <li><label><input type="checkbox" /><span>Sidebar: Groceries is active; Overview, Todo, Travel are disabled "soon" placeholders and not clickable.</span></label></li>
+              <li><label><input type="checkbox" /><span>Opens empty — no list is selected on launch; a protected <code>general</code> group is present in the rail with the built-in Groceries / Board / Todo lists inside it.</span></label></li>
+              <li><label><input type="checkbox" /><span>Selecting any list in the rail navigates to its surface; the empty/welcome state returns when nothing is selected.</span></label></li>
               <li><label><input type="checkbox" /><span>Status strip: hollow ring at 0 peers, breathing acid dot when ≥1 peer; clicking it navigates to the Peers pane.</span></label></li>
-              <li><label><input type="checkbox" /><span>Peers / Activity / Settings nav buttons switch panes with the entrance animation; peer-count badge pops when the count changes.</span></label></li>
+              <li><label><input type="checkbox" /><span>Overview / Peers / Settings nav buttons switch panes with the entrance animation; peer-count badge pops when the count changes.</span></label></li>
             </ul>
           </div>
 
@@ -582,7 +610,47 @@
           </div>
 
           <div class="qa-group">
-            <h3>6 · Share &amp; join</h3>
+            <h3>6 · Groups &amp; lists</h3>
+            <ul class="qa-list" data-qa="d-groups">
+              <li><label><input type="checkbox" /><span>Create a group, create a list inside it, then rename and delete each; every list belongs to some group (no orphans).</span></label></li>
+              <li><label><input type="checkbox" /><span>The <code>general</code> group is protected — it can't be deleted; deleting any other group re-homes its lists into <code>general</code> rather than dropping them.</span></label></li>
+              <li><label><input type="checkbox" /><span>The built-in Groceries / Board / Todo lists behave as ordinary lists inside <code>general</code> (rename, hide); their underlying data still lives on list id <code>default</code>.</span></label></li>
+              <li><label><input type="checkbox" /><span>Rail groups collapse/expand; a collapsed group shows a single green badge summing the unchecked counts of its lists; selecting a list auto-expands its group.</span></label></li>
+              <li><label><input type="checkbox" /><span>Group collapse state, names, and membership survive a relaunch (<code>preferences.collapsedGroups</code> is device-local; the registry layer replicates list/group structure).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>7 · Overview (Focus &amp; Planner)</h3>
+            <ul class="qa-list" data-qa="d-overview">
+              <li><label><input type="checkbox" /><span>Overview pane shows the Focus rail and the Planner; flagging works from list rows, grid cards, board tickets, and across lists — flagged items spotlight in Focus.</span></label></li>
+              <li><label><input type="checkbox" /><span>Planner shows a 7-day strip; clicking a future day opens its popover; items can be planned onto a day.</span></label></li>
+              <li><label><input type="checkbox" /><span>Drag-reorder within Focus / a day re-sorts via the shared <span class="source">@listam/domain/ordering.mjs</span> <code>order</code> field.</span></label></li>
+              <li><label><input type="checkbox" /><span>Marking a focused item done writes through to its source list (verify the item is completed in the originating Groceries / Board / Todo list).</span></label></li>
+              <li><label><input type="checkbox" /><span>Plan/flag state is a synced pointer channel (<span class="source">@listam/domain/plan.mjs</span>, <code>__plan__</code> via RPC_UPDATE) — it converges on a peer, not a new RPC.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>8 · Todo &amp; Board surfaces</h3>
+            <ul class="qa-list" data-qa="d-surfaces">
+              <li><label><input type="checkbox" /><span>Todo surface: text-only list, no grocery categories / grid / icons; add, edit, complete, delete behave like the list view.</span></label></li>
+              <li><label><input type="checkbox" /><span>Board surface renders status columns and ticket cards; opening a ticket shows the detail view with the 8-block body editor and the rigor editor.</span></label></li>
+              <li><label><input type="checkbox" /><span>Board interop: tickets still read whether stored as <code>board</code> or the legacy <code>kanban</code> wire type (<span class="source">@listam/domain/board.mjs</span> <code>isBoardType()</code> dual-read).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>9 · Move &amp; reorder</h3>
+            <ul class="qa-list" data-qa="d-move">
+              <li><label><input type="checkbox" /><span>"Move to…" on an item opens the picker; moving it to another list relocates it cross-list; promote-to-board converts it into a ticket on a board list (<span class="source">@listam/domain/list-move.mjs</span>, RPC_MOVE=28).</span></label></li>
+              <li><label><input type="checkbox" /><span>Reorder a list with <code>Alt</code>+<code>↑</code>/<code>↓</code> and with drag; the new order persists and replicates to peers (LWW <code>order</code> field).</span></label></li>
+              <li><label><input type="checkbox" /><span>Reorder holds inside grouped views — within categories (grocery) and within board status columns the manual order is preserved per display site.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>10 · Share &amp; join</h3>
             <ul class="qa-list" data-qa="d-share">
               <li><label><input type="checkbox" /><span>Share opens the invite dialog with a z32 code; Copy puts it on the clipboard + "Copied" notice; the code rotates on the next Share.</span></label></li>
               <li><label><input type="checkbox" /><span>Join dialog with empty input → "paste an invite code" error notice.</span></label></li>
@@ -592,7 +660,7 @@
           </div>
 
           <div class="qa-group">
-            <h3>7 · Peers pane</h3>
+            <h3>11 · Peers pane</h3>
             <ul class="qa-list" data-qa="d-peers">
               <li><label><input type="checkbox" /><span>Peer count and live dot match reality as peers come and go.</span></label></li>
               <li><label><input type="checkbox" /><span>Create-invite section shows the current code (copy works) or the "no active invite" empty state.</span></label></li>
@@ -602,7 +670,7 @@
           </div>
 
           <div class="qa-group">
-            <h3>8 · Leaf bridge</h3>
+            <h3>12 · Leaf bridge</h3>
             <ul class="qa-list" data-qa="d-leaf">
               <li><label><input type="checkbox" /><span>In browser/mock mode the pane shows the "requires Pear runtime" unavailable state.</span></label></li>
               <li><label><input type="checkbox" /><span>Enable → status "Waiting on port 9993"; the 64-hex control key appears with a working Copy button.</span></label></li>
@@ -610,11 +678,12 @@
               <li><label><input type="checkbox" /><span>Relaunch with the toggle left on → bridge auto-starts at boot.</span></label></li>
               <li><label><input type="checkbox" /><span>Connect a leaf (ESP32 board or the <code>tools/cross-device/esp32-leaf.mjs</code> harness) → status shows "1 connection"; disconnecting drops the count.</span></label></li>
               <li><label><input type="checkbox" /><span>Disable stops the listener; status returns to "Off".</span></label></li>
+              <li><label><input type="checkbox" /><span>BLE leaf pairing (Web Bluetooth): the pairing flow finds the leaf over <code>navigator.bluetooth</code>, sends Wi-Fi + the hub's controlKey/hubAddr over the custom GATT (<span class="source">@listam/provisioning</span>), and the leaf reboots and dials the bridge. In <code>?mock=1</code> the dialog opens but BLE is unavailable.</span></label></li>
             </ul>
           </div>
 
           <div class="qa-group">
-            <h3>9 · Owner control (headless devices)</h3>
+            <h3>13 · Owner control (headless devices)</h3>
             <ul class="qa-list" data-qa="d-control">
               <li><label><input type="checkbox" /><span>Pair: mint a code on the node (<code>control-pair</code>), paste it with a name → device row appears with name, capabilities, and key chip.</span></label></li>
               <li><label><input type="checkbox" /><span>Query → the "last status" line fills with the node snapshot.</span></label></li>
@@ -624,16 +693,50 @@
           </div>
 
           <div class="qa-group">
-            <h3>10 · Settings</h3>
+            <h3>14 · Settings</h3>
             <ul class="qa-list" data-qa="d-settings">
               <li><label><input type="checkbox" /><span>Theme System / Light / Dark applies instantly; with System selected, changing the OS theme live re-themes the app.</span></label></li>
-              <li><label><input type="checkbox" /><span>Language System / English / Español / Pseudo (en-XA) / Long strings (en-XL) → all visible text updates; scan the major panes in the pseudo locales for clipping or overflow.</span></label></li>
+              <li><label><input type="checkbox" /><span>Language System / English / Español / Deutsch / Français / Italiano / Português → all visible text updates; scan the major panes for clipping or overflow.</span></label></li>
               <li><label><input type="checkbox" /><span>Show-keyboard-hints toggle matches the bottom hint bar and persists.</span></label></li>
+              <li><label><input type="checkbox" /><span>This device's name (and a chosen built-in list rename, e.g. Groceries → Spesa) sync to peers via the synced labels channel (<span class="source">@listam/domain/labels.mjs</span>); the name shows in the peers roster on another device.</span></label></li>
             </ul>
           </div>
 
           <div class="qa-group">
-            <h3>11 · Diagnostics</h3>
+            <h3>15 · Settings → Backup &amp; data</h3>
+            <ul class="qa-list" data-qa="d-backup">
+              <li><label><input type="checkbox" /><span>Export data → password dialog → writes an encrypted <code>.listam</code> file (Argon2id + XChaCha20; RPC_EXPORT_DATA=24).</span></label></li>
+              <li><label><input type="checkbox" /><span>Import → pick the <code>.listam</code> file, enter the password → it auto-detects the envelope type and merges by LWW (RPC_IMPORT=26); a wrong password fails cleanly with no data change.</span></label></li>
+              <li><label><input type="checkbox" /><span>Export instance seed → password-encrypted <code>.listamseed</code> file containing the full identity (RPC_EXPORT_SEED=25); restoring it on a fresh app reproduces this peer.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>16 · Settings → Analytics</h3>
+            <ul class="qa-list" data-qa="d-analytics">
+              <li><label><input type="checkbox" /><span>Analytics panel renders the congruency (board calibration gap) and activity views; numbers track the board's estimate-vs-actual data.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>17 · Servers pane</h3>
+            <ul class="qa-list" data-qa="d-servers">
+              <li><label><input type="checkbox" /><span>Pair a remote headless peer over owner-control: mint a code on the node, enter it with a name → a status card appears for the server.</span></label></li>
+              <li><label><input type="checkbox" /><span>Refresh shows the node's live status; mint-invite returns a joinable invite; export and shutdown are offered and act on the remote node (verify on the node).</span></label></li>
+              <li><label><input type="checkbox" /><span>The persistent owner-control connection survives a refresh cycle — repeated requests don't fail to reconnect (the connect-per-request reconnect bug stays fixed).</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>18 · Voice host</h3>
+            <ul class="qa-list" data-qa="d-voice">
+              <li><label><input type="checkbox" /><span>The Voice section accepts a whisper model path (<code>voiceModelPath</code> → a multilingual GGML model) and a <code>voiceLocale</code>; both are device-local and persist.</span></label></li>
+              <li><label><input type="checkbox" /><span>With voice enabled, the desktop Pear worker hosts the pipeline (leaf audio on <code>:9994</code> → whisper via bare-subprocess → writes to its own base); a spoken command lands an item in this app's list.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>19 · Diagnostics</h3>
             <ul class="qa-list" data-qa="d-diagnostics">
               <li><label><input type="checkbox" /><span>Summary shows backend ready state, peer count, join phase, and locale correctly.</span></label></li>
               <li><label><input type="checkbox" /><span>Event log records sync/add/update/delete/invite/peer-count/join events newest-first, capped at 50, with no raw keys or item payloads leaked.</span></label></li>
@@ -641,7 +744,7 @@
           </div>
 
           <div class="qa-group">
-            <h3>12 · Dialogs &amp; notices</h3>
+            <h3>20 · Dialogs &amp; notices</h3>
             <ul class="qa-list" data-qa="d-dialogs">
               <li><label><input type="checkbox" /><span><code>Esc</code> and backdrop click close every dialog type (share, join, confirm, settings, member-remove, shortcuts).</span></label></li>
               <li><label><input type="checkbox" /><span>Notices stack to at most 4 and auto-dismiss after ~4 s.</span></label></li>
@@ -650,7 +753,7 @@
           </div>
 
           <div class="qa-group">
-            <h3>13 · Persistence &amp; instances</h3>
+            <h3>21 · Persistence &amp; instances</h3>
             <ul class="qa-list" data-qa="d-persistence">
               <li><label><input type="checkbox" /><span>Quit + relaunch → items, invite state, theme, view mode, and all preferences restored.</span></label></li>
               <li><label><input type="checkbox" /><span>Preferences are local to this machine — they do not replicate to peers.</span></label></li>
@@ -659,7 +762,7 @@
           </div>
 
           <div class="qa-group">
-            <h3>14 · Installer &amp; distribution (release builds)</h3>
+            <h3>22 · Installer &amp; distribution (release builds)</h3>
             <ul class="qa-list" data-qa="d-installer">
               <li><label><input type="checkbox" /><span><code>installer/build-macos.sh --release</code> produces the DMG; drag-install to /Applications works.</span></label></li>
               <li><label><input type="checkbox" /><span>Quarantined download: right-click → Open launches despite ad-hoc signing.</span></label></li>
@@ -767,12 +870,38 @@
             <h3>9 · Leaf bridge</h3>
             <ul class="qa-list" data-qa="h-leaf">
               <li><label><input type="checkbox" /><span><code>LISTAM_LEAF_BRIDGE_PORT=9993 node headless.mjs run …</code> → status includes <code>leafBridge</code> with port and controlKey.</span></label></li>
+              <li><label><input type="checkbox" /><span>The <code>leafBridge</code> status block also reports <code>hubAddr</code> (auto-detected external IPv4:port) and, when voice is enabled, <code>audioAddr</code> (the same host on the voice port).</span></label></li>
               <li><label><input type="checkbox" /><span>A leaf connects and mirrors appends (full leaf scenario in <a href="#qa-cross-device">Cross-Device</a>).</span></label></li>
             </ul>
           </div>
 
           <div class="qa-group">
-            <h3>10 · Installer (Linux: Pi / cassandrina-node)</h3>
+            <h3>10 · BLE leaf provisioning</h3>
+            <ul class="qa-list" data-qa="h-provision">
+              <li><label><input type="checkbox" /><span><code>{"op":"provision-leaf","ssid":"&lt;wifi&gt;","psk":"&lt;pw&gt;"}</code> scans for a nearby leaf over BLE, writes Wi-Fi + the hub's controlKey/hubAddr to it (<span class="source">src/provision-ble.mjs</span> + <span class="source">@listam/provisioning</span>), and the reply reports the fingerprint and <code>hubAddr</code>.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>hubAddr</code> can be overridden in the request; auto-detection falling back to no external IPv4 returns a clear <code>ok:false</code> error rather than hanging.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>11 · Voice-enabled run</h3>
+            <ul class="qa-list" data-qa="h-voice">
+              <li><label><input type="checkbox" /><span>With voice enabled, <code>run</code> starts the audio bridge on <code>:9994</code> (override with <code>LISTAM_VOICE_PORT</code>); the log shows "audio bridge listening".</span></label></li>
+              <li><label><input type="checkbox" /><span>A GGML whisper model is present and reachable; a missing model fails with a clear error and does not crash the service.</span></label></li>
+              <li><label><input type="checkbox" /><span>Per-intent exec floors gate writes (<span class="source">@listam/backend/lib/voice-feedback.mjs</span> <code>DEFAULT_EXEC_FLOORS</code>, overridable via <code>LISTAM_VOICE_FLOOR_*</code>) — a low-confidence parse lights up but is not saved.</span></label></li>
+              <li><label><input type="checkbox" /><span>Dataset capture is on by default and persists utterances under <code>&lt;storage&gt;/voice-dataset</code>; <code>LISTAM_VOICE_DATASET=0</code> disables it.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>12 · Peer label (setup --name)</h3>
+            <ul class="qa-list" data-qa="h-name">
+              <li><label><input type="checkbox" /><span><code>setup --name "Raspberry Pi"</code> records the name in the config (trimmed, ≤64 chars); on boot the node writes a synced peer-label item so GUI peers see the human-readable name in their roster.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>13 · Installer (Linux: Pi / cassandrina-node)</h3>
             <ul class="qa-list" data-qa="h-installer">
               <li><label><input type="checkbox" /><span><code>node headless.mjs install --storage ~/listam</code> creates <code>run.sh</code>, the systemd user unit, and enables linger; the service is active right after install.</span></label></li>
               <li><label><input type="checkbox" /><span>Install with <code>--invite &lt;z32&gt;</code> → the node joins the base during install (joined:true within the 180 s budget).</span></label></li>
@@ -780,6 +909,59 @@
               <li><label><input type="checkbox" /><span>Kill the process → systemd restarts it (Restart=always; allow the 30 s lease TTL).</span></label></li>
               <li><label><input type="checkbox" /><span>Reboot the box → service returns without an interactive login (linger), or via the cron <code>@reboot</code> + 5-min guard fallback where systemd is unavailable.</span></label></li>
               <li><label><input type="checkbox" /><span>Re-running <code>install</code> is idempotent (no duplicate cron lines); <code>uninstall</code> removes unit + cron entries but preserves the storage directory.</span></label></li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="qa-voice" class="page page-searchable">
+          <div class="section-heading qa-heading">
+            <div>
+              <span class="eyebrow">Voice · ESP32 leaf + host (desktop or headless)</span>
+              <h2>Voice Checklist</h2>
+            </div>
+            <span class="qa-progress" data-qa-progress="qa-voice">0 / 0</span>
+          </div>
+          <div class="callout">
+            <strong>Prep:</strong> the leaf captures mic audio and runs the on-device wake model; the
+            <em>host</em> does whisper STT + intent parsing and applies the result through normal
+            backend RPCs. Run this pass against whichever host hosts the pipeline — the desktop Pear
+            worker or a headless node — with the leaf streaming to the host's audio bridge
+            (<code>:9994</code>). Use a multilingual GGML model (not <code>medium.en</code>) for
+            non-English locales.
+          </div>
+
+          <div class="qa-group">
+            <h3>1 · Wake word</h3>
+            <ul class="qa-list" data-qa="v-wake">
+              <li><label><input type="checkbox" /><span>Saying "yo" fires the on-device wake model (max_prob ≈ 0.996) → the leaf LED blinks yellow; ambient noise does not trip it repeatedly.</span></label></li>
+              <li><label><input type="checkbox" /><span>The WAKE SUMMARY diagnostic line is logged on the board for each fire.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>2 · Command paths</h3>
+            <ul class="qa-list" data-qa="v-commands">
+              <li><label><input type="checkbox" /><span>Add: "yo add milk" → item added to the list; LED turns green on a successful send.</span></label></li>
+              <li><label><input type="checkbox" /><span>Remove: "yo remove milk" → the item is deleted (remove is gated higher, so the wake word is effectively required).</span></label></li>
+              <li><label><input type="checkbox" /><span>Note: a note command appends to the note channel; LED green on send.</span></label></li>
+              <li><label><input type="checkbox" /><span>An unrecognized command (wake fired but no parseable intent) → LED turns red ("didn't understand"); nothing is written.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>3 · Locale &amp; gating</h3>
+            <ul class="qa-list" data-qa="v-locale">
+              <li><label><input type="checkbox" /><span>Locale-correct transcription: with the locale set to Italian, "yo aggiungi latte" adds "latte" (a multilingual model — <code>medium.en</code> would ignore <code>-l it</code>).</span></label></li>
+              <li><label><input type="checkbox" /><span>Exec-floor gating: ambient speech that merely parses (no wake, low confidence) lights up but does NOT mutate the list (<span class="source">@listam/backend/lib/voice-feedback.mjs</span> <code>shouldExecuteIntent</code>).</span></label></li>
+              <li><label><input type="checkbox" /><span>Training-dataset capture toggle: utterances are persisted by default (<code>LISTAM_VOICE_DATASET</code>) and capture stops when it is disabled.</span></label></li>
+            </ul>
+          </div>
+
+          <div class="qa-group">
+            <h3>4 · Both host paths</h3>
+            <ul class="qa-list" data-qa="v-hosts">
+              <li><label><input type="checkbox" /><span>Desktop host: the Pear worker spawns whisper via bare-subprocess and writes to its own base; a spoken command lands an item in the desktop app's list.</span></label></li>
+              <li><label><input type="checkbox" /><span>Headless host: a voice-enabled headless run does STT + parsing and the item appears on its peers (e.g. the Geekom backup host, failover after desktop).</span></label></li>
             </ul>
           </div>
         </section>

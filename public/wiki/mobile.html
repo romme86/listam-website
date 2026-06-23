@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -192,6 +195,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -206,6 +210,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -214,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -304,26 +309,27 @@
                 <code>useWorklet</code> starts a singleton Bare worklet, passing the Expo document
                 directory as the backend base path. It also creates the frontend RPC client.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts">app/hooks/_useWorklet.ts:81</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/_useWorklet.ts">app/hooks/_useWorklet.ts</a>
             </div>
             <div>
               <span>2</span>
               <h3>Backend boot</h3>
               <p>
-                The backend acquires a lock file, loads any saved base/encryption keys, starts an RPC
-                server, and initializes Autobase.
+                <code>backend/backend.mjs</code> is a thin shim that calls
+                <code>startBackend(createBareKitPlatform(...))</code> from <code>@listam/backend</code>.
+                The shared engine loads saved keys, starts an RPC server, and initializes Autobase.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:50</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend/backend.mjs</a>
             </div>
             <div>
               <span>3</span>
               <h3>List mutation</h3>
               <p>
-                Taps update React state optimistically and send <code>RPC_UPDATE</code>,
-                <code>RPC_ADD</code>, or <code>RPC_DELETE</code>. The backend serializes writes through
-                a promise chain before appending to Autobase.
+                Slices dispatch RPC commands — <code>RPC_ADD</code> (2), <code>RPC_UPDATE</code> (3),
+                <code>RPC_DELETE</code> (4), <code>RPC_MOVE</code> (28). The shared backend serializes
+                writes and reduces through <code>@listam/domain</code> before appending to Autobase.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs">backend/lib/item.mjs:8</a>
+              <span class="source">listam-packages/packages/backend/lib/item.mjs</span>
             </div>
             <div>
               <span>4</span>
@@ -332,7 +338,7 @@
                 Hyperswarm joins the Autobase discovery key as a topic. Peer connections are passed to
                 <code>autobase.replicate(conn)</code>.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:404</a>
+              <span class="source">listam-packages/packages/backend/lib/network.mjs</span>
             </div>
           </div>
 
@@ -346,7 +352,7 @@
               <li>Guest reinitializes Autobase with the host base key and encryption key.</li>
               <li>Guest replicates over the temporary connection, then waits until it becomes writable.</li>
             </ol>
-            <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:462</a>
+            <span class="source">listam-packages/packages/backend/lib/network.mjs</span>
           </div>
         </section>
 
@@ -356,34 +362,84 @@
             <h2>Frontend Functionality</h2>
           </div>
 
+          <p class="section-lede">
+            The app is no longer a single text-keyed shopping list. It now manages <strong>typed
+            lists organized into groups</strong> through a synced list registry, with grocery,
+            board, and todo surfaces. UI state lives in Redux Toolkit slices fed by RPC replies, not
+            in React state colocated in <code>app/index.tsx</code>.
+          </p>
+
           <div class="grid two">
             <article class="card">
               <h3>App composition</h3>
               <p>
                 <code>app/index.tsx</code> is the composition root. It wires <code>useWorklet</code>,
-                <code>useSubscription</code>, join handling, preferences, list/grid rendering, loyalty
-                cards, and paywall gating.
+                <code>useSubscription</code>, join handling, the multi-list navigation chrome, and
+                paywall gating, then hands UI state to Redux Toolkit slices.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/index.tsx">app/index.tsx:35</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/index.tsx">app/index.tsx</a>
+            </article>
+            <article class="card accent-blue">
+              <h3>Redux Toolkit state</h3>
+              <p>
+                <code>listsSlice</code>, <code>boardConfigSlice</code>, and <code>labelsSlice</code>
+                (plus <code>registrySelectors</code> and <code>syncSlice</code>) hold list contents,
+                board configuration, synced labels, and the active surface. Slices are fed by RPC
+                replies decoded in <code>_useWorklet.ts</code>.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/store/listsSlice.ts">app/store/listsSlice.ts</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/store/registrySelectors.ts">app/store/registrySelectors.ts</a>
+            </article>
+            <article class="card">
+              <h3>Typed lists &amp; groups</h3>
+              <p>
+                A synced list registry layers named lists, organized into groups, on top of the
+                project base. Each surface is keyed by <code>(listId, type)</code> — grocery, board,
+                and todo — using the shared <code>list-registry</code> and <code>list-nav</code>
+                domain modules.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/store/registrySelectors.ts">app/store/registrySelectors.ts</a>
+            </article>
+            <article class="card">
+              <h3>Multi-list navigation</h3>
+              <p>
+                <code>ListsMenu</code> picks the active list, <code>ListContextBar</code> shows and
+                renames the current surface, and <code>ListSwipePager</code> swipes between lists.
+                Board and todo surfaces have their own editors layered on the grocery list view.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/ListsMenu.tsx">app/components/ListsMenu.tsx</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/ListSwipePager.tsx">app/components/ListSwipePager.tsx</a>
             </article>
             <article class="card">
               <h3>View modes</h3>
               <p>
-                The standard list uses an animated inertial list with center-item scaling. The grid
-                view groups grocery items into categories and renders image cards with haptic feedback.
+                The standard grocery list uses an animated inertial list with center-item scaling. The
+                grid view groups grocery items into categories and renders icon cards (via
+                MaterialCommunityIcons) with haptic feedback.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/intertial_scroll.tsx">intertial_scroll.tsx</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/VisualGridList.tsx">VisualGridList.tsx</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/intertial_scroll.tsx">app/components/intertial_scroll.tsx</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/VisualGridList.tsx">app/components/VisualGridList.tsx</a>
             </article>
             <article class="card">
               <h3>Categories and icons</h3>
               <p>
                 Category lookup uses generated multilingual maps, keyword fallback, substring matching,
-                and Levenshtein typo tolerance. Icon lookup normalizes item text, translates to English,
-                tries exact and partial matches, then falls back to letter icons.
+                and Levenshtein typo tolerance. Category glyphs now render via
+                <code>MaterialCommunityIcons</code> from <code>@expo/vector-icons</code> (a
+                category-default plus curated overrides, since no icon kit covers every grocery item).
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/categoryLookup.ts">categoryLookup.ts:129</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/itemIconMap.ts">itemIconMap.ts:1680</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/categoryLookup.ts">app/components/categoryLookup.ts</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/categoryConstants.ts">app/components/categoryConstants.ts</a>
+            </article>
+            <article class="card accent-green">
+              <h3>Connection-status header dot</h3>
+              <p>
+                A header dot reflects real P2P state — green/online, blinking grey/connecting, or
+                grey/no-connection — derived by <code>deriveConnectionStatus</code> from the DHT
+                online flag and live connection count (not <code>flushed()</code>, which resolves
+                offline too).
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/connectionStatus.ts">app/components/connectionStatus.ts</a>
             </article>
             <article class="card">
               <h3>Loyalty cards</h3>
@@ -391,9 +447,50 @@
                 The scanner captures QR/barcode data with Expo Camera. The viewer draws QR codes and
                 selected barcode formats with <code>react-native-svg</code>.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/LoyaltyCardScanner.tsx">LoyaltyCardScanner.tsx:29</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/LoyaltyCardViewer.tsx">LoyaltyCardViewer.tsx:176</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/LoyaltyCardScanner.tsx">app/components/LoyaltyCardScanner.tsx</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/LoyaltyCardViewer.tsx">app/components/LoyaltyCardViewer.tsx</a>
             </article>
+          </div>
+        </section>
+
+        <section id="overview" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Day-plan surface</span>
+            <h2>Overview / Day-plan</h2>
+            <p class="section-lede">
+              A cross-list day-plan surface that pulls flagged items into a single &ldquo;today&rdquo;
+              focus, shared across devices over a dedicated meta-item channel with no new RPC opcode.
+            </p>
+          </div>
+
+          <div class="grid two">
+            <article class="card">
+              <h3>OverviewScreen &amp; PlanSheet</h3>
+              <p>
+                <code>OverviewScreen</code> renders the day plan and per-list cards;
+                <code>PlanSheet</code> is the planner sheet. Swiping right on an item flags it into
+                today&rsquo;s focus. The surface is typecheck-complete and still needs a device build.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/OverviewScreen.tsx">app/components/OverviewScreen.tsx</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/PlanSheet.tsx">app/components/PlanSheet.tsx</a>
+            </article>
+            <article class="card accent-blue">
+              <h3>Shared plan channel</h3>
+              <p>
+                Plan state syncs through <code>@listam/domain/plan</code> over a reserved
+                <code>__plan__</code> (<code>PLAN_LIST_ID</code>) meta-item channel — no new RPC, just
+                an <code>RPC_UPDATE</code> (3) upsert. <code>isPlanItem</code> guards keep plan
+                meta-items out of every list projection.
+              </p>
+              <span class="source">listam-packages/packages/domain/plan.mjs</span>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Lead:</strong>
+            The day plan is a projection, not a new list type. Flagging writes a pointer meta-item to
+            the shared base, so the same focus list appears on desktop and mobile without any extra
+            wire format.
           </div>
         </section>
 
@@ -405,22 +502,23 @@
 
           <div class="grid two">
             <article class="card accent-red">
-              <h3>Mutable module state</h3>
+              <h3>Shared engine</h3>
               <p>
-                <code>backend/lib/state.mjs</code> exports shared module-level variables and setters for
-                Autobase, Corestore, swarm, discovery, RPC, keys, pairing, current list, and join flags.
-                This is simple for an embedded singleton backend, but it depends on only one backend
-                instance touching storage.
+                The real P2P engine now lives in <code>@listam/backend</code> — the mobile
+                <code>backend/backend.mjs</code> only calls <code>startBackend</code> with the
+                <code>bare-kit</code> platform adapter. The same engine ships on desktop and headless
+                via different RPC/filesystem adapters.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/state.mjs">backend/lib/state.mjs</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend/backend.mjs</a>
             </article>
             <article class="card accent-green">
-              <h3>Singleton guard</h3>
+              <h3>Storage lease</h3>
               <p>
-                The backend opens <code>lista.lock</code> with exclusive write mode. If another backend
-                is already running, the new instance throws before it can touch storage.
+                The backend takes a storage lease so only one instance touches storage at a time; a
+                second instance backs off rather than corrupting keys. Storage is namespaced
+                (<code>lista</code> on mobile) to keep concurrent platforms isolated.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:58</a>
+              <span class="source">listam-packages/packages/backend/lib/storage-lease.mjs</span>
             </article>
             <article class="card accent-blue">
               <h3>Autobase initialization</h3>
@@ -430,16 +528,82 @@
                 rebuilds the list view, starts Hyperswarm, sets up blind pairing, and sends an invite to
                 the frontend.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:291</a>
+              <span class="source">listam-packages/packages/backend/lib/network.mjs</span>
             </article>
             <article class="card accent-amber">
               <h3>Apply function</h3>
               <p>
                 The Autobase <code>apply</code> function is the reducer. It validates item payloads,
-                writes a materialized JSON view, updates <code>currentList</code>, and emits backend-to-
-                frontend RPC updates.
+                writes a materialized JSON view, and emits backend-to-frontend RPC updates. All item
+                mutations flow through <code>@listam/domain</code>&rsquo;s id-keyed, last-write-wins
+                reduction — identical code on every platform.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:239</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend/backend.mjs</a>
+            </article>
+          </div>
+
+          <div class="section-heading" style="margin-top: 2rem">
+            <span class="eyebrow">Recent additions</span>
+            <h2>Shipped mobile features</h2>
+          </div>
+
+          <div class="grid three">
+            <article class="card">
+              <h3>Move items between lists</h3>
+              <p>
+                <code>MoveItemSheet</code> moves items across lists and types via
+                <code>RPC_MOVE</code> (28). When a target board needs rigor fields the move replies
+                <code>move-rigor-missing</code> over <code>RPC_MESSAGE</code> so nothing is deleted.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/MoveItemSheet.tsx">app/components/MoveItemSheet.tsx</a>
+            </article>
+            <article class="card">
+              <h3>Reorder items</h3>
+              <p>
+                A long-press &ldquo;Move to top/bottom&rdquo; overlay reorders items through the
+                shared last-write-wins <code>order</code> field in
+                <code>@listam/domain/ordering</code> (<code>sortByOrder</code> /
+                <code>computeReorder</code>).
+              </p>
+              <span class="source">listam-packages/packages/domain/ordering.mjs</span>
+            </article>
+            <article class="card accent-green">
+              <h3>Encrypted backup &amp; import</h3>
+              <p>
+                Settings export/import all data and export the instance seed, password-encrypted with
+                Argon2id + XChaCha20-Poly1305, via <code>RPC_EXPORT_DATA</code> (24),
+                <code>RPC_EXPORT_SEED</code> (25), and <code>RPC_IMPORT</code> (26). Envelopes move
+                through the OS share sheet and <code>expo-document-picker</code>.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/BackupSettings.tsx">app/components/BackupSettings.tsx</a>
+            </article>
+            <article class="card">
+              <h3>WYSIWYG markdown editor</h3>
+              <p>
+                <code>RichMarkdownEditor</code> edits ticket descriptions and markdown/callout blocks
+                as live WYSIWYG (TipTap in a webview via <code>@10play/tentap-editor</code>) over the
+                DOM-free <code>@listam/domain/markdown</code>; the stored value stays markdown.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/board/RichMarkdownEditor.tsx">app/components/board/RichMarkdownEditor.tsx</a>
+            </article>
+            <article class="card">
+              <h3>Synced peer/device names</h3>
+              <p>
+                A device-name input in Settings self-asserts a legible name over
+                <code>@listam/domain/labels</code>; those names show on the members screen
+                (<code>MembersDialog</code>). Labels sync through a registry-style meta-item channel.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/MembersDialog.tsx">app/components/MembersDialog.tsx</a>
+            </article>
+            <article class="card accent-blue">
+              <h3>Pair a leaf (BLE)</h3>
+              <p>
+                <code>useLeafProvisioning</code> + <code>LeafPairingDialog</code> provision the ESP32
+                leaf over Bluetooth (<code>react-native-ble-plx</code>), reading the hub control key
+                and address from owner-control <code>status</code>. Needs a dev-client build.
+              </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/useLeafProvisioning.ts">app/hooks/useLeafProvisioning.ts</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/LeafPairingDialog.tsx">app/components/LeafPairingDialog.tsx</a>
             </article>
           </div>
         </section>
@@ -461,28 +625,32 @@
             </thead>
             <tbody>
               <tr>
-                <td>Shopping list log and materialized view</td>
+                <td>Typed-list log and materialized view</td>
                 <td><code>{document}/lista-local</code></td>
                 <td>Bare backend</td>
-                <td>Corestore + Autobase, encrypted when Autobase has an encryption key.</td>
+                <td>Corestore + Autobase, encrypted when Autobase has an encryption key. One base holds
+                multiple typed lists (grocery / board / todo).</td>
               </tr>
               <tr>
-                <td>Autobase base key</td>
-                <td><code>lista-autobase-key.txt</code></td>
+                <td>List registry, labels &amp; plan</td>
+                <td>Autobase meta-items</td>
                 <td>Bare backend</td>
-                <td>Plain hex file in app documents, loaded on restart.</td>
+                <td>Named lists/groups, synced peer/device names, and the day plan all replicate as
+                reserved-bucket meta-items in the shared base.</td>
               </tr>
               <tr>
-                <td>Autobase encryption key</td>
-                <td><code>lista-encryption-key.txt</code></td>
+                <td>Autobase base &amp; encryption keys</td>
+                <td><code>@listam/secrets</code> secure storage</td>
                 <td>Bare backend</td>
-                <td>Plain hex file in app documents, loaded only when a base key exists.</td>
+                <td>No longer plain-hex files. Keys live in <code>@listam/secrets</code> secure
+                storage (Expo SecureStore); legacy <code>lista-*-key.txt</code> files are migrated and
+                deleted (<code>LEGACY_SECRET_FILES</code>).</td>
               </tr>
               <tr>
                 <td>Invite</td>
-                <td><code>lista-invite.json</code></td>
+                <td>Runtime / secure storage</td>
                 <td>Bare backend</td>
-                <td>Serialized by <code>saveInvite</code>; current code creates a fresh runtime invite.</td>
+                <td>BlindPairing invites are single-use and ~10-minute expiry; minted at runtime.</td>
               </tr>
               <tr>
                 <td>UI preferences</td>
@@ -522,8 +690,20 @@
             <div><strong>BlindPairing</strong><span>Invite flow that exchanges base and encryption credentials.</span></div>
             <div><strong>z32</strong><span>Shareable encoding for blind-pairing invites.</span></div>
             <div><strong>react-native-iap</strong><span>Subscription paywall, trial expiry, purchase and restore.</span></div>
+            <div><strong>Redux Toolkit</strong><span>UI state slices fed by RPC replies (lists, board config, labels, sync).</span></div>
+            <div><strong>@expo/vector-icons</strong><span>Category glyphs render via MaterialCommunityIcons.</span></div>
+            <div><strong>@10play/tentap-editor</strong><span>TipTap-in-a-webview WYSIWYG markdown editor for tickets and blocks.</span></div>
+            <div><strong>react-native-ble-plx</strong><span>BLE transport for &ldquo;Pair a leaf&rdquo; ESP32 provisioning.</span></div>
+            <div><strong>expo-document-picker</strong><span>Picks encrypted backup envelopes for import.</span></div>
+            <div><strong>@listam/secrets</strong><span>Secure storage for base/encryption keys and loyalty payloads.</span></div>
           </div>
-          <a class="source" href="https://github.com/SayNode/listam/blob/main/package.json">package.json:14</a>
+          <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/package.json">package.json</a>
+
+          <div class="callout">
+            <strong>Lead:</strong>
+            App version <code>1.0.1</code>. UI locales are System / EN / ES / DE / FR / IT / PT,
+            derived from the shared <code>@listam/i18n</code> <code>LOCALE_CHOICES</code>.
+          </div>
         </section>
 
         <section id="quality" class="page page-searchable">
@@ -537,20 +717,21 @@
               <h3>Conventions observed</h3>
               <ul>
                 <li>Single quotes and no semicolon-heavy style in application files.</li>
-                <li>React state is colocated in the composition root for feature wiring.</li>
+                <li>UI state lives in Redux Toolkit slices fed by RPC replies, not colocated React state.</li>
                 <li>Backend mutable singletons are centralized in <code>backend/lib/state.mjs</code>.</li>
                 <li>Generated lookup files are marked as auto-generated and sourced from CSV.</li>
-                <li>RPC command constants are numeric and shared from one file.</li>
+                <li>RPC command constants are numeric and re-exported from <code>@listam/protocol</code>.</li>
               </ul>
             </article>
             <article class="card">
               <h3>Quality gaps to track</h3>
               <ul>
-                <li>No test files or test script were found.</li>
-                <li><code>package-lock.json</code> is ignored, so dependency resolution is not reproducible by default.</li>
-                <li>Committed logs and generated bundles make review noisy and may leak runtime details.</li>
-                <li><code>app/hooks/_useWorklet.ts</code> imports the iOS backend bundle while the Android import is commented.</li>
-                <li><code>react-native-svg</code> and <code>qrcode-terminal</code> are imported but not listed as direct dependencies.</li>
+                <li><code>package-lock.json</code> handling: install requires <code>--legacy-peer-deps</code>.</li>
+                <li>Committed generated bundles (base64 backend) make review noisy.</li>
+                <li>Several new surfaces (Overview, leaf pairing, markdown editor) are typecheck-clean
+                but still need an on-device dev-client build.</li>
+                <li>Board tickets are still written with the legacy wire type <code>'kanban'</code> for
+                old-peer interop (<code>isBoardType()</code> dual-reads).</li>
               </ul>
             </article>
           </div>
@@ -567,36 +748,36 @@
               <span>01</span>
               <h3>Start with the promise</h3>
               <p>Read the README to understand why the architecture is local-first and P2P.</p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/README.md">README.md</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/README.md">README.md</a>
             </article>
             <article>
               <span>02</span>
               <h3>Follow the boot path</h3>
               <p>Read <code>useWorklet</code>, then backend lock/key loading, then <code>initAutobase</code>.</p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts">_useWorklet.ts</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend.mjs</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">network.mjs</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/_useWorklet.ts">_useWorklet.ts</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend.mjs</a>
+              <span class="source">listam-packages/packages/backend/lib/network.mjs</span>
             </article>
             <article>
               <span>03</span>
               <h3>Trace a mutation</h3>
-              <p>Start at a tap handler in <code>app/index.tsx</code>, cross RPC, append an op, then watch <code>apply</code> send a backend update.</p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/index.tsx">app/index.tsx:248</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs">item.mjs:17</a>
+              <p>Start at a list action in <code>app/index.tsx</code>, dispatch through a slice, cross RPC, append an op, then watch the shared reducer send a backend update.</p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/index.tsx">app/index.tsx</a>
+              <span class="source">listam-packages/packages/backend/lib/item.mjs</span>
             </article>
             <article>
               <span>04</span>
               <h3>Trace joining</h3>
               <p>Read the link parser, <code>RPC_JOIN_KEY</code>, blind-pairing candidate/member code, then the writable wait loop.</p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/index.tsx">app/index.tsx:68</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">network.mjs:462</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/index.tsx">app/index.tsx</a>
+              <span class="source">listam-packages/packages/backend/lib/network.mjs</span>
             </article>
             <article>
               <span>05</span>
               <h3>Study generated grocery intelligence</h3>
               <p>Read the CSV generator scripts, then category grouping and icon lookup. This is a data-heavy subsystem disguised as UI polish.</p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/scripts/generate-category-lookup.mjs">generate-category-lookup.mjs</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/categoryGrouping.ts">categoryGrouping.ts</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/scripts/generate-category-lookup.mjs">generate-category-lookup.mjs</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/categoryGrouping.ts">categoryGrouping.ts</a>
             </article>
             <article>
               <span>06</span>
@@ -615,18 +796,24 @@
           </div>
 
           <div class="file-index">
-            <a href="https://github.com/SayNode/listam/blob/main/app/index.tsx"><strong>app/index.tsx</strong><span>Composition root, UI preferences, join handling, list mutation handlers.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts"><strong>app/hooks/_useWorklet.ts</strong><span>Starts the Bare worklet, owns frontend RPC handler, exposes backend state.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/app/hooks/useSubscription.ts"><strong>app/hooks/useSubscription.ts</strong><span>IAP setup, 30-day trial, purchase/restore, paywall gate.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs"><strong>backend/backend.mjs</strong><span>Backend entry, lock, RPC server, cleanup, Autobase apply reducer.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs"><strong>backend/lib/network.mjs</strong><span>Corestore/Autobase lifecycle, Hyperswarm, BlindPairing, join flow.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs"><strong>backend/lib/item.mjs</strong><span>Add/update/delete operations, validation, rebuild from persisted ops.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/key.mjs"><strong>backend/lib/key.mjs</strong><span>Plain-file persistence for base key, encryption key, invite JSON.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/backend/lib/state.mjs"><strong>backend/lib/state.mjs</strong><span>Shared backend singletons and state setters.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/app/components/categoryLookup.ts"><strong>categoryLookup.ts</strong><span>Dominant-language detection and category matching.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/app/components/itemIconMap.ts"><strong>itemIconMap.ts</strong><span>Manual and generated item-to-icon lookup logic.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/scripts/generate-category-lookup.mjs"><strong>generate-category-lookup.mjs</strong><span>Generates multilingual category data from CSV.</span></a>
-            <a href="https://github.com/SayNode/listam/blob/main/scripts/wrap-bare-bundle.mjs"><strong>wrap-bare-bundle.mjs</strong><span>Wraps packed Bare bundle as chunked base64 module.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/index.tsx"><strong>app/index.tsx</strong><span>Composition root, UI preferences, join handling, list mutation handlers.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/_useWorklet.ts"><strong>app/hooks/_useWorklet.ts</strong><span>Starts the Bare worklet, owns frontend RPC handler, exposes backend state.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/useSubscription.ts"><strong>app/hooks/useSubscription.ts</strong><span>IAP setup, 30-day trial, purchase/restore, paywall gate.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs"><strong>backend/backend.mjs</strong><span>Thin shim that boots <code>@listam/backend</code> with the bare-kit platform adapter.</span></a>
+            <a href="https://github.com/romme86/listam-packages/blob/main/packages/backend/lib/network.mjs"><strong>@listam/backend lib/network.mjs</strong><span>Corestore/Autobase lifecycle, Hyperswarm, BlindPairing, join flow (shared engine).</span></a>
+            <a href="https://github.com/romme86/listam-packages/blob/main/packages/backend/lib/item.mjs"><strong>@listam/backend lib/item.mjs</strong><span>Add/update/delete/move operations and validation (shared engine).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/secrets.ts"><strong>app/secrets.ts</strong><span>Secure-storage bridge over <code>@listam/secrets</code> (keys, loyalty payloads, legacy migration).</span></a>
+            <a href="https://github.com/romme86/listam-packages/blob/main/packages/backend/lib/backup-crypto.mjs"><strong>@listam/backend lib/backup-crypto.mjs</strong><span>Argon2id + XChaCha20-Poly1305 backup envelope crypto (shared engine).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/store/listsSlice.ts"><strong>app/store/listsSlice.ts</strong><span>Redux Toolkit slice for typed-list contents, fed by RPC replies.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/store/registrySelectors.ts"><strong>app/store/registrySelectors.ts</strong><span>Selectors over the synced list registry (lists, groups, active surface).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/components/OverviewScreen.tsx"><strong>app/components/OverviewScreen.tsx</strong><span>Day-plan / focus surface (with <code>PlanSheet</code>).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/components/MoveItemSheet.tsx"><strong>app/components/MoveItemSheet.tsx</strong><span>Move items across lists/types over <code>RPC_MOVE</code> (28).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/components/BackupSettings.tsx"><strong>app/components/BackupSettings.tsx</strong><span>Encrypted backup export/import and seed export (RPC 24/25/26).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/components/board/RichMarkdownEditor.tsx"><strong>app/components/board/RichMarkdownEditor.tsx</strong><span>TipTap-in-webview WYSIWYG markdown editor.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/useLeafProvisioning.ts"><strong>app/hooks/useLeafProvisioning.ts</strong><span>BLE leaf provisioning hook (with <code>LeafPairingDialog</code>).</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/components/categoryLookup.ts"><strong>categoryLookup.ts</strong><span>Dominant-language detection and category matching.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/app/components/itemIconMap.ts"><strong>itemIconMap.ts</strong><span>Manual and generated item-to-icon lookup logic.</span></a>
+            <a href="https://github.com/romme86/listam-mobile/blob/main/scripts/wrap-bare-bundle.mjs"><strong>wrap-bare-bundle.mjs</strong><span>Wraps packed Bare bundle as chunked base64 module.</span></a>
           </div>
         </section>
 
@@ -646,8 +833,9 @@
             <article class="card accent-green">
               <h3>Unit</h3>
               <p>
-                Reducers/selectors; category lookup and grocery intelligence; item reduction/replay
-                order; id-migration of legacy text-only items (M1); redaction helpers (M5).
+                Store slices and selectors (<code>test:store</code>); category lookup and grocery
+                intelligence (<code>test:grocery</code>); backend secret-storage migration and crypto
+                (<code>test:security</code>).
               </p>
             </article>
             <article class="card accent-blue">
@@ -655,7 +843,7 @@
               <p>
                 Worklet RPC round-trips (add/update/delete → backend → <code>SYNC_LIST</code> /
                 <code>*_FROM_BACKEND</code>); join success/timeout/rollback; secure-storage migration of
-                keys and loyalty cards; deep-link join requires confirmation (H2).
+                keys and loyalty cards; deep-link join requires confirmation.
               </p>
             </article>
             <article class="card">
@@ -665,9 +853,11 @@
             <article class="card">
               <h3>How to run</h3>
               <p>
-                <code>npm test</code> (Jest/Vitest, added in milestone-zero); Expo dev client for manual
-                runs; two simulators for device-to-device.
+                <code>npm test</code> runs <code>test:security</code> + <code>test:store</code> +
+                <code>test:grocery</code> with <code>node:test</code> (TypeScript transpiled on the fly;
+                there is no Jest). Expo dev client for manual runs; two simulators for device-to-device.
               </p>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/store/listsSlice.test.mjs">app/store/listsSlice.test.mjs</a>
             </article>
           </div>
 

@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -192,6 +195,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -206,6 +210,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -214,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -222,7 +227,7 @@
       <main class="content">
         <header class="topbar">
           <div>
-            <span class="eyebrow">Headless · Node 22 service · v0.13.0</span>
+            <span class="eyebrow">Headless · Node 22 service · v0.13.1</span>
             <h1>Headless App</h1>
           </div>
           <label class="search">
@@ -236,7 +241,7 @@
             <span class="eyebrow">Folder intent</span>
             <h2>Project Structure</h2>
             <p class="section-lede">
-              <code>listam-headless</code> (v0.13.0) is the always-on owned peer: a long-lived
+              <code>listam-headless</code> (v0.13.1) is the always-on owned peer: a long-lived
               Node&nbsp;22 service for a device the user controls (Raspberry Pi, mini PC, NAS, a Mac
               that stays on) — a durable personal peer, not a cloud service. It runs the same
               <code>@listam/backend</code> engine as mobile and desktop and is driven entirely by
@@ -343,6 +348,41 @@
             asserts that no plaintext item text appears in any stored block, that blocks don't parse
             as readable operations, and that no <code>headless-secrets.json</code> was ever created
             on the blind instance.
+          </div>
+
+          <div class="note-grid">
+            <div class="note">
+              <strong>Self-asserted peer label.</strong>
+              A node names itself from config — <code>setup --name</code> or the
+              <code>LISTAM_INSTANCE_NAME</code> env (clamped to ≤64 chars, matching
+              <span class="source">@listam/domain</span> <code>MAX_LABEL_NAME</code>). Once the roster
+              reveals the node's own writer key, the service writes a <em>synced</em> peer-label item
+              (<span class="source">@listam/domain/labels</span> <code>buildPeerLabelItem</code> via
+              <code>RPC_UPDATE</code>), so every app shows a legible name like "Raspberry Pi" instead
+              of a key fingerprint. Label items live in a reserved bucket and are skipped by every list
+              projection (<code>isLabelItem</code>).
+            </div>
+            <div class="note">
+              <strong>Encrypted backup, export &amp; import.</strong>
+              The participant inherits the shared backend's password-encrypted backup surface
+              (Argon2id + XChaCha20): <code>RPC_EXPORT_DATA</code>&nbsp;(24) dumps all data,
+              <code>RPC_EXPORT_SEED</code>&nbsp;(25) exports the instance seed (full identity), and
+              <code>RPC_IMPORT</code>&nbsp;(26) merges an encrypted envelope back by stable id. The crypto
+              lives in <span class="source">lib/backup-crypto.mjs</span>,
+              <span class="source">lib/backup-payload.mjs</span>, and
+              <span class="source">lib/backup.mjs</span> — the same code path mobile and desktop expose
+              from Settings.
+            </div>
+            <div class="note">
+              <strong>Voice assistant (opt-in).</strong>
+              The voice pipeline can be wired into the service but is gated off by default
+              (<code>LISTAM_VOICE_ENABLED=1</code> + a configured whisper model). The host runs
+              whisper.cpp STT (<span class="source">lib/stt/whisper-cpp-subprocess.mjs</span>) over an
+              audio bridge on port&nbsp;<code>9994</code>, with a per-locale default whisper prompt,
+              a configurable STT locale/prompt (<code>LISTAM_VOICE_LOCALE</code> /
+              <code>LISTAM_VOICE_PROMPT</code>), and per-intent exec-confidence floors. The leaf
+              captures audio; the host transcribes and applies the parsed command through normal RPCs.
+            </div>
           </div>
         </section>
 
@@ -506,6 +546,11 @@
                 <td>Add a core public key to the replication set; return a raw block as hex — always ciphertext.</td>
               </tr>
               <tr>
+                <td><code>provision-leaf</code></td>
+                <td>participant (local radio only)</td>
+                <td>Initialize a nearby ESP32 leaf over BLE: <code>{op:'provision-leaf', ssid, psk}</code> (or <code>{wifi:[…]}</code>) builds a provisioning payload from the hub's leaf-bridge control key + auto-detected LAN address(es) + the operator's WiFi creds and writes it to the leaf over <code>@abandonware/noble</code>; the leaf reboots and mirrors. Degrades to <code>{ok:false, reason:'ble-unavailable'}</code> on radio-less hosts and is deliberately absent from the remote owner-control channel.</td>
+              </tr>
+              <tr>
                 <td><code>control-info</code> / <code>control-pair</code> / <code>control-devices</code> / <code>control-revoke</code> / <code>control-audit</code></td>
                 <td>both (local operator only)</td>
                 <td>Owner-control administration: inspect the control key, mint pairing codes, list/revoke devices, read the audit trail.</td>
@@ -517,6 +562,74 @@
               </tr>
             </tbody>
           </table>
+        </section>
+
+        <section id="provisioning" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Leaf onboarding</span>
+            <h2>Leaf Provisioning (BLE)</h2>
+            <p class="section-lede">
+              The <code>provision-leaf</code> op replaces hand-editing <code>cfg.toml</code> and
+              USB-flashing an ESP32 leaf: an operator standing next to the device pushes its WiFi
+              creds and the hub's connection details into it over Bluetooth Low Energy, and the leaf
+              reboots straight into mirroring.
+            </p>
+          </div>
+
+          <div class="callout">
+            <strong>Lead:</strong>
+            trust is anchored on physical BLE proximity (v1, cleartext), not a key exchange. A version
+            byte in the payload is reserved for a future PIN / AEAD upgrade. Because proximity is the
+            only credential, provisioning is a <em>local-radio operator</em> action and is deliberately
+            NOT exposed over the remote owner-control channel.
+          </div>
+
+          <div class="grid two">
+            <article class="card accent-blue">
+              <h3>Zero-dependency wire contract</h3>
+              <p>
+                The new <code>@listam/provisioning</code> package (v0.7.0, main only — not yet on npm)
+                defines the GATT service / characteristic UUIDs, the advertised name prefix
+                (<code>listam-leaf</code>), a framed BEGIN/CHUNK/COMMIT payload split to the negotiated
+                MTU, and a CRC16/CCITT-FALSE checksum verified by the firmware on COMMIT. It imports no
+                BLE stack itself — the transport is injected.
+              </p>
+              <span class="source">packages/provisioning/index.mjs</span>
+            </article>
+            <article class="card accent-green">
+              <h3>Injected transport</h3>
+              <p>
+                A <code>provisionLeaf</code> orchestrator drives the framed write against a per-runtime
+                transport. On headless that transport is <code>@abandonware/noble</code>, loaded as an
+                OPTIONAL / lazy dependency (a native addon that may not build on every host); desktop
+                uses Web Bluetooth and mobile uses <code>react-native-ble-plx</code> against the same
+                core contract.
+              </p>
+              <span class="source">packages/provisioning/transport/noble.mjs</span>
+            </article>
+            <article class="card">
+              <h3>What the leaf learns</h3>
+              <p>
+                The payload carries the hub's leaf-bridge control key, the auto-detected LAN address(es),
+                the operator's WiFi network(s), and optional audio-bridge / LED hints. A central app can
+                also fetch this from a participant directly: <code>RPC_LEAF_PROVISION_INFO</code>&nbsp;(27)
+                replies with <code>{type:'leaf-provision-info', controlKey, hubAddr, audioAddr}</code> to
+                write into the leaf.
+              </p>
+              <span class="source">src/provision-ble.mjs</span>
+            </article>
+            <article class="card accent-amber">
+              <h3>Graceful degradation</h3>
+              <p>
+                On a host with no BLE radio (or where the native noble addon failed to build), the op
+                never throws: it answers <code>{ok:false, reason:'ble-unavailable'}</code> with a hint
+                to install the optional dependency. Both the success path and the
+                <code>ble-unavailable</code> fallback are pinned by
+                <code>test/provision-ble.test.mjs</code>.
+              </p>
+              <span class="source">test/provision-ble.test.mjs</span>
+            </article>
+          </div>
         </section>
 
         <section id="owner-control" class="page page-searchable">

@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -114,6 +117,13 @@
                   <a href="phases.html#phase-13">Phase 13</a>
                   <a href="phases.html#phase-14">Phase 14</a>
                   <a href="phases.html#phase-15">Phase 15</a>
+                  <a href="phases.html#phase-16">Phase 16</a>
+                  <a href="phases.html#phase-17">Phase 17</a>
+                  <a href="phases.html#phase-18">Phase 18</a>
+                  <a href="phases.html#phase-19">Phase 19</a>
+                  <a href="phases.html#phase-20">Phase 20</a>
+                  <a href="phases.html#phase-21">Phase 21</a>
+                  <a href="phases.html#phase-22">Phase 22</a>
                 </div>
               </details>
               <details class="nav-subsection">
@@ -191,6 +201,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -205,6 +216,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -213,7 +225,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-12</strong>
+          <strong>2026-06-23</strong>
           <p>Phase log for the multi-app implementation plan.</p>
         </div>
       </aside>
@@ -1161,6 +1173,245 @@
               mobile CI green (45 shared + 100 security), headless green (13), desktop green (7).
             </p>
             <p>Phase commits: <code>listam-mobile</code> <code>089228b</code>, <code>listam-headless</code> <code>4ded719</code>.</p>
+          </details>
+
+          <div class="callout" data-nav-section>
+            <strong>Post-milestone:</strong>
+            after Phase 15 closed the first release milestone, the shared packages were extracted out of
+            <code>listam-mobile/packages/*</code> into their own <code>listam-packages/</code> repo (npm
+            workspaces of <code>@listam/*</code>, consumed by every app via <code>file:</code> links).
+            Phases 16 onward are new <em>list-domain</em> and <em>capability</em> work that builds on the
+            10 shared packages. Source paths below are package-relative under
+            <span class="source">listam-packages/packages/</span> unless an app prefix is shown.
+          </div>
+
+          <details class="phase-record" id="phase-16" data-nav-section>
+            <summary>Phase 16 - Board list type, dual-read rename, and desktop board surface</summary>
+            <p>
+              Commit boundary: add a structured "board" (kanban) list type to the shared domain layer,
+              rename the product surface from kanban to board with a backward-compatible DUAL-READ wire
+              type, and ship the desktop board surface (status-chip board view, full ticket detail with
+              the multi-block body editor, and the rigor/time-tracking config).
+            </p>
+            <p><strong>Depends on:</strong> 15 (shared-package extraction). <strong>Unblocks:</strong> 17, 22.</p>
+            <p><strong>Acceptance:</strong> board tickets created on a board-aware peer round-trip through an old peer without forking the base; <code>isBoardType()</code> resolves both the new and legacy type; the desktop board surface renders and edits tickets in <code>?mock=1</code>.</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><span class="source">domain/board.mjs</span> (added): pure, DOM-free ticket and body-block model shared by desktop and mobile - <code>isBoardType</code> (dual-read), <code>BOARD_WRITE_TYPE</code> (= the legacy type so writes stay interop-safe), block helpers, and rigor/time-tracking fields. Covered by <span class="source">domain/board.test.mjs</span>.</li>
+              <li><span class="source">domain/identity.mjs</span>: <code>isTodoType</code> / <code>isBoardType</code> mirror each other so item-identity and list-projection sites can branch on list type without importing board internals.</li>
+              <li><code>listam-desktop/src/ui.mjs</code>, <code>app.css</code>: the desktop board surface keyed by <code>(listId, type)</code> - status-chip columns, ticket cards, the full-screen ticket detail, and the 8-block body editor.</li>
+            </ul>
+            <h3>Decisions</h3>
+            <ul>
+              <li><strong>DUAL-READ rename, not a hard rename:</strong> <code>isBoardType()</code> accepts both <code>board</code> and the legacy <code>kanban</code> value, but the write-side value stays <code>'kanban'</code> (<code>BOARD_WRITE_TYPE = LEGACY_BOARD_LIST_TYPE</code>) until the whole mesh (mobile bundle + desktop + headless) ships dual-read; writing the new value before then would fork <code>apply()</code> on old peers.</li>
+              <li><strong>Pure domain logic:</strong> all block/ticket reduction lives in <span class="source">domain/board.mjs</span> so the desktop and mobile board UIs share one tested implementation and never diverge.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              <code>node --test packages/domain/board.test.mjs</code> green; desktop <code>npm run ci</code>
+              green and the board surface verified live in <code>?mock=1</code> (board view, ticket detail,
+              block editor). Follow-up: the write-side switch from <code>'kanban'</code> to
+              <code>'board'</code> is gated on the entire fleet shipping dual-read.
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-17" data-nav-section>
+            <summary>Phase 17 - Net-new 'todo' text list type and mobile typed-list surfaces</summary>
+            <p>
+              Commit boundary: add a text-only <code>todo</code> list type (no grocery intelligence, no
+              grid, no categories) and bring mobile up to the typed-list / groups / registry model with
+              board and todo surfaces, multi-list swipe navigation, and a real network-status header dot.
+            </p>
+            <p><strong>Depends on:</strong> 16. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> a <code>todo</code> list is plain text with no categorizer/grid; mobile renders grocery, board, and todo surfaces, swipes between named lists, and the header dot reflects real p2p connection state.</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><span class="source">domain/identity.mjs</span>: <code>isTodoType</code> - a net-new type, so no dual-read is needed (no legacy peers ever wrote it). Grocery intelligence, grid, and categories are skipped for todo lists.</li>
+              <li><span class="source">domain/list-registry.mjs</span>, <span class="source">domain/list-nav.mjs</span>: named-list registry meta-items and the active-surface <code>(listId, listType)</code> navigation model shared across apps.</li>
+              <li><a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/store/listsSlice.ts">app/store/listsSlice.ts</a>, <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/index.tsx">app/index.tsx</a>: typed lists, groups, registry, and the multi-list add/sync contract (<code>RPC_ADD</code> carries <code>{text, listId, listType}</code>; <code>SYNC_LIST</code> stays default-list scoped).</li>
+              <li><a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/BoardView.tsx">app/components/BoardView.tsx</a>, <code>TicketDetail</code>, <code>CreateTicket</code>: the mobile board surface over <span class="source">domain/board.mjs</span>.</li>
+              <li><a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/selectors/connectionStatus.ts">app/selectors/connectionStatus.ts</a>, <code>Header.tsx</code>: the header readiness dot (green/online, blinking grey/connecting, grey/offline) derived from real swarm DHT-online + connection-count state.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              <code>node --test app/store/listsSlice.test.mjs</code> and the mobile <code>typecheck</code> /
+              <code>ci</code> pass; board and todo surfaces render in the simulator (sim text entry blocked
+              only by the accent-popup keyboard gotcha). Backend bundles regenerated before Metro runs.
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-18" data-nav-section>
+            <summary>Phase 18 - Voice assistant: leaf firmware front-end, on-device "yo" wake word, and host STT pipeline</summary>
+            <p>
+              Commit boundary: build the ESP32-S3 leaf voice front-end (mic capture, dB loudness gate,
+              side-band utterance stream, RGB LED feedback), land an on-device <code>microWakeWord</code>
+              "yo" model that fires on hardware, and run host-side whisper.cpp STT plus intent parsing and
+              the controller that applies recognized commands through normal backend RPCs.
+            </p>
+            <p><strong>Depends on:</strong> 13, 16. <strong>Unblocks:</strong> 19.</p>
+            <p><strong>Acceptance:</strong> a real spoken "yo add milk" on the leaf -> host whisper -> intent parser -> item added; the leaf never holds an encryption key (it is a blind mirror that only streams raw audio side-band).</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><code>listam-hardware/leaf-peer/leaf-esp32/src/voice.rs</code>: mic capture (I2S, 16 kHz), the dB loudness gate, the on-device <code>microWakeWord</code> "yo" runner (int8 streaming MixedNet), and the side-band utterance stream to the host.</li>
+              <li><code>listam-hardware/leaf-peer/leaf-esp32/src/led.rs</code>: WS2812 RGB feedback (idle / wake-fired / understood / "didn't understand" states).</li>
+              <li><code>listam-hardware/leaf-peer/leaf-esp32/wakeword/yo.tflite</code>: the trained on-device "yo" wake-word model (fires reproducibly on real ESP32-S3 hardware).</li>
+              <li><span class="source">domain/voice-intent.mjs</span>, <span class="source">domain/voice-grammar.mjs</span>: pure, host-portable utterance -> intent parsing (add / remove / note), with a lenient retry that skips a wake-word mishear to the first verb; covered by <span class="source">domain/voice-intent.test.mjs</span>.</li>
+              <li>Host STT + controller: whisper.cpp (multilingual <code>medium</code>-class model - size, not cpp-vs-Python, was the accuracy bottleneck) runs on the host, parses the intent, applies it via backend RPCs, and records a training-dataset capture with per-intent execution floors.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              <code>cargo build --release</code> green for the leaf; host intent tests green; the "yo" model
+              fires on real hardware (yellow LED, repeatedly confirmed). End-to-end proven on-device: real
+              spoken "yo add milk" -> leaf mic -> host whisper -> parser -> item added. The leaf is a blind
+              read-only replica throughout - it captures and streams audio but the host does all STT and all
+              base writes.
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-19" data-nav-section>
+            <summary>Phase 19 - Desktop-native voice hosting</summary>
+            <p>
+              Commit boundary: host the whole voice pipeline inside the desktop Pear worker (leaf audio ->
+              whisper via a subprocess -> writes to the desktop's own base) so voice does not need a
+              separate leaf-hub peer or an orphan base.
+            </p>
+            <p><strong>Depends on:</strong> 18. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> the desktop worker spawns whisper, accepts the leaf audio stream, and writes recognized items into the desktop project; no separate Node leaf-hub is required.</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><code>listam-desktop/src/voice-host-worker.mjs</code> (added): the Bare-side voice host - receives the leaf utterance stream, runs whisper as a spawned subprocess, parses with <span class="source">domain/voice-intent.mjs</span>, and applies results through the worker's own backend RPCs.</li>
+              <li><code>listam-desktop/src/leaf-bridge-manager.mjs</code>, <code>leaf-bridge-config.mjs</code>: the leaf-bridge TCP listener (default :9994 for the audio side-band) and its config; a per-connection <code>process.env</code> read under Bare was root-caused as the cause of a worker SIGABRT and replaced with a Bare-safe path plus an <code>uncaughtException</code> keepalive handler.</li>
+              <li><code>listam-desktop/src/ui.mjs</code>: the Settings -> Voice section.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              Bare-spawns-whisper proven via a Pear terminal-app spike; desktop <code>npm run ci</code> and
+              lint green; the Voice section verified in <code>?mock=1</code>. The leaf still streams to :9994
+              so an on-device test needs no re-provision. Follow-up: leaf Bluetooth pairing UX (Phase 20)
+              and the on-hardware desktop end-to-end run.
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-20" data-nav-section>
+            <summary>Phase 20 - BLE leaf provisioning (@listam/provisioning + RPC_LEAF_PROVISION_INFO=27)</summary>
+            <p>
+              Commit boundary: initialize the ESP32 leaf over Bluetooth from any app instead of editing
+              <code>cfg.toml</code> and USB-flashing - a zero-dependency shared wire contract, a headless
+              operator op, a backend RPC that surfaces the hub's control key and bridge address, and the
+              firmware NimBLE GATT + NVS boot branch.
+            </p>
+            <p><strong>Depends on:</strong> 13, 14. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> an app reads the hub's <code>controlKey</code>/<code>hubAddr</code>, writes a CRC-checked, chunked provisioning payload over the custom GATT service, and the leaf persists it to NVS and boots from it.</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><span class="source">provisioning/index.mjs</span> (new package <code>@listam/provisioning@0.7.0</code>, main only - not on npm): the BLE GATT wire contract - service/characteristic UUIDs, payload schema, CRC16, chunking, and <code>buildProvisioningPayload</code> / <code>validateProvisioningPayload</code> / <code>provisionLeaf</code>. Covered by <span class="source">provisioning/provisioning.test.mjs</span>.</li>
+              <li><span class="source">protocol/index.mjs</span>: <code>RPC_LEAF_PROVISION_INFO = 27</code> - the backend surfaces leaf-provisioning context (hub control key + bridge address) to the apps.</li>
+              <li><code>listam-headless/src/provision-ble.mjs</code>: the operator <code>provision-leaf</code> op, driving <code>provisionLeaf()</code> from the shared package (JS tests green).</li>
+              <li>Mobile (ble-plx + LeafPairingDialog), desktop (Web Bluetooth in <code>ui.mjs</code>), firmware (C NimBLE GATT shim + NVS persistence + a boot branch that prefers a provisioned config): all read the hub's <code>controlKey</code>/<code>hubAddr</code> via owner-control <code>status</code>, not a direct RPC.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              Shared-package JS tests green (provisioning + headless op); desktop verified-boots in
+              <code>?mock=1</code> with <code>navigator.bluetooth</code> present; i18n done for all 6 catalogs.
+              Follow-up: firmware, mobile, and desktop BLE paths each need on-hardware verification; trust
+              model is proximity-trust v1.
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-21" data-nav-section>
+            <summary>Phase 21 - Item-level capabilities: overview/day-plan, reordering, cross-list move, encrypted backup, markdown, labels</summary>
+            <p>
+              Commit boundary: a batch of cross-app item capabilities, each a small synced domain channel
+              or a backend RPC, that together round out the list experience - the overview/day-plan
+              channel, item reordering, moving items between lists, encrypted backup/import, the WYSIWYG
+              markdown editor, and synced labels.
+            </p>
+            <p><strong>Depends on:</strong> 16, 17. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> each capability syncs conflict-free (LWW) across desktop, mobile, and headless without a new fork risk; backups are password-encrypted and import merges by LWW.</p>
+            <h3>Overview / day-plan channel</h3>
+            <ul>
+              <li><span class="source">domain/plan.mjs</span> (added): a synced pointer channel (reserved <code>__plan__</code> bucket, no new RPC - <code>RPC_UPDATE</code> upsert) for flagging items into a daily focus plan; <code>isPlanItem</code> guards every list-projection site. Covered by <span class="source">domain/plan.test.mjs</span>.</li>
+              <li>Desktop Overview (pinned-rail Focus + Planner) verified live in <code>?mock=1</code>; mobile <code>OverviewScreen</code> + plan sheet + swipe-right-to-flag (typecheck-only, needs device). Calendar deferred.</li>
+            </ul>
+            <h3>Item reordering</h3>
+            <ul>
+              <li><span class="source">domain/ordering.mjs</span> (added): a shared last-write-wins <code>order</code> field with <code>sortByOrder</code> / <code>computeReorder</code>; group-by-category / group-by-status reorder internally so <code>sortByOrder</code> re-applies per display site. Covered by <span class="source">domain/ordering.test.mjs</span>. Desktop drag + Alt-Up/Down verified across grocery/grid/todo/board; mobile = selector sort + long-press overlay.</li>
+            </ul>
+            <h3>Move items between lists / types</h3>
+            <ul>
+              <li><span class="source">protocol/index.mjs</span>: <code>RPC_MOVE = 28</code>.</li>
+              <li><span class="source">domain/list-move.mjs</span> (added): pure move reduction across list types (re-shapes a grocery item into a board ticket and back as needed via <code>isBoardType</code>). Covered by <span class="source">domain/list-move.test.mjs</span>.</li>
+            </ul>
+            <h3>Encrypted backup / import + seed export</h3>
+            <ul>
+              <li><span class="source">protocol/index.mjs</span>: <code>RPC_EXPORT_DATA = 24</code>, <code>RPC_EXPORT_SEED = 25</code>, <code>RPC_IMPORT = 26</code>.</li>
+              <li><span class="source">backend/lib/backup-crypto.mjs</span>, <span class="source">backend/lib/backup-payload.mjs</span>, <span class="source">backend/lib/backup.mjs</span>: password-encrypted export/import - Argon2id KDF (<code>crypto_pwhash</code>, interactive tier) + XChaCha20-Poly1305, reusing the same cipher as the epoch layer; import merges by LWW; the seed export is the full instance identity. Settings buttons on desktop and mobile.</li>
+            </ul>
+            <h3>WYSIWYG markdown editor</h3>
+            <ul>
+              <li><span class="source">domain/markdown.mjs</span> (added): a DOM-free <code>markdownToHtml</code> / <code>htmlToMarkdown</code> pair so the stored value stays markdown while the user edits live WYSIWYG (desktop contentEditable, mobile TipTap-in-webview). Covered by <span class="source">domain/markdown.test.mjs</span>.</li>
+            </ul>
+            <h3>Synced labels</h3>
+            <ul>
+              <li><span class="source">domain/labels.mjs</span> (added): a registry-style synced meta-item channel for self-asserted peer/device names and cross-device built-in-surface rename (Groceries -> Spesa); every list-projection site skips <code>isLabelItem</code>. Covered by <span class="source">domain/labels.test.mjs</span>.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              Domain unit tests green across <code>plan</code>, <code>ordering</code>, <code>list-move</code>,
+              <code>markdown</code>, and <code>labels</code>; desktop surfaces verified live in
+              <code>?mock=1</code>; backup export/import round-trips on desktop. Mobile counterparts are
+              typecheck-clean and pending an on-device dev-client rebuild (expo-document-picker for import,
+              TipTap webview for markdown).
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-22" data-nav-section>
+            <summary>Phase 22 - Desktop platform polish: Servers pane, open-empty + 'general' group, collapsible rail, Analytics-in-Settings, worker keepalive</summary>
+            <p>
+              Commit boundary: a set of desktop information-architecture and reliability improvements -
+              a Servers pane that monitors and safely controls remote headless peers over owner-control,
+              an open-empty start with a mandated 'general' group, collapsible rail groups, Analytics
+              folded into Settings, and a worker keepalive that survives Bare exceptions.
+            </p>
+            <p><strong>Depends on:</strong> 14. <strong>Unblocks:</strong> -.</p>
+            <p><strong>Acceptance:</strong> the desktop app monitors a remote headless peer (status / refresh / invite / export / shutdown) over owner-control; it opens with no list selected; every list has a group and 'general' is protected; the worker stays alive through a Bare exception and logs it.</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><span class="source">owner-control/index.mjs</span> (v0.14.0): a persistent hyperdht connection (a connect-per-request latent bug was found and fixed - hyperdht cannot reconnect a torn-down connection) plus a 15-finding adversarial-review pass; this is the wire the desktop Servers pane rides.</li>
+              <li><code>listam-desktop/src/ui.mjs</code>: the top-level Servers section (status cards, refresh/invite/export/shutdown), live-verified against the Geekom headless peer; the open-empty start; the mandated 'general' group (built-in Groceries/Board/Todo reframed as ordinary deletable lists inside it; deleting a group re-homes its lists to general); collapsible rail groups (<code>preferences.collapsedGroups</code>, summed green badge); Congruency + Activity analytics moved into Settings -> Analytics; the "Live · N peers" status strip removed.</li>
+              <li><code>listam-desktop/src/backend-worker.mjs</code>: a Bare <code>uncaughtException</code> handler that keeps the worker alive and logs to <code>&lt;storage&gt;/worker-errors.log</code> instead of SIGABRT-crashing the backend.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              Desktop <code>npm run ci</code> green and the panes verified in <code>?mock=1</code>; the
+              Servers pane live-verified against the Geekom headless peer; the worker keepalive shipped in
+              desktop release 3916.
+            </p>
+          </details>
+
+          <details class="phase-record" id="phase-versions" data-nav-section>
+            <summary>Published versions (as of 2026-06-23)</summary>
+            <p>Current shared-package and app versions after the post-milestone phases:</p>
+            <table class="info-table">
+              <thead>
+                <tr>
+                  <th>Package / app</th>
+                  <th>Version</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@listam/domain</code></td><td>0.9.0</td></tr>
+                <tr><td><code>@listam/protocol</code></td><td>0.8.0</td></tr>
+                <tr><td><code>@listam/backend</code></td><td>0.9.1</td></tr>
+                <tr><td><code>@listam/client</code></td><td>0.8.0</td></tr>
+                <tr><td><code>@listam/i18n</code></td><td>0.11.0</td></tr>
+                <tr><td><code>@listam/owner-control</code></td><td>0.14.0</td></tr>
+                <tr><td><code>@listam/provisioning</code></td><td>0.7.0 (main only, not on npm)</td></tr>
+                <tr><td>listam-desktop</td><td>0.13.0</td></tr>
+                <tr><td>listam-headless</td><td>0.13.1</td></tr>
+                <tr><td>listam-mobile</td><td>1.0.1</td></tr>
+              </tbody>
+            </table>
           </details>
 
           <a class="source" href="./plans.html#phases">plans.html#phases</a>

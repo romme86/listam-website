@@ -41,6 +41,7 @@
               <a href="mobile.html#structure">Project Structure</a>
               <a href="mobile.html#runtime">Runtime Flows</a>
               <a href="mobile.html#frontend">Frontend</a>
+              <a href="mobile.html#overview">Overview / Day-plan</a>
               <a href="mobile.html#backend">Backend</a>
               <a href="mobile.html#storage">Storage</a>
               <a href="mobile.html#libraries">Libraries</a>
@@ -57,6 +58,7 @@
               <a href="desktop.html#structure">Project Structure</a>
               <a href="desktop.html#runtime">Runtime Flows</a>
               <a href="desktop.html#frontend">Renderer UI</a>
+              <a href="desktop.html#overview">Overview / Day-plan</a>
               <a href="desktop.html#backend">Worker Backend</a>
               <a href="desktop.html#devices">Peers &amp; Devices</a>
               <a href="desktop.html#storage">Storage</a>
@@ -74,6 +76,7 @@
               <a href="headless.html#roles">Roles</a>
               <a href="headless.html#runtime">Runtime Flows</a>
               <a href="headless.html#ops">Control Interface</a>
+              <a href="headless.html#provisioning">Leaf Provisioning</a>
               <a href="headless.html#owner-control">Owner Control</a>
               <a href="headless.html#storage">Storage</a>
               <a href="headless.html#installer">Service Installer</a>
@@ -192,6 +195,7 @@
               <a href="voice.html#wake-words">Wake Words</a>
               <a href="voice.html#commands">Commands</a>
               <a href="voice.html#notetaker">Notetaker</a>
+              <a href="voice.html#dataset">Training Dataset</a>
               <a href="voice.html#stt">Speech-to-Text</a>
               <a href="voice.html#led">LED Feedback</a>
               <a href="voice.html#status">Status</a>
@@ -206,6 +210,7 @@
               <a href="qa.html#qa-mobile">Mobile Checklist</a>
               <a href="qa.html#qa-desktop">Desktop Checklist</a>
               <a href="qa.html#qa-headless">Headless Checklist</a>
+              <a href="qa.html#qa-voice">Voice Checklist</a>
               <a href="qa.html#qa-cross-device">Cross-Device Scenarios</a>
               <a href="qa.html#qa-release">Release Gate</a>
             </div>
@@ -214,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-16</strong>
+          <strong>2026-06-23</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -245,9 +250,11 @@
           </div>
           <div class="callout">
             <strong>Host-only writability:</strong> the leaf is a read-only hypercore replica — it
-            cannot write list items. So voice <em>actions</em> always execute on the paired host
-            (the headless peer for v1) that holds the writable list core. Voice needs that host
-            reachable, exactly as any write does.
+            cannot write list items. So voice <em>actions</em> always execute on whichever writable
+            host holds the list core — the always-on <strong>headless</strong> peer <em>or</em> the
+            <strong>desktop</strong> app, which now hosts the whole pipeline in its Bare worker and
+            writes straight into its own base. Voice needs one of those hosts reachable, exactly as
+            any write does.
           </div>
         </section>
 
@@ -288,6 +295,26 @@
               <span class="source">voice-controller.mjs</span>
             </div>
           </div>
+          <div class="note-grid">
+            <div class="note">
+              <h3>Headless host (Node)</h3>
+              <p>The always-on peer runs the bridge under Node and shells out to a real
+                 <code>whisper-cli</code> binary. It works while the desktop is closed and is the
+                 audio sink that also captures the training dataset.</p>
+              <span class="source">listam-headless/src/service.mjs</span>
+            </div>
+            <div class="note">
+              <h3>Desktop host (Bare worker)</h3>
+              <p>A leaf can instead stream to the desktop's audio bridge on TCP&nbsp;<code>:9994</code>
+                 (<code>DEFAULT_VOICE_PORT</code>). The Pear worker starts the <em>same</em> shared
+                 pipeline — audio-bridge → voice-bridge → STT → controller → LED feedback — but the
+                 STT engine spawns <code>whisper.cpp</code> via <code>bare-subprocess</code>, and the
+                 controller writes through the injected <code>callBackend</code> (<code>RPC_ADD</code>,
+                 <code>RPC_DELETE</code>) into the desktop's <strong>own base</strong> — no separate
+                 peer, no second base, no pairing round-trip.</p>
+              <span class="source">listam-desktop/src/voice-host-worker.mjs</span>
+            </div>
+          </div>
         </section>
 
         <section id="wake-words" class="page page-searchable">
@@ -295,24 +322,31 @@
             <span class="eyebrow">On the leaf</span>
             <h2>Wake Words</h2>
             <p class="section-lede">
-              Three custom wake words, detected entirely on-device with custom
-              <strong>microWakeWord</strong> models. The loudness gate is a hard requirement in
-              front of "yo", reusing the mic's existing RMS/dBFS math.
+              One wake word is actually built — and it <strong>fires on real ESP32-S3 hardware</strong>.
+              A ~62&nbsp;KB int8 streaming <strong>MixedNet</strong> KWS model (<code>yo.tflite</code>)
+              runs entirely on-device behind a loudness (dB) gate, reusing the mic's existing RMS/dBFS
+              math. Two more phrases are aspirational and not yet trained.
             </p>
           </div>
           <table class="info-table">
-            <thead><tr><th>Wake word</th><th>Detection</th><th>Notes</th></tr></thead>
+            <thead><tr><th>Wake word</th><th>Detection</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td><code>yo</code> / <code>yoooo</code></td><td>model + dB gate</td><td>Only fires above a configurable loudness threshold (<code>wake_db_threshold</code>) — a quiet "yo" is ignored.</td></tr>
-              <tr><td><code>hey listam</code></td><td>model</td><td>The primary phrase wake word.</td></tr>
-              <tr><td><code>dai dai dai dai</code></td><td>model</td><td>Rhythmic four-syllable trigger.</td></tr>
+              <tr><td><code>yo</code></td><td>on-device model + dB gate</td><td><strong>Built &amp; fires on-device.</strong> A clear "yo" scores <code>max_prob</code>&nbsp;≈&nbsp;0.996 (well over the <code>WAKE_PROB_CUTOFF</code> of 0.90); ambient sounds that merely trip the loudness gate score ≈&nbsp;0.03 and are rejected. The dB gate fronts it so a quiet "yo" never even runs the model.</td></tr>
+              <tr><td><code>hey listam</code></td><td>model (planned)</td><td>Unbuilt — aspirational.</td></tr>
+              <tr><td><code>dai dai dai</code></td><td>model (planned)</td><td>Unbuilt — aspirational.</td></tr>
             </tbody>
           </table>
           <div class="callout">
-            <strong>Memory gate:</strong> the wake model's tensor arena shares PSRAM with the
-            hypercore stack on the N16R8, so an on-device allocation probe runs before models ship
-            (known esphome&nbsp;#7242 failure mode).
+            <strong>On-device features must match training:</strong> <code>components/mww</code> bundles
+            <code>esp-tflite-micro</code> plus the vendored <code>rhasspy/pymicro-features</code>
+            fixed-point audio microfrontend (the exact code microWakeWord trains on), wrapped in a C++
+            shim so the on-device features byte-match the training pipeline. The corrected
+            <code>kFeatScale</code> (raw filterbank ÷&nbsp;25.6, was ÷&nbsp;64 — which under-scaled
+            features ~2.5× toward the int8 floor) is what finally made the model fire. The 64&nbsp;KB
+            tensor arena is allocated in <strong>PSRAM</strong> (<code>MALLOC_CAP_SPIRAM</code>) so it
+            doesn't contend with the hypercore stack.
           </div>
+          <span class="source">leaf-esp32/src/voice.rs · components/mww/mww.cc</span>
         </section>
 
         <section id="commands" class="page page-searchable">
@@ -334,6 +368,33 @@
           </table>
           <pre><code>parseIntent("add milk to groceries")
 → { intent: "add_item", slots: { item: "milk", list: "groceries" }, confidence: 0.9 }</code></pre>
+          <div class="callout">
+            <strong>Wake credit, not re-detection:</strong> the host write gate now <em>credits the
+            firmware's wake signal</em> — when the leaf's END frame reports <code>wake.fired</code>,
+            the command is treated as addressed and executes. This replaced re-detecting "yo" in the
+            transcript, which wrongly gated clearly-addressed commands whenever whisper mis-transcribed
+            the spoken "yo" (e.g. as the Italian "io"). It falls back to text detection
+            (<code>detectWake</code>) only for older firmware that doesn't send the label.
+          </div>
+          <p class="section-lede">
+            Parsing is not enough to mutate a list. Each intent has a write-gate confidence floor
+            (<code>DEFAULT_EXEC_FLOORS</code>) that the parse must clear when no wake word fired, so
+            ambient speech that merely parses can't touch the lists. The strictest bar is on the
+            destructive remove:
+          </p>
+          <table class="info-table">
+            <thead><tr><th>Intent</th><th>Floor (no wake)</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td><code>add_item</code></td><td>0.75</td><td>Anchored "add milk" still works hands-free; the lenient 0.6 retry path is excluded.</td></tr>
+              <tr><td><code>note</code></td><td>0.75</td><td>Same non-destructive bar as add.</td></tr>
+              <tr><td><code>remove_item</code></td><td>0.9</td><td>Destructive — above the grammar's max for a remove (anchored remove tops out at 0.85), so a wake word is effectively required to delete.</td></tr>
+            </tbody>
+          </table>
+          <p class="section-lede">
+            A wake word short-circuits the floor entirely (the user clearly addressed the device).
+            Floors are overridable via <code>config.voice.execConfidence</code>.
+          </p>
+          <span class="source">voice-feedback.mjs</span>
         </section>
 
         <section id="notetaker" class="page page-searchable">
@@ -358,20 +419,57 @@
           </div>
           <div class="grid two">
             <article class="card accent-green">
-              <h3>whisper.cpp (v1)</h3>
-              <p>Runs as a subprocess on the always-on headless peer — proven, no Bare-runtime
-                 limits, works while the desktop is closed. One multilingual GGML model covers all
-                 six UI locales (en/es/de/fr/it/pt).</p>
-              <span class="source">lib/stt/whisper-cpp-subprocess.mjs</span>
+              <h3>whisper.cpp — two host engines</h3>
+              <p>Both engines share one args builder and one multilingual GGML model (en/es/de/fr/it/pt):
+                 <code>whisper-cpp-subprocess.mjs</code> shells out under <strong>Node</strong> on the
+                 headless peer; <code>bare-whisper.mjs</code> spawns the same binary via
+                 <code>bare-subprocess</code> inside the <strong>desktop</strong> worker.</p>
+              <span class="source">lib/stt/whisper-cpp-subprocess.mjs · lib/stt/bare-whisper.mjs</span>
             </article>
             <article class="card accent-blue">
               <h3>QVAC (later)</h3>
-              <p>Tether's QVAC SDK (ASR = whisper.cpp under the hood) runs natively in the Bare
-                 worker and distributes models P2P over hyperdrive — a spike-gated upgrade for the
-                 desktop path, with an optional local LLM for multilingual intent.</p>
+              <p>Tether's QVAC SDK (ASR = whisper.cpp under the hood) would run natively in the Bare
+                 worker and distribute models P2P over hyperdrive — a spike-gated upgrade for the
+                 desktop path, with an optional local LLM for multilingual intent. Not yet built.</p>
               <span class="source">lib/stt/qvac.mjs</span>
             </article>
           </div>
+          <div class="callout">
+            <strong>Greedy single-pass decode:</strong> the shared <code>buildWhisperArgs</code> forces
+            a low-latency decode — <code>-bs&nbsp;1</code> (beam size 1), <code>-bo&nbsp;1</code>
+            (best-of 1), <code>-nf</code> (no temperature fallback), plus <code>-t&nbsp;threads</code>
+            and <code>-nt -np</code> (no timestamps / no progress). The spoken locale is threaded
+            end-to-end and passed as <code>-l&nbsp;&lt;locale&gt;</code> (omitted, so whisper
+            auto-detects, only on the "auto" fallback). A per-locale default <code>--prompt</code>
+            biases whisper toward the command vocabulary as an anti-merge guard ("add milk", not
+            "Admilk"). This fixed the earlier <code>medium.en</code> bug: that model is
+            English-only, so it ignored <code>-l&nbsp;it</code> and silently mis-transcribed Italian —
+            the fix is to use a multilingual GGML model.
+          </div>
+        </section>
+
+        <section id="dataset" class="page page-searchable">
+          <div class="section-heading">
+            <span class="eyebrow">Corpus</span>
+            <h2>Training Dataset</h2>
+            <p class="section-lede">
+              Every leaf utterance the audio bridge receives is persisted as a <strong>WAV + JSON
+              sidecar</strong>, auto-labeled from the wake-labeled END frame, building a real-life
+              "yo" corpus to retrain and improve the wake model.
+            </p>
+          </div>
+          <div class="callout">
+            <strong>Auto-labeled positives and hard-negatives:</strong> the leaf's END frame carries
+            <code>[reason, fired, probMilli, featPeak]</code>, so each clip is tagged a
+            <em>positive</em> that fired the on-device "yo" wake versus a <em>hard-negative</em> that
+            only tripped the dB gate. Hard-negatives are exactly what cuts false-accepts. The headless
+            peer is the audio sink, so the corpus accumulates on the always-on instance; it is wired
+            into the headless service and on by default — set <code>LISTAM_VOICE_DATASET=0</code> to
+            disable (directory via <code>LISTAM_VOICE_DATASET_DIR</code>). The filesystem is injected
+            and saves are fire-and-forget, so dataset capture never blocks the live pipeline; old clips
+            are pruned past a cap.
+          </div>
+          <span class="source">lib/voice-dataset.mjs · listam-headless/src/service.mjs</span>
         </section>
 
         <section id="led" class="page page-searchable">
@@ -386,9 +484,12 @@
           <table class="info-table">
             <thead><tr><th>State</th><th>LED</th></tr></thead>
             <tbody>
-              <tr><td>idle / normal</td><td>off</td></tr>
-              <tr><td>awake / listening</td><td>blinking yellow</td></tr>
-              <tr><td>sending the command</td><td>solid green</td></tr>
+              <tr><td>idle / normal (dB gate only)</td><td>off</td></tr>
+              <tr><td>wake word recognized / listening</td><td>blinking yellow</td></tr>
+              <tr><td>command recognized</td><td>purple</td></tr>
+              <tr><td>saved / sent</td><td>solid green</td></tr>
+              <tr><td>heard you, didn't understand</td><td>red</td></tr>
+              <tr><td>BLE provisioning (advertising, waiting to pair)</td><td>blue</td></tr>
             </tbody>
           </table>
           <span class="source">leaf-esp32/src/led.rs</span>
@@ -401,16 +502,19 @@
           </div>
           <div class="grid two">
             <article class="card accent-green">
-              <h3>Shipped &amp; tested</h3>
-              <p>The host command core: the <code>notes</code> list type, the multilingual intent
-                 parser, and the voice controller (add / remove-everywhere / note) — with unit tests
-                 and the <code>voice.*</code> i18n keys across all six catalogs.</p>
+              <h3>Shipped &amp; verified</h3>
+              <p>The host command core (<code>notes</code> list type, multilingual intent parser,
+                 add / remove-everywhere / note controller with write-gate floors); the leaf voice
+                 front-end (INMP441 I2S mic, dB gate, side-band PCM16 streaming, multi-addr
+                 <code>connect_any</code>, RGB LED); the on-device <strong>"yo" wake word</strong>
+                 (fires on real ESP32-S3); the host audio + STT bridge (whisper.cpp); desktop-native
+                 hosting in the Bare worker; and training-dataset capture.</p>
             </article>
             <article class="card accent-amber">
-              <h3>In progress</h3>
-              <p>Host audio + STT bridge (whisper.cpp subprocess + headless wiring); leaf firmware
-                 (voice thread, dB gate, side-band streaming, RGB LED); microWakeWord model training
-                 and the on-device PSRAM arena probe + hardware verification.</p>
+              <h3>Remaining / next</h3>
+              <p>More wake words and better "yo" recall (retrain on the captured corpus); the QVAC
+                 desktop STT upgrade; and a dedicated Notes UI surface in the desktop and mobile
+                 apps.</p>
             </article>
           </div>
           <div class="callout">

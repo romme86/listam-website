@@ -494,17 +494,115 @@
             <span class="eyebrow">Operator surface</span>
             <h2>Control Interface (stdin JSON)</h2>
             <p class="section-lede">
-              One JSON object per line on stdin, one reply per request on stdout, correlated by
-              <code>id</code>. Unknown ops or missing fields answer <code>ok: false</code> without
-              killing the service. The same surface is reachable through the installer's
-              <code>control.fifo</code> when running under systemd.
+              A headless peer has no UI — you drive it from a shell two ways. <strong>CLI subcommands</strong>
+              (<code>setup</code> / <code>run</code> / <code>status</code> / <code>install</code> / <code>uninstall</code>)
+              handle the lifecycle; <strong>JSON ops</strong> handle everything live — one JSON object per line on
+              stdin, one reply per request on stdout, correlated by <code>id</code>. Unknown ops or missing fields
+              answer <code>ok: false</code> without killing the service. Under systemd that stdin is the installer's
+              <code>control.fifo</code> and the replies land in the journal — see below.
             </p>
           </div>
 
-          <pre><code>→ {"id":1,"op":"add","text":"milk"}
-← {"id":1,"ok":true}
-→ {"id":2,"op":"dump"}
-← {"id":2,"ok":true,"items":[…],"peerCount":1,"joined":true,…}</code></pre>
+          <h3>Fastest check — role, base, data, peers</h3>
+          <p>
+            No op required. The service rewrites a status file every few seconds; read it (or run the
+            <code>status</code> subcommand) to see the role, which base it is on / replicating, whether it
+            joined, the live peer count, item count and quota.
+          </p>
+          <pre><code># over SSH on the peer
+cat ~/listam-data/headless-status.json
+# …or the CLI (exits 1 when the status is stale = not running)
+node headless.mjs status --storage ~/listam-data
+
+{
+  "role": "participant",         # participant = full writer · blind-storage = ciphertext mirror
+  "mode": "secure-store",
+  "baseId": "fnv1a32:42fc0b1b",  # the project base this peer is on / replicating
+  "joined": true,                # joined another base vs. owns its own
+  "peerCount": 1,                # live replication connections right now
+  "itemCount": 30,               # items in the materialised list
+  "inviteActive": false,
+  "quota": { "usedBytes": 4462636, "maxBytes": 1073741824, "exceeded": false },
+  "startedAt": 1782399966987, "updatedAt": 1782416867419
+}</code></pre>
+          <p>
+            A <code>blind-storage</code> peer reports <code>pins[]</code> instead — the cores it mirrors, each a
+            fingerprint + length — and states <code>"encryptionKey":"never-held"</code>: it holds ciphertext only.
+          </p>
+
+          <h3>Live ops — FIFO in, journal out</h3>
+          <p>
+            The peer reads JSON ops from <strong>stdin</strong>, which the installer wires to
+            <code>&lt;storage&gt;/control.fifo</code> (held open read-write so it never hits EOF — an EOF means
+            shutdown). Replies print to <strong>stdout</strong>, which systemd routes to the <strong>journal</strong>.
+            So you <em>echo an op into the FIFO</em> and <em>read the reply from the journal</em>, matched by <code>id</code>.
+          </p>
+          <pre><code># terminal A — watch replies
+journalctl --user -u listam-headless -f
+
+# terminal B — send ops (one JSON object per line)
+echo '{"id":1,"op":"status"}'            > ~/listam-data/control.fifo
+echo '{"id":2,"op":"add","text":"milk"}' > ~/listam-data/control.fifo
+echo '{"id":3,"op":"dump"}'              > ~/listam-data/control.fifo
+
+# → appears in terminal A:
+# {"id":2,"ok":true}
+# {"id":3,"ok":true,"items":[…],"peerCount":1,"joined":true,"roster":[…]}</code></pre>
+          <p>
+            Not under systemd? Run it in the foreground and ops/replies are just stdin/stdout:
+            <code>node headless.mjs run --storage ~/listam-data</code>, then type the JSON lines.
+          </p>
+
+          <h3>Recipes</h3>
+          <pre><code># What role / base / data is this peer on?
+cat ~/listam-data/headless-status.json
+
+# Full item list + the owner-signed writer roster (who can write)
+echo '{"id":1,"op":"dump"}'    > ~/listam-data/control.fifo
+echo '{"id":2,"op":"members"}' > ~/listam-data/control.fifo
+
+# Add / tick / edit / delete an item   (itemId comes from a dump)
+echo '{"id":3,"op":"add","text":"buy bread"}'                       > ~/listam-data/control.fifo
+echo '{"id":4,"op":"done","itemId":"abc123","isDone":true}'         > ~/listam-data/control.fifo
+echo '{"id":5,"op":"edit","itemId":"abc123","text":"buy 2 loaves"}' > ~/listam-data/control.fifo
+echo '{"id":6,"op":"delete","itemId":"abc123"}'                     > ~/listam-data/control.fifo
+
+# Mint an invite for another device to join THIS base   (reply: {"inviteKey":"…z32…"})
+echo '{"id":7,"op":"invite"}' > ~/listam-data/control.fifo
+
+# Join another peer's whole base (REPLACES this peer's base; 180s budget)
+echo '{"id":8,"op":"join","invite":"PASTE_Z32"}' > ~/listam-data/control.fifo
+
+# Share / join a SINGLE list (additive — the rest of the project stays private)
+echo '{"id":9,"op":"share-list","listId":"default"}'      > ~/listam-data/control.fifo
+echo '{"id":10,"op":"join-list","invite":"PASTE_Z32"}'    > ~/listam-data/control.fifo
+
+# Back up / restore (plain JSON dump, id-stable upsert on import)
+echo '{"id":11,"op":"export","path":"/home/cassandrina/listam-export.json"}' > ~/listam-data/control.fifo
+echo '{"id":12,"op":"import","path":"/home/cassandrina/listam-export.json"}' > ~/listam-data/control.fifo
+
+# Pre-join encrypted auto-backups
+echo '{"id":13,"op":"set-backup-password","password":"hunter2"}' > ~/listam-data/control.fifo
+echo '{"id":14,"op":"list-backups"}'                             > ~/listam-data/control.fifo
+echo '{"id":15,"op":"restore-backup","file":"NAME","password":"hunter2"}' > ~/listam-data/control.fifo
+
+# Graceful stop   (or: systemctl --user stop listam-headless)
+echo '{"id":16,"op":"shutdown"}' > ~/listam-data/control.fifo</code></pre>
+
+          <h3>CLI subcommands</h3>
+          <table class="info-table">
+            <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>setup --storage DIR --role participant|blind-storage [--base-key HEX] [--bootstrap host:port,…] [--max-storage-bytes N] [--name STR] [--force]</code></td><td>Write the config. The <strong>role is chosen here</strong> and is fixed for the storage dir.</td></tr>
+              <tr><td><code>run --storage DIR [--bootstrap …]</code></td><td>The long-lived peer. Reads JSON ops on stdin, one reply per line. Normally launched by the systemd unit, not by hand.</td></tr>
+              <tr><td><code>status --storage DIR</code></td><td>Print the last status snapshot (role, baseId, joined, peers, items, quota). Exits 1 when stale = not running.</td></tr>
+              <tr><td><code>install --storage DIR [--role …] [--base-key HEX] [--invite Z32]</code></td><td>Linux only: create <code>control.fifo</code>, a systemd <code>--user</code> unit (<code>listam-headless.service</code>), enable linger, and start it. <code>--invite</code> joins a base on first start.</td></tr>
+              <tr><td><code>uninstall --storage DIR</code></td><td>Disable + remove the unit. Storage is left intact.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Every op</h3>
+          <p>Aliases: <code>print-invite</code>→<code>invite</code>, <code>dump-list</code>→<code>dump</code>, <code>add-item</code>→<code>add</code>, <code>edit-item</code>→<code>edit</code>, <code>mark-done</code>→<code>done</code>, <code>delete-item</code>→<code>delete</code>.</p>
 
           <table class="info-table">
             <thead>
@@ -523,7 +621,12 @@
               <tr>
                 <td><code>invite</code> / <code>join</code></td>
                 <td>participant</td>
-                <td>Mint a z32 BlindPairing invite, or consume one to join a base (180&nbsp;s budget; the joined base persists).</td>
+                <td>Mint a z32 BlindPairing invite, or consume one to join a base (180&nbsp;s budget; the joined base persists). <code>join</code> is a <strong>whole-project</strong> join — it REPLACES this peer's base.</td>
+              </tr>
+              <tr>
+                <td><code>share-list</code> / <code>join-list</code></td>
+                <td>participant</td>
+                <td>Promote one list (<code>{listId}</code>) into its own shared base and return its co-edit invite, or additively <code>{invite}</code>-join one shared list — the rest of the project stays private (no base replacement).</td>
               </tr>
               <tr>
                 <td><code>add</code> / <code>edit</code> / <code>done</code> / <code>delete</code></td>
@@ -533,7 +636,12 @@
               <tr>
                 <td><code>export</code> / <code>import</code> / <code>sync</code></td>
                 <td>participant</td>
-                <td>JSON export (optionally to a 0600 file), id-stable import, explicit sync request.</td>
+                <td>JSON export (optionally to a 0600 file via <code>{path}</code>), id-stable <code>{path|data}</code> import (upsert), explicit sync request.</td>
+              </tr>
+              <tr>
+                <td><code>set-backup-password</code> / <code>list-backups</code> / <code>restore-backup</code></td>
+                <td>participant</td>
+                <td>Manage the encrypted pre-join auto-backups: set the <code>{password}</code> (required before they run), list them, and <code>{file, password}</code>-restore one (decrypt + LWW merge).</td>
               </tr>
               <tr>
                 <td><code>members</code> / <code>remove-member</code></td>

@@ -465,7 +465,8 @@
               </ul>
               <p>
                 Every list projection must skip these buckets so meta-items never render as grocery rows.
-                Device-local state (theme, device name, locale) is deliberately <em>not</em> replicated.
+                Only theme and locale are device-local and deliberately <em>not</em> replicated. The device
+                name <em>is</em> replicated — that is what <code>__peers__</code> above is for.
               </p>
             </article>
           </div>

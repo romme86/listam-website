@@ -225,7 +225,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-23</strong>
+          <strong>2026-07-31</strong>
           <p>Phase log for the multi-app implementation plan.</p>
         </div>
       </aside>
@@ -1304,7 +1304,7 @@
             <p><strong>Acceptance:</strong> an app reads the hub's <code>controlKey</code>/<code>hubAddr</code>, writes a CRC-checked, chunked provisioning payload over the custom GATT service, and the leaf persists it to NVS and boots from it.</p>
             <h3>Files modified / added</h3>
             <ul>
-              <li><span class="source">provisioning/index.mjs</span> (new package <code>@listam/provisioning@0.7.0</code>, main only - not on npm): the BLE GATT wire contract - service/characteristic UUIDs, payload schema, CRC16, chunking, and <code>buildProvisioningPayload</code> / <code>validateProvisioningPayload</code> / <code>provisionLeaf</code>. Covered by <span class="source">provisioning/provisioning.test.mjs</span>.</li>
+              <li><span class="source">provisioning/index.mjs</span> (package <code>@listam/provisioning@0.7.0</code>): the BLE GATT wire contract - service/characteristic UUIDs, payload schema, CRC16, chunking, and <code>buildProvisioningPayload</code> / <code>validateProvisioningPayload</code> / <code>provisionLeaf</code>. Covered by <span class="source">provisioning/provisioning.test.mjs</span>.</li>
               <li><span class="source">protocol/index.mjs</span>: <code>RPC_LEAF_PROVISION_INFO = 27</code> - the backend surfaces leaf-provisioning context (hub control key + bridge address) to the apps.</li>
               <li><code>listam-headless/src/provision-ble.mjs</code>: the operator <code>provision-leaf</code> op, driving <code>provisionLeaf()</code> from the shared package (JS tests green).</li>
               <li>Mobile (ble-plx + LeafPairingDialog), desktop (Web Bluetooth in <code>ui.mjs</code>), firmware (C NimBLE GATT shim + NVS persistence + a boot branch that prefers a provisioned config): all read the hub's <code>controlKey</code>/<code>hubAddr</code> via owner-control <code>status</code>, not a direct RPC.</li>
@@ -1389,9 +1389,34 @@
             </p>
           </details>
 
+          <details class="phase-record" id="phase-23" data-nav-section>
+            <summary>Phase 23 - Collision-free sharing for the built-in default grocery</summary>
+            <p>
+              Commit boundary: make the literal <code>default:shopping</code> surface shareable without
+              sweeping its multiplexed Board/Todo siblings or colliding with the recipient's own default
+              grocery. The promoted list derives a canonical id from its shared base key; owner-side
+              visibility, day-plan references, and orphan recovery remain durable and conflict-free.
+            </p>
+            <p><strong>Depends on:</strong> 14, 17, 21. <strong>Unblocks:</strong> safe built-in grocery co-editing across mobile, desktop, and headless.</p>
+            <p><strong>Acceptance:</strong> a recipient retains its own default grocery and mounts the promoted list alongside it; only shopping items move, Board/Todo stay personal, and a later live default-grocery item cannot remain hidden.</p>
+            <h3>Files modified / added</h3>
+            <ul>
+              <li><span class="source">backend/lib/share-promotion.mjs</span>, <span class="source">backend/lib/shared-source.mjs</span>, <span class="source">backend/backend.mjs</span>: canonical re-ID, shared-source recovery metadata, plan-pointer migration, and a commit sequence that never tombstones originals before the synced visibility write is accepted.</li>
+              <li><span class="source">domain/labels.mjs</span>: the durable <code>__builtinvisibility__</code> channel; content wins ties and newer content resurrects a hidden built-in surface.</li>
+              <li><code>listam-mobile</code>, <code>listam-desktop</code>, and <code>listam-headless</code>: pass the list type/name, route to the returned canonical id, expose grocery sharing, and retain the Board/Todo safety block.</li>
+            </ul>
+            <h3>Verification</h3>
+            <p>
+              Shared packages: 750 tests (748 pass, 2 documented TODO); desktop: 168 tests; headless:
+              42 tests; mobile CI green including lint, typecheck, dependency, secret, i18n, bundle, and
+              105 behavior tests. The signed Android release was installed in place on Gioieiere, retained
+              its data, cold-launched, opened the Autobase, and joined the swarm without a startup error.
+            </p>
+          </details>
+
           <details class="phase-record" id="phase-versions" data-nav-section>
-            <summary>Published versions (as of 2026-06-25)</summary>
-            <p>Current shared-package and app versions after the single-list-sharing release:</p>
+            <summary>Published versions (as of 2026-07-31)</summary>
+            <p>Current shared-package and app versions after the default-grocery sharing release:</p>
             <table class="info-table">
               <thead>
                 <tr>
@@ -1400,16 +1425,19 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td><code>@listam/domain</code></td><td>0.10.0</td></tr>
-                <tr><td><code>@listam/protocol</code></td><td>0.9.0</td></tr>
-                <tr><td><code>@listam/backend</code></td><td>0.10.0</td></tr>
-                <tr><td><code>@listam/client</code></td><td>0.9.0</td></tr>
-                <tr><td><code>@listam/i18n</code></td><td>0.12.0</td></tr>
+                <tr><td><code>@listam/domain</code></td><td>0.10.1</td></tr>
+                <tr><td><code>@listam/protocol</code></td><td>0.9.1</td></tr>
+                <tr><td><code>@listam/backend</code></td><td>0.10.1</td></tr>
+                <tr><td><code>@listam/client</code></td><td>0.9.1</td></tr>
+                <tr><td><code>@listam/grocery</code></td><td>0.8.0</td></tr>
+                <tr><td><code>@listam/i18n</code></td><td>0.12.1</td></tr>
+                <tr><td><code>@listam/logging</code></td><td>0.7.0</td></tr>
                 <tr><td><code>@listam/owner-control</code></td><td>0.14.0</td></tr>
                 <tr><td><code>@listam/provisioning</code></td><td>0.7.0</td></tr>
-                <tr><td>listam-desktop</td><td>0.14.0</td></tr>
-                <tr><td>listam-headless</td><td>0.14.0</td></tr>
-                <tr><td>listam-mobile</td><td>1.0.1</td></tr>
+                <tr><td><code>@listam/secrets</code></td><td>0.8.0</td></tr>
+                <tr><td>listam-desktop</td><td>0.19.12</td></tr>
+                <tr><td>listam-headless</td><td>0.14.1</td></tr>
+                <tr><td>listam-mobile</td><td>1.3.1</td></tr>
               </tbody>
             </table>
           </details>

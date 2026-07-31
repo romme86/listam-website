@@ -219,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-23</strong>
+          <strong>2026-07-31</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -227,7 +227,7 @@
       <main class="content">
         <header class="topbar">
           <div>
-            <span class="eyebrow">Desktop · Pear / Bare · v<span data-fact="version:listam-desktop">0.19.9</span></span>
+            <span class="eyebrow">Desktop · Pear / Bare · v<span data-fact="version:listam-desktop">0.19.12</span></span>
             <h1>Desktop App</h1>
           </div>
           <label class="search">
@@ -241,7 +241,7 @@
             <span class="eyebrow">Folder intent</span>
             <h2>Project Structure</h2>
             <p class="section-lede">
-              <code>listam-desktop</code> (v<span data-fact="version:listam-desktop">0.19.9</span>) is a Pear desktop app. The renderer is vanilla
+              <code>listam-desktop</code> (v<span data-fact="version:listam-desktop">0.19.12</span>) is a Pear desktop app. The renderer is vanilla
               DOM + CSS; the real backend is the shared <code>@listam/backend</code> engine — the
               same one the mobile worklet and the headless service run — booted in a Pear worker
               because <code>bare-*</code> modules cannot load in the renderer.
@@ -405,9 +405,12 @@
               <h3>Groups and collapsible rail</h3>
               <p>
                 Groups and lists are renamable and deletable; deleting a group re-homes its lists to
-                <code>general</code>. Device-local preferences pick which built-ins show
-                (<code>hiddenBuiltins</code>) and which surface opens
-                (<code>defaultSurfaceKey</code>). Rail groups collapse
+                <code>general</code>. Grocery visibility is a synced
+                <code>__builtinvisibility__</code> lifecycle record: deleting Groceries hides it on
+                every owner device, while a same-time or newer live grocery item resurrects it so
+                quick adds never become invisible. Board and Todo retain the legacy device-local
+                <code>hiddenBuiltins</code> preference. <code>defaultSurfaceKey</code> still chooses
+                which surface opens locally. Rail groups collapse
                 (<code>preferences.collapsedGroups</code>): a collapsed group shows one green badge
                 summing its surfaces' counts and auto-expands when a surface inside it is selected.
                 The old "Live · N peers" status strip is gone — the peer count moved to the Peers

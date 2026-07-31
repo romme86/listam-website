@@ -219,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Generated</span>
-          <strong>2026-06-23</strong>
+          <strong>2026-07-31</strong>
           <p>Multi-app wiki: the mobile, desktop, and headless apps plus plans, phases, and release QA.</p>
         </div>
       </aside>
@@ -406,6 +406,9 @@
                 <code>ListsMenu</code> picks the active list, <code>ListContextBar</code> shows and
                 renames the current surface, and <code>ListSwipePager</code> swipes between lists.
                 Board and todo surfaces have their own editors layered on the grocery list view.
+                The built-in grocery can be promoted into a collision-free shared list: the backend
+                re-identifies it from <code>default</code>, preserves the recipient's own default
+                groceries, and syncs the owner's hide/resurrection lifecycle separately.
               </p>
               <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/ListsMenu.tsx">app/components/ListsMenu.tsx</a>
               <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/ListSwipePager.tsx">app/components/ListSwipePager.tsx</a>

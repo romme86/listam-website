@@ -219,7 +219,7 @@
 
         <div class="sidebar-card">
           <span class="eyebrow">Updated</span>
-          <strong>2026-06-23</strong>
+          <strong>2026-07-31</strong>
           <p>Manual release QA: checklists for the mobile, desktop, and headless apps plus cross-device scenarios.</p>
         </div>
       </aside>
@@ -515,6 +515,7 @@
               <li><label><input type="checkbox" /><span>The reorder overlay (long-press) offers "Move to top" / "Move to bottom"; the new order persists and replicates.</span></label></li>
               <li><label><input type="checkbox" /><span>Board surface (when <code>boardEnabled</code>): status chips + cards, full-screen ticket detail with the 8-block editor and rigor form; tickets dual-read <code>board</code>/<code>kanban</code>.</span></label></li>
               <li><label><input type="checkbox" /><span>Todo surface: text-only list, no grocery categories / grid / icons.</span></label></li>
+              <li><label><input type="checkbox" /><span>Share the built-in Groceries surface as a list: it becomes a separate shared list with a non-<code>default</code> id; the recipient keeps their own default groceries and sees the shared items alongside them.</span></label></li>
               <li><label><input type="checkbox" /><span>Rich markdown editor: a markdown block edits as live WYSIWYG and the stored value stays markdown (<a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/board/RichMarkdownEditor.tsx">app/components/board/RichMarkdownEditor.tsx</a>).</span></label></li>
             </ul>
           </div>
@@ -614,7 +615,7 @@
             <ul class="qa-list" data-qa="d-groups">
               <li><label><input type="checkbox" /><span>Create a group, create a list inside it, then rename and delete each; every list belongs to some group (no orphans).</span></label></li>
               <li><label><input type="checkbox" /><span>The <code>general</code> group is protected — it can't be deleted; deleting any other group re-homes its lists into <code>general</code> rather than dropping them.</span></label></li>
-              <li><label><input type="checkbox" /><span>The built-in Groceries / Board / Todo lists behave as ordinary lists inside <code>general</code> (rename, hide); their underlying data still lives on list id <code>default</code>.</span></label></li>
+              <li><label><input type="checkbox" /><span>The built-in Groceries / Board / Todo lists behave as ordinary lists inside <code>general</code> (rename, hide). Grocery visibility syncs across owner devices and newer live content resurrects it; Board/Todo keep the legacy device-local hide. Their personal data still lives on list id <code>default</code>.</span></label></li>
               <li><label><input type="checkbox" /><span>Rail groups collapse/expand; a collapsed group shows a single green badge summing the unchecked counts of its lists; selecting a list auto-expands its group.</span></label></li>
               <li><label><input type="checkbox" /><span>Group collapse state, names, and membership survive a relaunch (<code>preferences.collapsedGroups</code> is device-local; the registry layer replicates list/group structure).</span></label></li>
             </ul>
@@ -656,6 +657,7 @@
               <li><label><input type="checkbox" /><span>Join dialog with empty input → "paste an invite code" error notice.</span></label></li>
               <li><label><input type="checkbox" /><span>Valid invite → confirmation dialog (warns the local list is replaced) → join overlay with phases → lists merge and the roster updates.</span></label></li>
               <li><label><input type="checkbox" /><span>Bad or dead invite → join-error notice; the app returns to a usable ready state.</span></label></li>
+              <li><label><input type="checkbox" /><span>List settings → Share on built-in Groceries promotes only shopping rows into a new shared-list id, keeps default Board/Todo rows personal, migrates day-plan pointers, and returns a usable invite. Built-in Board/Todo sharing remains blocked.</span></label></li>
             </ul>
           </div>
 
@@ -825,6 +827,7 @@
             <ul class="qa-list" data-qa="h-join">
               <li><label><input type="checkbox" /><span><code>{"op":"invite"}</code> returns a z32 invite key that a GUI peer can join with.</span></label></li>
               <li><label><input type="checkbox" /><span><code>{"op":"join","invite":…}</code> against a live host succeeds (budget up to 180 s); <code>status</code> then shows <code>joined:true</code> and the host's items.</span></label></li>
+              <li><label><input type="checkbox" /><span><code>{"op":"share-list","listId":"default","type":"shopping","name":"Groceries"}</code> returns a non-<code>default</code> <code>listId</code> and invite; a <code>join-list</code> guest keeps its own default grocery and can co-edit the added shared list.</span></label></li>
               <li><label><input type="checkbox" /><span>Join with a garbage invite → <code>ok:false</code>; the service stays up.</span></label></li>
             </ul>
           </div>

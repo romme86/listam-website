@@ -25,7 +25,8 @@ import { fileURLToPath } from 'node:url'
 
 const websiteRoot = join(fileURLToPath(import.meta.url), '..', '..')
 const workspace = join(websiteRoot, '..')
-const WIKI_DIR = join(websiteRoot, 'public', 'wiki')
+const PUBLIC_DIR = join(websiteRoot, 'public')
+const WIKI_DIR = join(PUBLIC_DIR, 'wiki')
 
 // fact kind -> (arg) => string. Throw for an argument this repo cannot answer,
 // so a typo in a marker fails loudly instead of silently writing "undefined".
@@ -48,8 +49,12 @@ const FACTS = {
 
 const MARKER = /<span data-fact="([a-z]+):([^"]+)">([^<]*)<\/span>/g
 
-function wikiFiles() {
-    return readdirSync(WIKI_DIR).filter((f) => f.endsWith('.html')).map((f) => join(WIKI_DIR, f))
+// The wiki is not the only page that states a version: downloads.html advertised
+// desktop 0.12.0 while the app was at 0.19.12, because this gate only ever looked
+// at public/wiki/. Every marked page in public/ is checked now.
+function markedFiles() {
+    const html = (dir) => readdirSync(dir).filter((f) => f.endsWith('.html')).map((f) => join(dir, f))
+    return [...html(PUBLIC_DIR), ...html(WIKI_DIR)]
 }
 
 function resolve(kind, arg) {
@@ -64,7 +69,7 @@ const errors = []
 let marked = 0
 let rewritten = 0
 
-for (const file of wikiFiles()) {
+for (const file of markedFiles()) {
     const source = readFileSync(file, 'utf8')
     let changed = false
     const next = source.replace(MARKER, (whole, kind, arg, current) => {

@@ -415,55 +415,49 @@ body {
 }
 .rung.is-start .rung-mark { background: var(--signal); color: var(--on-signal); }
 
-/* ---- the Overview composition diagram (schematic, not a screenshot) ---- */
+/* ---- the Overview convergence figure ----
+   Rows are the logo's own vocabulary: bars. A list keeps most of its rows quiet;
+   the ones you picked for today carry the acid, and are traced into the plan.
+   Acid is a fill here, never a stroke — a hairline of it would vanish on light. */
 
-.plan-diagram {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-  align-items: center;
-}
-@media (min-width: 768px) {
-  .plan-diagram { grid-template-columns: 1fr auto 1fr; }
-}
-.plan-src {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.625rem 0.875rem;
-  border: 1px dashed var(--line);
-  border-radius: var(--r-row);
-  color: var(--ink-mute);
-  font-size: 14px;
-}
-.plan-src + .plan-src { margin-top: 0.5rem; }
-.plan-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink-faint);
-}
-.plan-today {
-  border: 1px solid var(--line);
-  border-radius: var(--r-row);
-  background: var(--card);
-  padding: 0.875rem 1rem;
-}
-.plan-item {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.4rem 0;
-  font-size: 14px;
-}
-.plan-item i {
-  width: 3px;
-  height: 15px;
-  border-radius: 2px;
-  background: var(--signal);
+.plan-figure {
   display: block;
-  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
+.pf-row {
+  fill: var(--ink);
+  opacity: 0.18;
+}
+.pf-row-on { fill: var(--signal); }
+.pf-card {
+  fill: var(--card);
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.pf-card-title {
+  fill: var(--ink);
+  opacity: 0.35;
+}
+.pf-link {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-opacity: 0.55;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* the lines draw themselves as the section arrives — the convergence, once, not
+   on a loop. 460 exceeds every path length here, so each one completes. */
+.reveal .pf-link { stroke-dasharray: 460; stroke-dashoffset: 460; }
+.reveal.is-inview .pf-link {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1400ms var(--ease);
+}
+.reveal.is-inview .pf-link:nth-of-type(2) { transition-delay: 120ms; }
+.reveal.is-inview .pf-link:nth-of-type(3) { transition-delay: 240ms; }
+.reveal.is-inview .pf-link:nth-of-type(4) { transition-delay: 360ms; }
 
 /* ---- stillness for those who ask for it ---- */
 @media (prefers-reduced-motion: reduce) {
@@ -474,6 +468,10 @@ body {
   }
   .breathe-tilt { transform: rotate(4deg); }
   .reveal, .zen-rule, .draw-link, .lift {
+    transition: none !important;
+  }
+  .reveal .pf-link, .reveal.is-inview .pf-link {
+    stroke-dashoffset: 0 !important;
     transition: none !important;
   }
   .reveal { opacity: 1; transform: none; filter: none; }

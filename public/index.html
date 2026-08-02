@@ -230,37 +230,54 @@
         avoiding, one card off the renovation board — and whatever you miss carries forward
         instead of quietly disappearing.
       </p>
-      <div class="border border-line rounded-2xl bg-surface-1 p-6 md:p-8">
-        <div class="plan-diagram">
-          <div>
-            <p class="eyebrow mb-3">Any list</p>
-            <div class="plan-src">
-              <span class="material-symbols-outlined text-lg" aria-hidden="true">shopping_cart</span>
-              Groceries · 7 left
-            </div>
-            <div class="plan-src">
-              <span class="material-symbols-outlined text-lg" aria-hidden="true">checklist</span>
-              Todo · 3 left
-            </div>
-            <div class="plan-src">
-              <span class="material-symbols-outlined text-lg" aria-hidden="true">view_kanban</span>
-              Hardware · 2 left
-            </div>
-          </div>
-          <div class="plan-arrow" aria-hidden="true">
-            <svg class="rotate-90 md:rotate-0" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="M14 7l5 5-5 5"/></svg>
-          </div>
-          <div class="plan-today">
-            <p class="eyebrow mb-2">Today</p>
-            <div class="plan-item"><i aria-hidden="true"></i> Call the dentist</div>
-            <div class="plan-item"><i aria-hidden="true"></i> Sourdough bread</div>
-            <div class="plan-item"><i aria-hidden="true"></i> Solder the leaf board</div>
-          </div>
-        </div>
-        <p class="text-xs text-ink-faint mt-6 font-mono leading-relaxed">
+      <figure class="border border-line rounded-2xl bg-surface-1 p-4 sm:p-6 md:p-10">
+        <!-- Convergence: the acid rows are the ones you picked; every list keeps the rest.
+             No text inside the SVG — at phone width it would scale to ~4px. -->
+        <svg class="plan-figure" viewBox="0 0 880 412" role="img" aria-labelledby="pfTitle pfDesc">
+          <title id="pfTitle">Items chosen from every list converging into one plan for the day</title>
+          <desc id="pfDesc">On the left, four groups of rows stand for four lists. One row in each group is highlighted, and a line traces it into a single card on the right holding the day's plan.</desc>
+
+          <!-- the four lists -->
+          <g>
+            <rect class="pf-row"    x="24" y="36"  width="232" height="9" rx="4.5"/>
+            <rect class="pf-row-on" x="24" y="58"  width="186" height="9" rx="4.5"/>
+            <rect class="pf-row"    x="24" y="80"  width="268" height="9" rx="4.5"/>
+          </g>
+          <g>
+            <rect class="pf-row-on" x="24" y="132" width="204" height="9" rx="4.5"/>
+            <rect class="pf-row"    x="24" y="154" width="252" height="9" rx="4.5"/>
+            <rect class="pf-row"    x="24" y="176" width="168" height="9" rx="4.5"/>
+          </g>
+          <g>
+            <rect class="pf-row"    x="24" y="228" width="244" height="9" rx="4.5"/>
+            <rect class="pf-row"    x="24" y="250" width="196" height="9" rx="4.5"/>
+            <rect class="pf-row-on" x="24" y="272" width="220" height="9" rx="4.5"/>
+          </g>
+          <g>
+            <rect class="pf-row"    x="24" y="324" width="178" height="9" rx="4.5"/>
+            <rect class="pf-row-on" x="24" y="346" width="240" height="9" rx="4.5"/>
+            <rect class="pf-row"    x="24" y="368" width="202" height="9" rx="4.5"/>
+          </g>
+
+          <!-- each chosen row is traced from where it ends into the plan's edge -->
+          <path class="pf-link" d="M 210 62 C 330 62, 460 180, 560 180"/>
+          <path class="pf-link" d="M 228 136 C 340 136, 465 206, 560 206"/>
+          <path class="pf-link" d="M 244 276 C 360 276, 470 232, 560 232"/>
+          <path class="pf-link" d="M 264 350 C 380 350, 480 258, 560 258"/>
+
+          <!-- the plan -->
+          <rect class="pf-card" x="560" y="116" width="296" height="180" rx="14"/>
+          <rect class="pf-card-title" x="584" y="146" width="90" height="9" rx="4.5"/>
+          <rect class="pf-row-on" x="584" y="176" width="162" height="9" rx="4.5"/>
+          <rect class="pf-row-on" x="584" y="202" width="204" height="9" rx="4.5"/>
+          <rect class="pf-row-on" x="584" y="228" width="140" height="9" rx="4.5"/>
+          <rect class="pf-row-on" x="584" y="254" width="180" height="9" rx="4.5"/>
+        </svg>
+        <figcaption class="text-xs text-ink-faint mt-6 font-mono leading-relaxed">
+          Groceries · Todo · Board · Hardware <span class="text-ink-mute">→</span> Today.
           Schematic — the Overview is defined by what it pulls in from elsewhere.
-        </p>
-      </div>
+        </figcaption>
+      </figure>
     </section>
 
     <!-- The three apps -->

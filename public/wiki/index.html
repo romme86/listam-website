@@ -284,7 +284,7 @@
                 That design appears in the code: UI actions optimistically change React state, then send
                 RPC commands to the backend for canonical log append and replication.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/README.md">README.md</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/README.md">README.md</a>
             </article>
             <article class="card accent-blue">
               <h3>The backend is not simulated</h3>
@@ -293,7 +293,7 @@
                 That bundle creates its own RPC server, Corestore, Autobase, Hyperswarm, and blind
                 pairing state.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/hooks/_useWorklet.ts">app/hooks/_useWorklet.ts:81</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/hooks/_useWorklet.ts">app/hooks/_useWorklet.ts:81</a>
             </article>
           </div>
         </section>
@@ -341,7 +341,7 @@
               <strong>Boundary</strong>
               <p>
                 Frontend files never open Corestore directly. They read/write through numeric RPC
-                commands defined in <a href="https://github.com/SayNode/listam/blob/main/rpc-commands.mjs">rpc-commands.mjs</a>.
+                commands defined in <a href="https://github.com/romme86/listam-mobile/blob/main/rpc-commands.mjs">rpc-commands.mjs</a>.
               </p>
             </div>
             <div class="note">
@@ -358,7 +358,7 @@
                 low-level contract that lets separately built pieces of software call each other
                 correctly. In Listam, that contract is the fixed numeric vocabulary both runtimes use
                 to understand each other over <code>bare-rpc</code>. The symbolic names in
-                <a href="https://github.com/SayNode/listam/blob/main/rpc-commands.mjs">rpc-commands.mjs</a> make the code readable, but the
+                <a href="https://github.com/romme86/listam-mobile/blob/main/rpc-commands.mjs">rpc-commands.mjs</a> make the code readable, but the
                 value that crosses the React Native/Bare boundary is the number itself. If
                 <code>RPC_ADD</code> stopped meaning <code>2</code> in one bundle while the other side
                 still dispatches command <code>2</code> as "add item," the frontend and backend would no
@@ -388,7 +388,7 @@
                 <code>id</code>, <code>listId</code>, <code>updatedAt</code>, and
                 <code>timestamp</code>, but the UI only relies on these three fields.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/app/components/_types.ts">app/components/_types.ts</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/app/components/_types.ts">app/components/_types.ts</a>
             </article>
 
             <article class="card">
@@ -401,7 +401,7 @@
                 Operations are appended to Autobase, then the <code>apply</code> function materializes
                 them into a JSON view and notifies the frontend.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:239</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend/backend.mjs:239</a>
             </article>
 
             <article class="card">
@@ -416,7 +416,7 @@
                 Blind pairing invites are encoded with <code>z32</code> for sharing. A runtime invite
                 is reused up to ten times before rotation.
               </p>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:168</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:168</a>
             </article>
           </div>
 
@@ -508,8 +508,8 @@
                 <li>Static peer writer cores can be opened with <code>store.get({ key: peerKey })</code>.</li>
                 <li>On teardown, the store is flushed and closed after Autobase and swarm cleanup.</li>
               </ul>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:301</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:50</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:301</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend/backend.mjs:50</a>
             </article>
 
             <article class="primitive-card log">
@@ -534,8 +534,8 @@
                 <li>Frontend writes are rejected until <code>autobase.writable</code> is true.</li>
                 <li>A promise chain serializes writes to avoid concurrent append/flush races.</li>
               </ul>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/backend.mjs">backend/backend.mjs:230</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/item.mjs">backend/lib/item.mjs:8</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/backend.mjs">backend/backend.mjs:230</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/item.mjs">backend/lib/item.mjs:8</a>
             </article>
 
             <article class="primitive-card swarm">
@@ -559,8 +559,8 @@
                 <li>A temporary swarm is also created during invite joining to bootstrap pairing and early replication.</li>
                 <li>The temp swarm is cleaned up once the main swarm connects or the join flow finishes.</li>
               </ul>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:404</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:494</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:404</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:494</a>
             </article>
 
             <article class="primitive-card pairing">
@@ -585,8 +585,8 @@
                 <li>The host confirms with <code>autobase.key</code> and <code>autobase.encryptionKey</code>.</li>
                 <li>The invite is reusable for up to ten successful pairings before rotation.</li>
               </ul>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:168</a>
-              <a class="source" href="https://github.com/SayNode/listam/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:182</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:168</a>
+              <a class="source" href="https://github.com/romme86/listam-mobile/blob/main/backend/lib/network.mjs">backend/lib/network.mjs:182</a>
             </article>
           </div>
 

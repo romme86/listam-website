@@ -45,21 +45,27 @@ fi
 
 (cd "$OUT" && shasum -a 256 "${SUM_FILES[@]}" > SHA256SUMS.txt)
 
-# Windows zip: facts only, file stays on GitHub Releases (see header).
+# Windows: facts only, files stay on GitHub Releases (see header). The setup
+# exe is the primary download; the zip is the portable alternative.
 SRC_ZIP="$DESKTOP/installer/dist/Listam-$DMG_VERSION-win32-x64.zip"
+SRC_SETUP="$DESKTOP/installer/dist/Listam-Setup-$DMG_VERSION-win32-x64.exe"
 WITH_ZIP=0
-if grep -q 'zip-sha' "$PAGE"; then
-    if [ -f "$SRC_ZIP" ]; then
-        WITH_ZIP=1
-    else
-        echo "warn: page expects a Windows zip but $SRC_ZIP is missing — skipped" >&2
-        echo "      build it with installer/build-windows.ps1, or download the" >&2
-        echo "      windows-appling CI artifact into that path." >&2
-    fi
+WITH_SETUP=0
+missing_win() {
+    echo "warn: page expects $1 but $2 is missing — skipped" >&2
+    echo "      build it with installer/build-windows.ps1, or download the" >&2
+    echo "      windows-appling CI artifact into that path." >&2
+}
+if grep -q 'zip-sha\|zip-size' "$PAGE"; then
+    if [ -f "$SRC_ZIP" ]; then WITH_ZIP=1; else missing_win "a Windows zip" "$SRC_ZIP"; fi
+fi
+if grep -q 'setup-sha' "$PAGE"; then
+    if [ -f "$SRC_SETUP" ]; then WITH_SETUP=1; else missing_win "a Windows installer" "$SRC_SETUP"; fi
 fi
 
 WITH_DMG="$WITH_DMG" DMG_VERSION="$DMG_VERSION" TGZ_VERSION="$TGZ_VERSION" \
-WITH_ZIP="$WITH_ZIP" SRC_ZIP="$SRC_ZIP" node <<'EOF'
+WITH_ZIP="$WITH_ZIP" SRC_ZIP="$SRC_ZIP" \
+WITH_SETUP="$WITH_SETUP" SRC_SETUP="$SRC_SETUP" node <<'EOF'
 const fs = require('node:fs')
 
 const withDmg = process.env.WITH_DMG === '1'
@@ -95,22 +101,33 @@ if (withDmg) {
     mark('dmg-sha', sums[dmgFile])
 }
 
+const sha256 = (f) => require('node:crypto')
+    .createHash('sha256').update(fs.readFileSync(f)).digest('hex')
+const mbOf = (f) => `${Math.round(fs.statSync(f).size / 1048576)} MB`
+
+// Tag and filename both carry the version, so rewrite each URL as a whole
+// rather than in two passes that could half-apply.
+const rewriteUrl = (leaf) => {
+    const url = `/releases/download/v${dmgVersion}/${leaf(dmgVersion)}`
+    const pattern = leaf('[0-9][0-9a-zA-Z.-]*').replace(/\./g, '\\.')
+    const re = new RegExp(`/releases/download/v[0-9][0-9a-zA-Z.-]*/${pattern}`, 'g')
+    if (!re.test(html)) throw new Error(`release URL for ${leaf(dmgVersion)} not found in ${page}`)
+    html = html.replace(re, url)
+}
+
 const withZip = process.env.WITH_ZIP === '1'
 if (withZip) {
     const srcZip = process.env.SRC_ZIP
-    const zipSha = require('node:crypto')
-        .createHash('sha256').update(fs.readFileSync(srcZip)).digest('hex')
-    const zipSize = `${Math.round(fs.statSync(srcZip).size / 1048576)} MB`
+    rewriteUrl((v) => `Listam-${v}-win32-x64.zip`)
+    if (!mark('zip-size', mbOf(srcZip))) throw new Error(`zip markers missing in ${page}`)
+}
 
-    // Tag and filename both carry the version, so rewrite the URL as a whole
-    // rather than in two passes that could half-apply.
-    const url = `/releases/download/v${dmgVersion}/Listam-${dmgVersion}-win32-x64.zip`
-    const urlRe = /\/releases\/download\/v[0-9][0-9a-zA-Z.-]*\/Listam-[0-9][0-9a-zA-Z.-]*-win32-x64\.zip/g
-    if (!urlRe.test(html)) throw new Error(`Windows release URL not found in ${page}`)
-    html = html.replace(urlRe, url)
-
-    if (!mark('zip-size', zipSize) | !mark('zip-sha', zipSha)) {
-        throw new Error(`zip markers missing in ${page}`)
+const withSetup = process.env.WITH_SETUP === '1'
+if (withSetup) {
+    const srcSetup = process.env.SRC_SETUP
+    rewriteUrl((v) => `Listam-Setup-${v}-win32-x64.exe`)
+    if (!mark('setup-size', mbOf(srcSetup)) | !mark('setup-sha', sha256(srcSetup))) {
+        throw new Error(`setup markers missing in ${page}`)
     }
 }
 
@@ -118,6 +135,7 @@ fs.writeFileSync(page, html)
 
 const parts = [`${tgzFile} (${kb(tgzFile)})`]
 parts.push(withDmg ? `${dmgFile} (${mb(dmgFile)})` : 'no DMG (pear run path)')
-parts.push(withZip ? `Listam-${dmgVersion}-win32-x64.zip (facts only, hosted on GitHub Releases)` : 'no Windows zip')
-console.log(`synced ${parts.join(', ')}`)
+parts.push(withSetup ? `Listam-Setup-${dmgVersion}-win32-x64.exe` : 'no Windows installer')
+parts.push(withZip ? `Listam-${dmgVersion}-win32-x64.zip` : 'no Windows zip')
+console.log(`synced ${parts.join(', ')} (Windows files: facts only, hosted on GitHub Releases)`)
 EOF

@@ -104,25 +104,25 @@
           One download, nothing to set up first — Listam brings the Pear runtime with it and fetches
           itself over the swarm on first launch. Version <span data-fact="version:listam-desktop">0.19.13</span>.
         </p>
-        <a class="block text-center w-full py-3 px-6 bg-inverse text-inverse-ink rounded-lg font-bold hover:opacity-80 transition-opacity" href="https://github.com/romme86/listam-desktop/releases/download/v0.19.13/Listam-0.19.13-win32-x64.zip">
+        <a class="block text-center w-full py-3 px-6 bg-inverse text-inverse-ink rounded-lg font-bold hover:opacity-80 transition-opacity" href="https://github.com/romme86/listam-desktop/releases/download/v0.19.13/Listam-Setup-0.19.13-win32-x64.exe">
           Download for Windows
         </a>
         <p class="mt-3 text-xs text-ink-faint text-center font-mono">
-          <!-- zip-size -->17 MB<!-- /zip-size --> · SHA-256 <span class="break-all"><!-- zip-sha -->f22c1f7acb433a638e0528788cfaf7341c61cb67c8c651f44aacb2a17ce1af37<!-- /zip-sha --></span>
+          <!-- setup-size -->14 MB<!-- /setup-size --> · SHA-256 <span class="break-all"><!-- setup-sha -->f9d30654d9a3c8724d2c4d9918aa198d7ef75b6cd19414d3b77920d380a4f671<!-- /setup-sha --></span>
         </p>
         <ol class="mt-6 space-y-4 text-ink-mute text-sm leading-relaxed list-none">
           <li class="flex gap-4">
             <span class="font-mono text-ink-faint flex-shrink-0">01</span>
-            <span>Unzip anywhere, keeping <span class="font-mono text-ink">Listam.exe</span> and
-              <span class="font-mono text-ink">splash.png</span> together in the same folder.</span>
+            <span>Run the installer. It installs just for you, so there is no administrator prompt,
+              and it adds Listam to your Start menu.</span>
           </li>
           <li class="flex gap-4">
             <span class="font-mono text-ink-faint flex-shrink-0">02</span>
-            <span>Run <span class="font-mono text-ink">Listam.exe</span>. Windows shows a blue
-              <span class="text-ink">“Windows protected your PC”</span> box. Click
-              <span class="text-ink font-medium">More info</span>, then
+            <span>Windows shows a blue <span class="text-ink">“Windows protected your PC”</span> box.
+              Click <span class="text-ink font-medium">More info</span>, then
               <span class="text-ink font-medium">Run anyway</span> — the button only appears after
-              “More info”, which is what makes this step easy to miss.</span>
+              “More info”, which is what makes this step easy to miss. You see this once, on the
+              installer; the app itself opens with no warning afterwards.</span>
           </li>
           <li class="flex gap-4">
             <span class="font-mono text-ink-faint flex-shrink-0">03</span>
@@ -136,9 +136,16 @@
           certificate, not about the file — nothing needs to be switched off, and you should not turn
           off any protection to run it. If you want to confirm you have the genuine build, compare the
           SHA-256 above against your download: run
-          <span class="font-mono text-ink">Get-FileHash .\Listam-<span data-fact="version:listam-desktop">0.19.13</span>-win32-x64.zip -Algorithm SHA256</span>
+          <span class="font-mono text-ink">Get-FileHash .\Listam-Setup-<span data-fact="version:listam-desktop">0.19.13</span>-win32-x64.exe -Algorithm SHA256</span>
           in PowerShell. Signed builds are on the way.
         </div>
+        <p class="mt-4 text-xs text-ink-faint leading-relaxed">
+          Would rather not run an installer?
+          <a class="draw-link pb-0.5 text-ink-mute" href="https://github.com/romme86/listam-desktop/releases/download/v0.19.13/Listam-0.19.13-win32-x64.zip">Download the portable zip</a>
+          (<!-- zip-size -->17 MB<!-- /zip-size -->) instead — unzip it and keep
+          <span class="font-mono">Listam.exe</span> and <span class="font-mono">splash.png</span>
+          together in the same folder.
+        </p>
       </div>
 
       <div class="lift border border-line rounded-2xl p-8 bg-card">

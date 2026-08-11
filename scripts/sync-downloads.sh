@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # Refreshes public/downloads/ from the sibling app repos and rewrites the
 # version/size/sha facts in public/downloads.html (between the
-# <!-- dmg-* --> / <!-- tgz-* --> markers, plus the literal filenames).
+# <!-- dmg-* --> / <!-- tgz-* --> / <!-- zip-* --> markers, plus the literal
+# filenames).
 # The DMG is optional: it is synced only when the desktop dist has one AND
 # the page carries dmg markers (Firebase's Spark plan refuses .dmg files,
 # so the desktop section currently ships the `pear run` path instead).
+# The Windows zip is NOT copied into public/: it is served from GitHub
+# Releases. Spark allows 360 MB of egress per DAY, which a multi-megabyte
+# binary would exhaust in a couple of dozen downloads and take the whole site
+# down with it. This only reads the built zip to refresh the page's facts and
+# rewrite the release URL, so the two cannot drift.
 # Run after a build or version bump, then commit and `firebase deploy`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -39,7 +45,21 @@ fi
 
 (cd "$OUT" && shasum -a 256 "${SUM_FILES[@]}" > SHA256SUMS.txt)
 
-WITH_DMG="$WITH_DMG" DMG_VERSION="$DMG_VERSION" TGZ_VERSION="$TGZ_VERSION" node <<'EOF'
+# Windows zip: facts only, file stays on GitHub Releases (see header).
+SRC_ZIP="$DESKTOP/installer/dist/Listam-$DMG_VERSION-win32-x64.zip"
+WITH_ZIP=0
+if grep -q 'zip-sha' "$PAGE"; then
+    if [ -f "$SRC_ZIP" ]; then
+        WITH_ZIP=1
+    else
+        echo "warn: page expects a Windows zip but $SRC_ZIP is missing — skipped" >&2
+        echo "      build it with installer/build-windows.ps1, or download the" >&2
+        echo "      windows-appling CI artifact into that path." >&2
+    fi
+fi
+
+WITH_DMG="$WITH_DMG" DMG_VERSION="$DMG_VERSION" TGZ_VERSION="$TGZ_VERSION" \
+WITH_ZIP="$WITH_ZIP" SRC_ZIP="$SRC_ZIP" node <<'EOF'
 const fs = require('node:fs')
 
 const withDmg = process.env.WITH_DMG === '1'
@@ -74,7 +94,30 @@ if (withDmg) {
     mark('dmg-size', mb(dmgFile))
     mark('dmg-sha', sums[dmgFile])
 }
+
+const withZip = process.env.WITH_ZIP === '1'
+if (withZip) {
+    const srcZip = process.env.SRC_ZIP
+    const zipSha = require('node:crypto')
+        .createHash('sha256').update(fs.readFileSync(srcZip)).digest('hex')
+    const zipSize = `${Math.round(fs.statSync(srcZip).size / 1048576)} MB`
+
+    // Tag and filename both carry the version, so rewrite the URL as a whole
+    // rather than in two passes that could half-apply.
+    const url = `/releases/download/v${dmgVersion}/Listam-${dmgVersion}-win32-x64.zip`
+    const urlRe = /\/releases\/download\/v[0-9][0-9a-zA-Z.-]*\/Listam-[0-9][0-9a-zA-Z.-]*-win32-x64\.zip/g
+    if (!urlRe.test(html)) throw new Error(`Windows release URL not found in ${page}`)
+    html = html.replace(urlRe, url)
+
+    if (!mark('zip-size', zipSize) | !mark('zip-sha', zipSha)) {
+        throw new Error(`zip markers missing in ${page}`)
+    }
+}
+
 fs.writeFileSync(page, html)
 
-console.log(`synced ${tgzFile} (${kb(tgzFile)})${withDmg ? ` and ${dmgFile} (${mb(dmgFile)})` : ' — no DMG (pear run path)'}`)
+const parts = [`${tgzFile} (${kb(tgzFile)})`]
+parts.push(withDmg ? `${dmgFile} (${mb(dmgFile)})` : 'no DMG (pear run path)')
+parts.push(withZip ? `Listam-${dmgVersion}-win32-x64.zip (facts only, hosted on GitHub Releases)` : 'no Windows zip')
+console.log(`synced ${parts.join(', ')}`)
 EOF

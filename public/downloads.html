@@ -108,14 +108,36 @@
           Download for Windows
         </a>
         <p class="mt-3 text-xs text-ink-faint text-center font-mono">
-          <!-- zip-size -->17 MB<!-- /zip-size --> · SHA-256 <span class="break-all"><!-- zip-sha -->6fef81931018d09071a92abc26337279e0ac37013a99e18c9c8ecce43b1cd228<!-- /zip-sha --></span>
+          <!-- zip-size -->17 MB<!-- /zip-size --> · SHA-256 <span class="break-all"><!-- zip-sha -->f22c1f7acb433a638e0528788cfaf7341c61cb67c8c651f44aacb2a17ce1af37<!-- /zip-sha --></span>
         </p>
+        <ol class="mt-6 space-y-4 text-ink-mute text-sm leading-relaxed list-none">
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">01</span>
+            <span>Unzip anywhere, keeping <span class="font-mono text-ink">Listam.exe</span> and
+              <span class="font-mono text-ink">splash.png</span> together in the same folder.</span>
+          </li>
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">02</span>
+            <span>Run <span class="font-mono text-ink">Listam.exe</span>. Windows shows a blue
+              <span class="text-ink">“Windows protected your PC”</span> box. Click
+              <span class="text-ink font-medium">More info</span>, then
+              <span class="text-ink font-medium">Run anyway</span> — the button only appears after
+              “More info”, which is what makes this step easy to miss.</span>
+          </li>
+          <li class="flex gap-4">
+            <span class="font-mono text-ink-faint flex-shrink-0">03</span>
+            <span>First launch fetches the app peer-to-peer behind the splash screen, so give it a
+              moment. After that it starts straight away.</span>
+          </li>
+        </ol>
         <div class="mt-6 p-4 rounded-lg bg-surface-1 border border-line text-xs text-ink-mute leading-relaxed">
-          Unzip anywhere and run <span class="font-mono text-ink">Listam.exe</span>, keeping the two files
-          together. It is not code-signed yet, so Windows shows
-          <span class="text-ink">“Windows protected your PC”</span> — choose
-          <span class="text-ink font-medium">More info → Run anyway</span>. The first launch downloads the
-          app peer-to-peer and takes a moment behind the splash screen.
+          <span class="font-bold text-ink">Why the warning?</span> Listam is not code-signed yet, so
+          Windows cannot name the publisher and marks it “unknown”. That is a statement about the
+          certificate, not about the file — nothing needs to be switched off, and you should not turn
+          off any protection to run it. If you want to confirm you have the genuine build, compare the
+          SHA-256 above against your download: run
+          <span class="font-mono text-ink">Get-FileHash .\Listam-<span data-fact="version:listam-desktop">0.19.13</span>-win32-x64.zip -Algorithm SHA256</span>
+          in PowerShell. Signed builds are on the way.
         </div>
       </div>
 

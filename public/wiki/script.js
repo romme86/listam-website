@@ -6,7 +6,9 @@
 
   function getPageName(pathname) {
     const name = pathname.split("/").pop();
-    return name || "index.html";
+    // Firebase cleanUrls redirects desktop.html to desktop. Both must map to
+    // the same page or the sidebar never finds its sections in production.
+    return (name || "index").replace(/\.html$/, "");
   }
 
   function isCurrentPageLink(link) {
@@ -97,7 +99,7 @@
 
   sections.forEach((section) => observer.observe(section));
 
-  searchInput.addEventListener("input", () => {
+  searchInput?.addEventListener("input", () => {
     const query = searchInput.value.trim().toLowerCase();
 
     searchable.forEach((section) => {
@@ -118,7 +120,7 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+    if (searchInput && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
       searchInput.focus();
       searchInput.select();
@@ -126,7 +128,12 @@
   });
 
   window.addEventListener("hashchange", syncActiveNavFromHash);
-  window.addEventListener("scroll", () => requestAnimationFrame(syncActiveNav), {
+  let scrollPending = false;
+  window.addEventListener("scroll", () => {
+    if (scrollPending) return;
+    scrollPending = true;
+    requestAnimationFrame(() => { scrollPending = false; syncActiveNav(); });
+  }, {
     passive: true,
   });
   requestAnimationFrame(() => {

@@ -31,6 +31,13 @@ const WIKI_DIR = join(PUBLIC_DIR, 'wiki')
 // fact kind -> (arg) => string. Throw for an argument this repo cannot answer,
 // so a typo in a marker fails loudly instead of silently writing "undefined".
 const FACTS = {
+    download(repo) {
+        if (repo !== 'listam-desktop') throw new Error(`unknown download repository '${repo}'`)
+        const page = readFileSync(join(PUBLIC_DIR, 'downloads.html'), 'utf8')
+        const versions = new Set([...page.matchAll(/github\.com\/romme86\/listam-desktop\/releases\/download\/v([^/]+)\//g)].map((m) => m[1]))
+        if (versions.size !== 1) throw new Error('desktop download links must identify one released installer version')
+        return [...versions][0]
+    },
     version(repo) {
         const pkgPath = join(workspace, repo, 'package.json')
         if (existsSync(pkgPath)) {

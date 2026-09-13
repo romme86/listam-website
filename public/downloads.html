@@ -154,7 +154,7 @@
           <span class="text-xs font-mono text-ink-faint">via the Pear runtime</span>
         </div>
         <p class="text-sm text-ink-mute mb-6">
-          Version <span data-fact="version:listam-desktop">0.21.0</span>. A native installer is still to come
+          Version <span data-fact="version:listam-desktop">0.22.0</span>. A native installer is still to come
           here — for now Listam arrives through Pear, with no installer to download.
         </p>
         <ol class="space-y-4 text-ink-mute text-sm leading-relaxed list-none">
@@ -197,11 +197,12 @@
       <div class="border border-line rounded-2xl bg-card p-8">
         <div class="flex items-center gap-3 mb-4">
           <h3 class="text-xl font-bold">From npm</h3>
-          <span class="text-xs font-mono text-ink-faint">RECOMMENDED</span>
+          <span class="text-xs font-mono text-ink-faint">LATEST NPM RELEASE</span>
         </div>
         <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>npm install -g listam-headless
 listam-headless install --storage ~/listam-data --invite &lt;code&gt;</code></pre>
         <p class="text-sm text-ink-mute leading-relaxed">
+          For version 0.15.0, use the download below; npm publication is pending.
           <span class="font-mono text-ink">install</span> sets the peer up, registers a systemd user
           service that survives reboots, starts it, and joins your list. The invite code comes from
           the share flow in the Listam app on your phone or desktop. Use a global install rather than
@@ -211,12 +212,12 @@ listam-headless install --storage ~/listam-data --invite &lt;code&gt;</code></pr
       <div class="border border-line rounded-2xl bg-card p-8">
         <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
           <h3 class="text-xl font-bold flex-1">From this site</h3>
-          <a class="lift inline-flex items-center justify-center gap-2 py-2 px-5 bg-inverse text-inverse-ink rounded-lg font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap" href="/downloads/listam-headless-0.14.2.tgz" download>
+          <a class="lift inline-flex items-center justify-center gap-2 py-2 px-5 bg-inverse text-inverse-ink rounded-lg font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap" href="/downloads/listam-headless-0.15.0.tgz" download>
             <span class="material-icons-round text-base" aria-hidden="true">download</span>
-            listam-headless <!-- tgz-version -->0.14.2<!-- /tgz-version --> · <!-- tgz-size -->32 KB<!-- /tgz-size -->
+            listam-headless <!-- tgz-version -->0.15.0<!-- /tgz-version --> · <!-- tgz-size -->617 KB<!-- /tgz-size -->
           </a>
         </div>
-        <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>tar xzf listam-headless-0.14.2.tgz &amp;&amp; cd package
+        <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4"><code>tar xzf listam-headless-0.15.0.tgz &amp;&amp; cd package
 npm install --omit=dev
 node headless.mjs install --storage ~/listam-data --invite &lt;code&gt;</code></pre>
         <p class="text-sm text-ink-mute leading-relaxed">
@@ -257,7 +258,7 @@ listam-headless uninstall --storage ~/listam-data</code></pre>
       <p class="text-sm text-ink-mute leading-relaxed mb-4">
         Verify what you downloaded before you run it — <a class="draw-link pb-0.5 text-ink font-medium" href="/downloads/SHA256SUMS.txt">SHA256SUMS.txt</a>:
       </p>
-      <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-xs overflow-x-auto mb-4"><code>listam-headless-0.14.2.tgz   <!-- tgz-sha -->38863937d20aed4a0bb665b270ba0840ed62ed7fe77ed9690fd4f63c6b6d8003<!-- /tgz-sha --></code></pre>
+      <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-xs overflow-x-auto mb-4"><code>listam-headless-0.15.0.tgz   <!-- tgz-sha -->8dd0fd38b7f82922cc3c5122fc313cdbe6a92fed2af26f0faa3b9672a8bf1172<!-- /tgz-sha --></code></pre>
       <pre class="bg-surface-1 border border-line rounded-lg p-4 font-mono text-sm overflow-x-auto"><code>shasum -a 256 -c SHA256SUMS.txt</code></pre>
     </div>
   </section>

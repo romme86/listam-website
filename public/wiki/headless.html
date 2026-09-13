@@ -227,7 +227,7 @@
       <main class="content">
         <header class="topbar">
           <div>
-            <span class="eyebrow">Headless · Node 22 service · v<span data-fact="version:listam-headless">0.14.2</span></span>
+            <span class="eyebrow">Headless · Node 22 service · v<span data-fact="version:listam-headless">0.15.0</span></span>
             <h1>Headless App</h1>
           </div>
           <label class="search">
@@ -241,7 +241,7 @@
             <span class="eyebrow">Folder intent</span>
             <h2>Project Structure</h2>
             <p class="section-lede">
-              <code>listam-headless</code> (v<span data-fact="version:listam-headless">0.14.2</span>) is the always-on owned peer: a long-lived
+              <code>listam-headless</code> (v<span data-fact="version:listam-headless">0.15.0</span>) is the always-on owned peer: a long-lived
               Node&nbsp;22 service for a device the user controls (Raspberry Pi, mini PC, NAS, a Mac
               that stays on) — a durable personal peer, not a cloud service. It runs the same
               <code>@listam/backend</code> engine as mobile and desktop and is driven entirely by
@@ -336,10 +336,23 @@
                 pins and replicates blocks as opaque ciphertext through Corestore + Hyperswarm —
                 there is no Autobase, no view, and no code path that accepts an encryption key. Its
                 status reports <code>encryptionKey: "never-held"</code>, and remote owner-control
-                restricts it to pin-style commands.
+                restricts it to public-key pin and manifest commands. Version 0.15 persists
+                manual pins and authenticated, versioned manifests of bootstrap, writer and view
+                cores, so a helper restart retains the complete registered mirror. A participant
+                explicitly subscribes each list and refreshes its manifest as membership changes.
               </p>
               <span class="source">src/blind.mjs</span>
             </article>
+          </div>
+
+          <div class="callout">
+            <strong>Three independent services:</strong> a participant is a trusted list member;
+            blind storage retains encrypted list blocks; a connection relay forwards encrypted
+            traffic between connected peers. Geekom and Pi run separate participant and relay
+            services with separate data directories. Their relay identities survive updates.
+            <code>relay-check --storage &lt;relay-directory&gt;</code> verifies an encrypted round
+            trip and records its result in <code>relay-health.json</code>. Connection relays do
+            not by themselves preserve lists while every writer is offline.
           </div>
 
           <div class="callout">
